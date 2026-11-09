@@ -52,10 +52,12 @@ static const int64 CENT = 100;
 #define ARRAYLEN(array)     (sizeof(array)/sizeof((array)[0]))
 #define printf              OutputDebugStringF
 
+#if defined(_MSC_VER) || defined(__MSVCRT__)
 #ifdef snprintf
 #undef snprintf
 #endif
 #define snprintf my_snprintf
+#endif
 
 #ifndef PRI64d
 #if defined(_MSC_VER) || defined(__MSVCRT__)

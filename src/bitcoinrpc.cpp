@@ -4617,12 +4617,14 @@ Value splitshareoutputs(const Array& params, bool fHelp)
     return result;
 }
 
+#if __cplusplus < 201103L
 template<class BidirIt>
 BidirIt prev(BidirIt it, typename std::iterator_traits<BidirIt>::difference_type n = 1)
 {
     std::advance(it, -n);
     return it;
 }
+#endif
 
 Value mergeoutputs(const Array& params, bool fHelp)
 {
@@ -4710,7 +4712,7 @@ Value mergeoutputs(const Array& params, bool fHelp)
                 wtxNew.vin.push_back(CTxIn(out.tx->GetHash(), out.i));
                 nTotal += out.tx->vout[out.i].nValue;
                 vInputTx.push_back(out.tx);
-                vOutput.erase(prev(vOutput.end()));
+                vOutput.pop_back();
             }
             printf("Merging %d inputs\n", wtxNew.vin.size());
 
@@ -5431,7 +5433,11 @@ public:
     }
     bool connect(const std::string& server, const std::string& port)
     {
+#if BOOST_VERSION >= 107000
+        ip::tcp::resolver resolver(stream.get_executor());
+#else
         ip::tcp::resolver resolver(stream.get_io_service());
+#endif
         ip::tcp::resolver::query query(server.c_str(), port.c_str());
         ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
         ip::tcp::resolver::iterator end;
@@ -5611,23 +5617,31 @@ void ThreadRPCServer2(void* parg)
         return;
     }
 
+#if BOOST_VERSION >= 107000
+    ssl::context context(ssl::context::sslv23);
+#else
     ssl::context context(io_service, ssl::context::sslv23);
+#endif
     if (fUseSSL)
     {
         context.set_options(ssl::context::no_sslv2 | ssl::context::no_sslv3);
 
-        filesystem::path pathCertFile(GetArg("-rpcsslcertificatechainfile", "server.cert"));
-        if (!pathCertFile.is_complete()) pathCertFile = filesystem::path(GetDataDir()) / pathCertFile;
-        if (filesystem::exists(pathCertFile)) context.use_certificate_chain_file(pathCertFile.string());
+        boost::filesystem::path pathCertFile(GetArg("-rpcsslcertificatechainfile", "server.cert"));
+        if (!pathCertFile.is_absolute()) pathCertFile = boost::filesystem::path(GetDataDir()) / pathCertFile;
+        if (boost::filesystem::exists(pathCertFile)) context.use_certificate_chain_file(pathCertFile.string());
         else printf("ThreadRPCServer ERROR: missing server certificate file %s\n", pathCertFile.string().c_str());
 
-        filesystem::path pathPKFile(GetArg("-rpcsslprivatekeyfile", "server.pem"));
-        if (!pathPKFile.is_complete()) pathPKFile = filesystem::path(GetDataDir()) / pathPKFile;
-        if (filesystem::exists(pathPKFile)) context.use_private_key_file(pathPKFile.string(), ssl::context::pem);
+        boost::filesystem::path pathPKFile(GetArg("-rpcsslprivatekeyfile", "server.pem"));
+        if (!pathPKFile.is_absolute()) pathPKFile = boost::filesystem::path(GetDataDir()) / pathPKFile;
+        if (boost::filesystem::exists(pathPKFile)) context.use_private_key_file(pathPKFile.string(), ssl::context::pem);
         else printf("ThreadRPCServer ERROR: missing server private key file %s\n", pathPKFile.string().c_str());
 
         string strCiphers = GetArg("-rpcsslciphers", "TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!AH:!3DES:@STRENGTH");
+#if BOOST_VERSION >= 105400
+        SSL_CTX_set_cipher_list(context.native_handle(), strCiphers.c_str());
+#else
         SSL_CTX_set_cipher_list(context.impl(), strCiphers.c_str());
+#endif
     }
 
     loop
@@ -5758,7 +5772,11 @@ Object CallRPC(const string& strMethod, const Array& params)
     // Connect to localhost
     bool fUseSSL = GetBoolArg("-rpcssl");
     asio::io_service io_service;
+#if BOOST_VERSION >= 107000
+    ssl::context context(ssl::context::sslv23);
+#else
     ssl::context context(io_service, ssl::context::sslv23);
+#endif
     context.set_options(ssl::context::no_sslv2 | ssl::context::no_sslv3);
     SSLStream sslStream(io_service, context);
     SSLIOStreamDevice d(sslStream, fUseSSL);
@@ -5810,7 +5828,11 @@ std::string CallPeercoinRPC(const std::string &strMethod, const Array &params)
     // Connect to localhost
     bool fUseSSL = GetBoolArg("-rpcssl");
     asio::io_service io_service;
+#if BOOST_VERSION >= 107000
+    ssl::context context(ssl::context::sslv23);
+#else
     ssl::context context(io_service, ssl::context::sslv23);
+#endif
     context.set_options(ssl::context::no_sslv2 | ssl::context::no_sslv3);
     SSLStream sslStream(io_service, context);
     SSLIOStreamDevice d(sslStream, fUseSSL);

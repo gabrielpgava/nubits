@@ -82,6 +82,21 @@ BOOST_AUTO_TEST_CASE(DoS_bantime)
     BOOST_CHECK(!CNode::IsBanned(addr));
 }
 
+unsigned int ComputeMinWork(unsigned int nBase, int64 nTime)
+{
+    static const CBigNum bnProofOfWorkLimit(~uint256(0) >> 20);
+    CBigNum bnResult;
+    bnResult.SetCompact(nBase);
+    bnResult *= 2;
+    while (nTime > 0 && bnResult < bnProofOfWorkLimit)
+    {
+        // Maximum 200% adjustment per day...
+        bnResult *= 2;
+        nTime -= 24 * 60 * 60;
+    }
+    return bnResult.GetCompact();
+}
+
 static bool CheckNBits(unsigned int nbits1, int64 time1, unsigned int nbits2, int64 time2)\
 {
     if (time1 > time2)

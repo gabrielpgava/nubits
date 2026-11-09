@@ -1012,7 +1012,7 @@ boost::filesystem::path GetConfigFile()
     namespace fs = boost::filesystem;
 
     fs::path pathConfigFile(GetArg("-conf", "nu.conf"));
-    if (!pathConfigFile.is_complete()) pathConfigFile = GetDataDir(false) / pathConfigFile;
+    if (!pathConfigFile.is_absolute()) pathConfigFile = GetDataDir(false) / pathConfigFile;
     return pathConfigFile;
 }
 
@@ -1021,7 +1021,7 @@ boost::filesystem::path GetPeercoinConfigFile()
     namespace fs = boost::filesystem;
 
     fs::path pathConfigFile(GetArg("-peercoinconf", "ppcoin.conf"));
-    if (!pathConfigFile.is_complete()) pathConfigFile = GetPeercoinDataDir(false) / pathConfigFile;
+    if (!pathConfigFile.is_absolute()) pathConfigFile = GetPeercoinDataDir(false) / pathConfigFile;
     return pathConfigFile;
 }
 
@@ -1082,7 +1082,7 @@ boost::filesystem::path GetPidFile()
     namespace fs = boost::filesystem;
 	
     fs::path pathPidFile(GetArg("-pid", "nu.pid"));
-    if (!pathPidFile.is_complete()) pathPidFile = GetDataDir() / pathPidFile;
+    if (!pathPidFile.is_absolute()) pathPidFile = GetDataDir() / pathPidFile;
     return pathPidFile;
 }
 
@@ -1270,7 +1270,7 @@ boost::filesystem::path static StartupShortcutPath()
 
 bool GetStartOnSystemStartup()
 {
-    return filesystem::exists(StartupShortcutPath());
+    return boost::filesystem::exists(StartupShortcutPath());
 }
 
 bool SetStartOnSystemStartup(bool fAutoStart)

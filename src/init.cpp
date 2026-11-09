@@ -18,7 +18,9 @@
 #include "unit.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#if BOOST_VERSION < 106000
 #include <boost/filesystem/convenience.hpp>
+#endif
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>

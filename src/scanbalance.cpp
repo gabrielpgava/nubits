@@ -11,7 +11,9 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#if BOOST_VERSION < 106000
 #include <boost/filesystem/convenience.hpp>
+#endif
 #include <boost/interprocess/sync/file_lock.hpp>
 
 #ifndef WIN32
