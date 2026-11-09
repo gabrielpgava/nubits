@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -eux
+
+cd $(dirname $0)
+
+for i in S B Y E X
+do
+  sass --sourcemap=none --line-numbers $i.sass $i.qss
+done
+
+touch ../../bitcoin.qrc

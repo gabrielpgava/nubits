@@ -1,0 +1,136 @@
+/* line 3, _base.sass */
+QMainWindow {
+  background: #f8f8f8; }
+
+/* line 6, _base.sass */
+QToolBar {
+  background-color: #000;
+  height: 125px;
+  border-bottom: 4px solid #019d4d; }
+  /* line 12, _base.sass */
+  QToolBar > .toolbarSpacer {
+    min-width: 125px;
+    min-height: 44px;
+    background: url(":/images/res/images/X") no-repeat;
+    border: 1px solid transparent;
+    margin-top: 5px;
+    margin-left: 15px;
+    margin-right: 40px; }
+    /* line 20, _base.sass */
+    QToolBar > .toolbarSpacer:hover {
+      background-color: transparent; }
+  /* line 23, _base.sass */
+  QToolBar > QToolButton {
+    border: 0px;
+    background-color: #000;
+    color: white;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    margin-left: 3px;
+    margin-right: 3px;
+    height: 15px;
+    font-size: 12px;
+    font-weight: 500;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px; }
+    /* line 39, _base.sass */
+    QToolBar > QToolButton:checked {
+      border-bottom: 2px solid #019d4d;
+      color: white;
+      margin-top: 17px;
+      margin-bottom: 15px;
+      height: 15px;
+      font-weight: 500;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      padding-left: 5px;
+      padding-right: 5px; }
+      /* line 51, _base.sass */
+      QToolBar > QToolButton:checked:hover {
+        background-color: #322f30; }
+    /* line 54, _base.sass */
+    QToolBar > QToolButton:hover {
+      background-color: #322f30; }
+
+/* line 57, _base.sass */
+QGroupBox {
+  background: transparent;
+  color: black; }
+
+/* line 61, _base.sass */
+QTableView {
+  selection-background-color: #c2efff;
+  selection-color: black; }
+
+/* line 65, _base.sass */
+QPushButton {
+  background-color: #0074a0;
+  border: 1px solid #006287;
+  border-radius: 3px;
+  font-weight: 600;
+  color: white;
+  padding: 4px; }
+  /* line 73, _base.sass */
+  QPushButton:hover {
+    background-color: #004f6d; }
+  /* line 76, _base.sass */
+  QPushButton:disabled {
+    background-color: #dddddd;
+    color: #9f9f9f;
+    border: 1px solid #9f9f9f; }
+
+/* line 81, _base.sass */
+QLabel, QCheckBox {
+  background-color: transparent; }
+
+/* line 84, _base.sass */
+QDialog {
+  background-color: #f8f8f8; }
+
+/* line 87, _base.sass */
+QDoubleSpinBox, QLineEdit {
+  background-color: white; }
+
+/* line 90, _base.sass */
+QMessageBox {
+  background-color: #f8f8f8; }
+
+/* line 93, _base.sass */
+QSizeGrip {
+  background-color: #000; }
+
+/* line 96, _base.sass */
+QStatusBar {
+  color: white;
+  background-color: #000; }
+  /* line 100, _base.sass */
+  QStatusBar .progressBarLabel, QStatusBar > .statusBarStyle {
+    color: #ffffff; }
+
+/* line 103, _base.sass */
+QTimeEdit {
+  background-color: #f8f8f8; }
+
+/* line 106, _base.sass */
+QToolButton {
+  background-color: #0074a0;
+  border: 1px solid #006287; }
+  /* line 110, _base.sass */
+  QToolButton:hover {
+    background-color: #004f6d; }
+  /* line 113, _base.sass */
+  QToolButton:disabled {
+    background-color: #dddddd;
+    border: 1px solid #9f9f9f; }
+
+/* line 117, _base.sass */
+QToolTip {
+  background-color: #f8f8f8;
+  color: block;
+  border: 0px; }
+
+/* line 122, _base.sass */
+QProgressBar {
+  max-height: 25px; }

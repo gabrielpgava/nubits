@@ -1,0 +1,102 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../boot', __FILE__)
+
+start_time = Time.utc(2016, 10, 15, 12, 0, 0)
+start_time_shift = (start_time - Time.now).to_i
+
+puts "Starting seed"
+seed = CoinContainer.new(
+  image: 'nunet2/seed',
+  bind_code: true,
+  args: {
+    timetravel: start_time_shift,
+  },
+)
+
+node_names = %w( a b c d e )
+puts "Starting #{node_names.size} nodes: #{node_names.inspect}"
+nodes = []
+node_names.each do |name|
+  puts "Starting #{name}"
+  node = CoinContainer.new(
+    image: "nunet2/#{name}",
+    bind_code: true,
+    links: [seed] + nodes,
+    args: {
+      timetravel: start_time_shift,
+    },
+  )
+  nodes << node
+end
+
+puts "Starting empty node"
+empty_node = CoinContainer.new(
+  image: 'nunet2/empty',
+  bind_code: true,
+  links: [seed] + nodes,
+  delete_at_exit: true,
+  remove_wallet_after_shutdown: true,
+  args: {
+    timetravel: start_time_shift,
+  },
+)
+
+all = [seed] + nodes + [empty_node]
+
+puts "Waiting for all nodes to boot"
+all.each(&:wait_for_boot)
+
+7.times do
+  puts "Generating block with vote for 3.0"
+  all.each { |n| n.rpc("timetravel", 60) }
+  seed.generate_stake
+end
+p seed.rpc("getprotocolvotes")
+puts "Moving 2 weeks later"
+all.each { |n| n.rpc("timetravel", 15 * 24 * 3600) }
+2.times do
+  puts "Generating block"
+  all.each { |n| n.rpc("timetravel", 60) }
+  seed.generate_stake
+end
+protocol = seed.info["protocolversion"]
+p protocol: protocol
+raise "Protocol didn't switch" if protocol != "3"
+
+target_height = seed.block_count
+
+puts "Waiting for all nodes to sync at height #{target_height}"
+loop do
+  heights = all.map(&:block_count)
+  p heights
+  break if heights.all? { |h| h == target_height }
+  sleep 1
+end
+
+last_block_time = seed.top_block["time"]
+puts "Last block time: #{last_block_time}"
+
+puts "Shutting down seed"
+seed.shutdown
+image_name = "nunet3/seed"
+puts "Creating image #{image_name}"
+seed.wait_for_shutdown
+seed.commit(image_name)
+
+nodes.each_with_index do |node, i|
+  name = node_names[i]
+  image_name = "nunet3/#{name}"
+  puts "Creating image #{image_name}"
+  node.shutdown
+  node.wait_for_shutdown
+  node.commit(image_name)
+end
+
+node = empty_node
+name = "empty"
+image_name = "nunet3/#{name}"
+puts "Creating image #{image_name}"
+node.shutdown
+node.wait_for_shutdown
+node.commit(image_name)
