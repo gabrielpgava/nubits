@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QtCore>
+#if QT_VERSION >= 0x050000
+#include <QException>
+#endif
 #include <vector>
 #include <map>
 
@@ -32,7 +35,11 @@ public:
     qint64 amount;
 };
 
+#if QT_VERSION < 0x050000
 class WalletModelException : public QtConcurrent::Exception
+#else
+class WalletModelException : public QException
+#endif
 {
 public:
     QString message;
@@ -51,7 +58,11 @@ public:
         throw *this;
     }
 
+#if QT_VERSION < 0x050000
     Exception *clone() const
+#else
+    WalletModelException *clone() const
+#endif
     {
         return new WalletModelException(*this);
     }

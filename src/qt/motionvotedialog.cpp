@@ -96,7 +96,7 @@ void MotionVoteDialog::accept()
             error(tr("The motion hash must only contain hexdecimal characters (row %1)").arg(row));
             return;
         }
-        vVote.push_back(uint160(motionHash.toAscii().data()));
+        vVote.push_back(uint160(motionHash.toLatin1().data()));
     }
 
     CVote vote = model->getVote();

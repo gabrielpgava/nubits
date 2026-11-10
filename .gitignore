@@ -3,6 +3,7 @@ src/peershares
 src/peersharesd
 src/test_peershares
 src/nud
+.qmake.stash
 ppcoin-qt
 nu-qt
 nu
@@ -42,4 +43,5 @@ src/qt/res/styles/fire_app_log.txt
 /src/test/containers/tmp/
 /.localnet-data/
 /nud
+.qmake.stash
 

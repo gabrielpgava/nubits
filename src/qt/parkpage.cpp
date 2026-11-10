@@ -49,7 +49,11 @@ void ParkPage::setModel(WalletModel *model)
     view->horizontalHeader()->resizeSection(ParkTableModel::Amount, 100);
     view->horizontalHeader()->resizeSection(ParkTableModel::EstimatedTimeLeft, 100);
     view->horizontalHeader()->resizeSection(ParkTableModel::Premium, 100);
+#if QT_VERSION >= 0x050000
+    view->horizontalHeader()->setSectionResizeMode(ParkTableModel::UnparkAddress, QHeaderView::Stretch);
+#else
     view->horizontalHeader()->setResizeMode(ParkTableModel::UnparkAddress, QHeaderView::Stretch);
+#endif
 }
 
 void ParkPage::on_park_clicked()

@@ -18,7 +18,16 @@
 
 #ifdef Q_WS_MAC
 #include <ApplicationServices/ApplicationServices.h>
+#if QT_VERSION < 0x050000
 extern bool qt_mac_execute_apple_script(const QString &script, AEDesc *ret);
+#else
+#include <QProcess>
+static bool qt_mac_execute_apple_script(const QString &script, AEDesc *ret)
+{
+    Q_UNUSED(ret);
+    return (QProcess::execute("/usr/bin/osascript", QStringList() << "-e" << script) == 0);
+}
+#endif
 #endif
 
 // https://wiki.ubuntu.com/NotificationDevelopmentGuidelines recommends at least 128

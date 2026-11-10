@@ -23,16 +23,23 @@ Para sincronizar ou testar a conexão do binário local moderno com o nó legado
 
 ## 2. Arquitetura e Estado Atual do Repositório
 
-- **Foco Atual**: CLI / Daemon (`nud`) e suíte de testes (`test_nu`).
-- **GUI Pendente**: A carteira gráfica Qt (`Nu.app` / [`nu.pro`](nu.pro) / `src/qt/`) foi deixada intencionalmente pendente para o futuro (port de Qt4 para Qt5/Qt6 documentado em [`TODO.md`](TODO.md)).
+- **Foco Concluído**: CLI / Daemon (`nud`), suíte de testes (`test_nu`) e Carteira Gráfica (`Nu.app` / Qt 5.15).
 - **Stack Modernizada (macOS Apple Silicon / Intel)**:
   - **C++17** (`-std=c++17`) com otimização `-O2` por padrão (`-O3` com `RELEASE=1`).
+  - **Qt 5.15** (`qt@5` via Homebrew) com APIs migradas de Qt4 para Qt5 (`QtWidgets`, `QtConcurrent`, `QStandardPaths`, `QUrlQuery`, `setSectionResizeMode`).
   - **OpenSSL 3.x nativo** (`openssl@3` via Homebrew), com `CBigNum` encapsulando `BIGNUM*` (`BN_new`/`BN_clear_free`), `EVP_CIPHER_CTX` dinâmico e normalização DER estrita em `ECDSA_SIG`.
   - **Boost 1.85** (`boost@1.85`) e **Berkeley DB 5.3** (`berkeley-db@5`).
 
 ---
 
 ## 3. Comandos Rápidos de Desenvolvimento
+
+### Compilar a Carteira Gráfica (`Nu.app`)
+```bash
+./build_gui_mac.sh
+# Para executar em modo localnet:
+./Nu.app/Contents/MacOS/Nu -localnet
+```
 
 ### Compilar o Daemon (`nud`)
 ```bash

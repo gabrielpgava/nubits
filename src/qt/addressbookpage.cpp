@@ -119,8 +119,13 @@ void AddressBookPage::setModel(AddressTableModel *model)
             AddressTableModel::Address, 320);
     ui->tableView->horizontalHeader()->resizeSection(
             AddressTableModel::DividendAddress, 320);
+#if QT_VERSION >= 0x050000
+    ui->tableView->horizontalHeader()->setSectionResizeMode(
+            AddressTableModel::Label, QHeaderView::Stretch);
+#else
     ui->tableView->horizontalHeader()->setResizeMode(
             AddressTableModel::Label, QHeaderView::Stretch);
+#endif
 
     connect(ui->tableView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
             this, SLOT(selectionChanged()));

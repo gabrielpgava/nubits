@@ -2,8 +2,11 @@ TEMPLATE = app
 TARGET = nu
 VERSION = 5.3.0
 INCLUDEPATH += src src/json src/qt
-DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE
-CONFIG += no_include_pwd
+DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE BOOST_BIND_GLOBAL_PLACEHOLDERS
+CONFIG += no_include_pwd c++17 sdk_no_version_check
+greaterThan(QT_MAJOR_VERSION, 4) {
+    QT += widgets concurrent
+}
 
 # for boost 1.37, add -mt to the boost libraries 
 # use: qmake BOOST_LIB_SUFFIX=-mt
@@ -34,10 +37,6 @@ UI_DIR = build
 
 # use: qmake "RELEASE=1"
 contains(RELEASE, 1) {
-    # Mac: compile for maximum compatibility (10.5, 32-bit)
-    #macx:QMAKE_CXXFLAGS += -mmacosx-version-min=10.5 -arch i386 -isysroot /Developer/SDKs/MacOSX10.5.sdk
-    macx:QMAKE_CXXFLAGS += -mmacosx-version-min=10.6 -arch x86_64 -isysroot /Developer/SDKs/MacOSX10.6.sdk
-
     !windows:!macx {
         # Linux: static link
         LIBS += -Wl,-Bstatic
@@ -64,6 +63,7 @@ contains(USE_QRCODE, 1) {
 #  or: qmake "USE_UPNP=0" (disabled by default; default)
 #  or: qmake "USE_UPNP=-" (not supported)
 # miniupnpc (http://miniupnp.free.fr/files/) must be installed for support
+macx:isEmpty(USE_UPNP): USE_UPNP = -
 contains(USE_UPNP, -) {
     message(Building without UPNP support)
 } else {
@@ -112,7 +112,8 @@ contains(BITCOIN_NEED_QT_PLUGINS, 1) {
     DEFINES += HAVE_BUILD_INFO
 }
 
-QMAKE_CXXFLAGS_WARN_ON = -Wall -Wextra -Wformat -Wformat-security -Wno-invalid-offsetof -Wno-sign-compare -Wno-unused-parameter
+QMAKE_CXXFLAGS += -std=c++17
+QMAKE_CXXFLAGS_WARN_ON = -Wall -Wextra -Wformat -Wformat-security -Wno-invalid-offsetof -Wno-sign-compare -Wno-unused-parameter -Wno-deprecated-declarations -Wno-reserved-user-defined-literal
 # this option unrecognized when building on OSX 10.6.8
 !macx {
     QMAKE_CXXFLAGS_WARN_ON += -fdiagnostics-show-option
@@ -344,6 +345,18 @@ OTHER_FILES += \
     doc/*.rst doc/*.txt doc/README README.md res/bitcoin-qt.rc
 
 # platform specific defaults, if not overridden on command line
+macx {
+    isEmpty(OPENSSL_INCLUDE_PATH): OPENSSL_INCLUDE_PATH = /opt/homebrew/opt/openssl@3/include
+    isEmpty(OPENSSL_LIB_PATH): OPENSSL_LIB_PATH = /opt/homebrew/opt/openssl@3/lib
+    isEmpty(BOOST_INCLUDE_PATH): BOOST_INCLUDE_PATH = /opt/homebrew/opt/boost@1.85/include
+    isEmpty(BOOST_LIB_PATH): BOOST_LIB_PATH = /opt/homebrew/opt/boost@1.85/lib
+    isEmpty(BDB_INCLUDE_PATH): BDB_INCLUDE_PATH = /opt/homebrew/opt/berkeley-db@5/include
+    isEmpty(BDB_LIB_PATH): BDB_LIB_PATH = /opt/homebrew/opt/berkeley-db@5/lib
+    isEmpty(BDB_LIB_SUFFIX): BDB_LIB_SUFFIX =
+    isEmpty(BOOST_LIB_SUFFIX): BOOST_LIB_SUFFIX = -mt
+    isEmpty(USE_UPNP): USE_UPNP = -
+}
+
 isEmpty(BOOST_LIB_SUFFIX) {
     macx:BOOST_LIB_SUFFIX = -mt
     windows:BOOST_LIB_SUFFIX = -mgw48-mt-1_55
@@ -354,23 +367,23 @@ isEmpty(BOOST_THREAD_LIB_SUFFIX) {
 }
 
 isEmpty(BDB_LIB_PATH) {
-    macx:BDB_LIB_PATH = /opt/local/lib/db48
+    macx:BDB_LIB_PATH = /opt/homebrew/opt/berkeley-db@5/lib
 }
 
 isEmpty(BDB_LIB_SUFFIX) {
-    macx:BDB_LIB_SUFFIX = -4.8
+    macx:BDB_LIB_SUFFIX =
 }
 
 isEmpty(BDB_INCLUDE_PATH) {
-    macx:BDB_INCLUDE_PATH = /opt/local/include/db48
+    macx:BDB_INCLUDE_PATH = /opt/homebrew/opt/berkeley-db@5/include
 }
 
 isEmpty(BOOST_LIB_PATH) {
-    macx:BOOST_LIB_PATH = /opt/local/lib
+    macx:BOOST_LIB_PATH = /opt/homebrew/opt/boost@1.85/lib
 }
 
 isEmpty(BOOST_INCLUDE_PATH) {
-    macx:BOOST_INCLUDE_PATH = /opt/local/include
+    macx:BOOST_INCLUDE_PATH = /opt/homebrew/opt/boost@1.85/include
 }
 
 windows:LIBS += -lws2_32 -lshlwapi
@@ -395,10 +408,10 @@ windows:!contains(MINGW_THREAD_BUGFIX, 0) {
 
 macx:HEADERS += src/qt/macdockiconhandler.h
 macx:OBJECTIVE_SOURCES += src/qt/macdockiconhandler.mm
-macx:LIBS += -framework Foundation -framework ApplicationServices -framework AppKit
-macx:DEFINES += MAC_OSX MSG_NOSIGNAL=0
+macx:LIBS += -framework Foundation -framework ApplicationServices -framework AppKit -lz
+macx:DEFINES += MAC_OSX MSG_NOSIGNAL=0 Q_WS_MAC
 macx:ICON = src/qt/res/icons/nu.icns
-macx:TARGET = "nu"
+macx:TARGET = "Nu"
 
 # Set libraries and includes at end, to use platform-defined defaults if not overridden
 INCLUDEPATH += $$BOOST_INCLUDE_PATH $$BDB_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH $$QRENCODE_INCLUDE_PATH

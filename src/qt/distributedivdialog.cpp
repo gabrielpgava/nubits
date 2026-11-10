@@ -1,5 +1,5 @@
-#include "distributedivdialog.h"
 #include "ui_distributedivdialog.h"
+#include "distributedivdialog.h"
 #include "scanbalance.h"
 
 #include <boost/foreach.hpp>
