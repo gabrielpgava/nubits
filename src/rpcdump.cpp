@@ -119,7 +119,7 @@ Value exportpeercoinkeys(const Array& params, bool fHelp)
     if (fHelp || params.size() != 0)
         throw runtime_error(
             "exportpeercoinkeys\n"
-            "Add the Peercoin keys associated with the NuShares addresses to the Peercoin wallet. Peercoin must be running and accept RPC commands.");
+            "Add the keys associated with the NuShares addresses to the NuBits wallet via RPC.");
 
     if (pwalletMain->IsLocked())
         throw JSONRPCError(-13, "Error: Please enter the wallet passphrase with walletpassphrase first.");

@@ -1026,7 +1026,7 @@ Value getpeercoinaddresses(const Array& params, bool fHelp)
     if (fHelp || params.size() != 1)
         throw runtime_error(
             "getpeercoinaddresses <account>\n"
-            "Returns the list of addresses and the associated Peercoin address for the given account.");
+            "Returns the list of addresses and the associated NuBits address for the given account.");
 
     string strAccount = AccountFromValue(params[0]);
 
@@ -1635,8 +1635,8 @@ Value distribute(const Array& params, bool fHelp)
         throw runtime_error(
             "distribute <cutoff timestamp> <amount> [<proceed>]\n"
             "cutoff is date and time at which the share balances should be considered. Format is unix time.\n"
-            "amount is the the number of peercoins to distribute, in double-precision floating point number.\n"
-            "If proceed is not true the peercoins are not sent and the details of the distribution are returned.");
+            "amount is the number of NuBits to distribute, in double-precision floating point number.\n"
+            "If proceed is not true the NuBits are not sent and the details of the distribution are returned.");
 
     unsigned int cutoffTime = params[0].get_int();
     bool fProceed = false;

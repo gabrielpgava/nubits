@@ -300,7 +300,7 @@ void BitcoinGUI::createActions()
     quitAction->setToolTip(tr("Quit application"));
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
-    aboutAction = new QAction(QIcon(":/icons/ppcoin"), tr("&About %1").arg(qApp->applicationName()), this);
+    aboutAction = new QAction(QIcon(":/icons/nu"), tr("&About %1").arg(qApp->applicationName()), this);
     aboutAction->setToolTip(tr("Show information about Nu"));
     aboutAction->setMenuRole(QAction::AboutRole);
     aboutQtAction = new QAction(tr("About &Qt"), this);
@@ -309,7 +309,7 @@ void BitcoinGUI::createActions()
     optionsAction = new QAction(QIcon(":/icons/options"), tr("&Options..."), this);
     optionsAction->setToolTip(tr("Modify configuration options for Nu"));
     optionsAction->setMenuRole(QAction::PreferencesRole);
-    toggleHideAction = new QAction(QIcon(":/icons/ppcoin"), tr("Show/Hide &Nu"), this);
+    toggleHideAction = new QAction(QIcon(":/icons/nu"), tr("Show/Hide &Nu"), this);
     toggleHideAction->setToolTip(tr("Show or hide the Nu window"));
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
@@ -325,8 +325,8 @@ void BitcoinGUI::createActions()
     changePassphraseAction->setToolTip(tr("Change the passphrase used for portfolio encryption"));
     openRPCConsoleAction = new QAction(tr("&Debug window"), this);
     openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
-    exportPeercoinKeysAction = new QAction(QIcon(":/icons/export"), tr("&Export Peercoin keys..."), this);
-    exportPeercoinKeysAction->setToolTip(tr("Export the Peercoin keys associated with the NuShares addresses to Peercoin via RPC"));
+    exportPeercoinKeysAction = new QAction(QIcon(":/icons/export"), tr("&Export NuBits keys..."), this);
+    exportPeercoinKeysAction->setToolTip(tr("Export NuBits private keys via RPC"));
     distributeDividendsAction = new QAction(tr("&Distribute dividends..."), this);
     distributeDividendsAction->setToolTip(tr("Distribute dividends to share holders"));
 
@@ -1146,8 +1146,8 @@ void BitcoinGUI::exportPeercoinKeys()
 {
     QMessageBox::StandardButton reply;
 
-    QString sQuestion = tr("All your NuShares private keys will be converted to Peercoin private keys and imported into your Peercoin wallet.\n\nThe Peercoin wallet must be running, unlocked (if it was encrypted) and accept RPC commands.\n\nThis process may take several minutes because Peercoin will scan the blockchain for transactions on all the imported keys.\n\nDo you want to proceed?");
-    reply = QMessageBox::warning(this, tr("Peercoin keys export confirmation"), sQuestion, QMessageBox::Yes | QMessageBox::No);
+    QString sQuestion = tr("All your private keys will be converted and imported into your NuBits wallet.\n\nThe wallet must be running, unlocked (if it was encrypted) and accept RPC commands.\n\nThis process may take several minutes because the blockchain will be scanned for transactions on all the imported keys.\n\nDo you want to proceed?");
+    reply = QMessageBox::warning(this, tr("NuBits keys export confirmation"), sQuestion, QMessageBox::Yes | QMessageBox::No);
     if (reply != QMessageBox::Yes)
         return;
 
@@ -1170,8 +1170,8 @@ void BitcoinGUI::exportPeercoinKeys()
         if (fMustLock)
             walletModel->setWalletLocked(true);
         QMessageBox::information(this,
-                tr("Peercoin keys export"),
-                tr("%1 key(s) were exported to Peercoin.\n%2 key(s) were either already known or invalid.")
+                tr("NuBits keys export"),
+                tr("%1 key(s) were exported to NuBits.\n%2 key(s) were either already known or invalid.")
                   .arg(iExportedCount)
                   .arg(iErrorCount)
                 );
@@ -1180,7 +1180,7 @@ void BitcoinGUI::exportPeercoinKeys()
         if (fMustLock)
             walletModel->setWalletLocked(true);
         QMessageBox::critical(this,
-                tr("Peercoin keys export"),
+                tr("NuBits keys export"),
                 tr("Error: %1").arg(e.what()));
     }
 }

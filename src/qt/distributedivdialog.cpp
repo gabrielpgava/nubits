@@ -92,7 +92,7 @@ void BalanceScannerThread::Scan(unsigned int cutoffTime)
 
 
 const char* DistributeDivDialog::columnHeadings[] = {
-    "NuShares Address", "Shares", "Peercoin Address", "Dividend"
+    "NuShares Address", "Shares", "NuBits Address", "Dividend"
 };
 
 DistributeDivDialog::DistributeDivDialog(QWidget *parent) :
@@ -284,10 +284,10 @@ bool DistributeDivDialog::ConfirmDistribution()
     }
     catch (const exception &error)
     {
-        QMessageBox::critical(this, "Error", QString("Unable to get Peercoin balance: %1").arg(error.what()));
+        QMessageBox::critical(this, "Error", QString("Unable to get NuBits balance: %1").arg(error.what()));
         return false;
     }
-    QString sQuestion = QString("%1 peercoins will be sent to %2 addresses in %3 transaction(s).\nYour current peercoin balance is %4.\n\nAre you sure?").arg(
+    QString sQuestion = QString("%1 NuBits will be sent to %2 addresses in %3 transaction(s).\nYour current NuBits balance is %4.\n\nAre you sure?").arg(
             QString::number(distributor.TotalDistributed()),
             QString::number(distributor.GetDistributions().size()),
             QString::number(GetTransactionCount()),

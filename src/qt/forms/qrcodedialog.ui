@@ -102,7 +102,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>shares</string>
+               <string>NBT</string>
               </property>
               <property name="buddy">
                <cstring>lnReqAmount</cstring>
