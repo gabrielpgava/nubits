@@ -20,6 +20,8 @@
 #include <QTranslator>
 #include <QSplashScreen>
 #include <QLibraryInfo>
+#include <QPalette>
+#include <QColor>
 
 #include <boost/interprocess/ipc/message_queue.hpp>
 
@@ -184,6 +186,23 @@ int main(int argc, char *argv[])
     QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
     QApplication app(argc, argv);
+
+    // Apply native dark palette for dark macOS titlebar and global dark styling
+    QPalette darkPalette;
+    darkPalette.setColor(QPalette::Window, QColor(13, 17, 23));
+    darkPalette.setColor(QPalette::WindowText, QColor(230, 237, 243));
+    darkPalette.setColor(QPalette::Base, QColor(22, 27, 34));
+    darkPalette.setColor(QPalette::AlternateBase, QColor(13, 17, 23));
+    darkPalette.setColor(QPalette::ToolTipBase, QColor(22, 27, 34));
+    darkPalette.setColor(QPalette::ToolTipText, QColor(240, 246, 252));
+    darkPalette.setColor(QPalette::Text, QColor(230, 237, 243));
+    darkPalette.setColor(QPalette::Button, QColor(33, 38, 45));
+    darkPalette.setColor(QPalette::ButtonText, QColor(240, 246, 252));
+    darkPalette.setColor(QPalette::BrightText, Qt::red);
+    darkPalette.setColor(QPalette::Link, QColor(88, 166, 255));
+    darkPalette.setColor(QPalette::Highlight, QColor(245, 166, 35));
+    darkPalette.setColor(QPalette::HighlightedText, Qt::black);
+    app.setPalette(darkPalette);
 
     // Command-line options take precedence:
     ParseParameters(argc, argv);

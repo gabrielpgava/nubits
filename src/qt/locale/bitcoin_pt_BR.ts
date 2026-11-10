@@ -52,7 +52,7 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location filename="../forms/addressbookpage.ui" line="60"/>
         <source>&amp;New Address...</source>
-        <translation>&amp;amp; Novo endereço ...</translation>
+        <translation>&amp; Novo endereço ...</translation>
     </message>
     <message>
         <location filename="../forms/addressbookpage.ui" line="67"/>
@@ -62,7 +62,7 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location filename="../forms/addressbookpage.ui" line="70"/>
         <source>&amp;Copy to Clipboard</source>
-        <translation>&amp;amp; Copie para a área de transferência do sistema</translation>
+        <translation>&amp; Copie para a área de transferência do sistema</translation>
     </message>
     <message>
         <location filename="../forms/addressbookpage.ui" line="77"/>
@@ -87,7 +87,7 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location filename="../forms/addressbookpage.ui" line="97"/>
         <source>&amp;Delete</source>
-        <translation>&amp;amp; Excluir</translation>
+        <translation>&amp; Excluir</translation>
     </message>
     <message>
         <location filename="../addressbookpage.cpp" line="65"/>
@@ -335,59 +335,59 @@ Are you sure you wish to encrypt your wallet?</source>
     <message>
         <location filename="../bitcoingui.cpp" line="221"/>
         <source>&amp;Receive</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Receber</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="222"/>
         <location filename="../bitcoingui.cpp" line="438"/>
         <source>Show the list of addresses for receiving %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar a lista de endereços para receber %1</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="227"/>
         <source>&amp;Send</source>
-        <translation type="unfinished">&amp;Send</translation>
+        <translation>&amp;Enviar</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="228"/>
         <location filename="../bitcoingui.cpp" line="439"/>
         <source>Send coins to a %1 address</source>
-        <translation type="unfinished"></translation>
+        <translation>Enviar moedas para um endereço %1</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="233"/>
         <source>Sign/Verify &amp;message</source>
-        <translation type="unfinished"></translation>
+        <translation>Assinar/Verificar &amp;mensagem</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="234"/>
         <source>Prove you control an address</source>
-        <translation type="unfinished"></translation>
+        <translation>Provar que você controla um endereço</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="240"/>
         <source>&amp;Park</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Rendimentos</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="241"/>
         <source>Park coins</source>
-        <translation type="unfinished"></translation>
+        <translation>Estacionar moedas para obter rendimentos</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="246"/>
         <source>&amp;Vote</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Governança</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="247"/>
         <source>Change your vote</source>
-        <translation type="unfinished"></translation>
+        <translation>Votar em moções e governança</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="253"/>
         <source>Switch unit</source>
-        <translation type="unfinished"></translation>
+        <translation>Alternar moeda</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="275"/>
@@ -522,7 +522,7 @@ Are you sure you wish to encrypt your wallet?</source>
     <message>
         <location filename="../bitcoingui.cpp" line="334"/>
         <source>&amp;File</source>
-        <translation type="unfinished">&amp;amp; Arquivo</translation>
+        <translation type="unfinished">&amp; Arquivo</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="343"/>
@@ -542,7 +542,7 @@ Are you sure you wish to encrypt your wallet?</source>
     <message>
         <location filename="../bitcoingui.cpp" line="356"/>
         <source>&amp;Help</source>
-        <translation type="unfinished">&amp;amp; Ajuda</translation>
+        <translation type="unfinished">&amp; Ajuda</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="372"/>

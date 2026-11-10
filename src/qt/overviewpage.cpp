@@ -103,6 +103,13 @@ OverviewPage::OverviewPage(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    setAttribute(Qt::WA_StyledBackground, true);
+    setAutoFillBackground(true);
+    ui->frame->setAttribute(Qt::WA_StyledBackground, true);
+    ui->frame->setAutoFillBackground(true);
+    ui->frame_2->setAttribute(Qt::WA_StyledBackground, true);
+    ui->frame_2->setAutoFillBackground(true);
+
     // Balance: <balance>
     ui->labelBalance->setToolTip(tr("Your current balance"));
     ui->labelBalance->setTextInteractionFlags(Qt::TextSelectableByMouse|Qt::TextSelectableByKeyboard);
@@ -122,7 +129,8 @@ OverviewPage::OverviewPage(QWidget *parent) :
     ui->labelNumTransactions->setToolTip(tr("Total number of transactions in wallet"));
 
     // Recent transactions
-    ui->listTransactions->setStyleSheet("QListView { background:transparent }");
+    ui->listTransactions->setStyleSheet("QListView { background: transparent; border: none; outline: none; }");
+    ui->listTransactions->setFrameShape(QFrame::NoFrame);
     ui->listTransactions->setItemDelegate(txdelegate);
     ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
     ui->listTransactions->setSelectionMode(QAbstractItemView::NoSelection);

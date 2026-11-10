@@ -46,6 +46,8 @@
 #include <QIcon>
 #include <QTabWidget>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QToolButton>
 #include <QToolBar>
 #include <QStatusBar>
 #include <QLabel>
@@ -105,9 +107,6 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     // Create application menu bar
     createMenuBar();
 
-    // Create the toolbars
-    createToolBars();
-
     // Create the tray icon (or setup the dock icon)
     createTrayIcon();
 
@@ -116,6 +115,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->setContentsMargins(20, 20, 20, 20);
     transactionView = new TransactionView(this);
     vbox->addWidget(transactionView);
     transactionsPage->setLayout(vbox);
@@ -133,6 +133,29 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     votePage = new VotePage(this);
 
     centralWidget = new QStackedWidget(this);
+    centralWidget->setObjectName("centralWidget");
+    centralWidget->setAttribute(Qt::WA_StyledBackground, true);
+    centralWidget->setAutoFillBackground(true);
+
+    overviewPage->setAttribute(Qt::WA_StyledBackground, true);
+    overviewPage->setAutoFillBackground(true);
+    transactionsPage->setAttribute(Qt::WA_StyledBackground, true);
+    transactionsPage->setAutoFillBackground(true);
+    addressBookPage->setAttribute(Qt::WA_StyledBackground, true);
+    addressBookPage->setAutoFillBackground(true);
+    receiveCoinsPage->setAttribute(Qt::WA_StyledBackground, true);
+    receiveCoinsPage->setAutoFillBackground(true);
+    sendCoinsPage->setAttribute(Qt::WA_StyledBackground, true);
+    sendCoinsPage->setAutoFillBackground(true);
+#ifdef FIRST_CLASS_MESSAGING
+    messagePage->setAttribute(Qt::WA_StyledBackground, true);
+    messagePage->setAutoFillBackground(true);
+#endif
+    parkPage->setAttribute(Qt::WA_StyledBackground, true);
+    parkPage->setAutoFillBackground(true);
+    votePage->setAttribute(Qt::WA_StyledBackground, true);
+    votePage->setAutoFillBackground(true);
+
     centralWidget->addWidget(overviewPage);
     centralWidget->addWidget(transactionsPage);
     centralWidget->addWidget(addressBookPage);
@@ -143,7 +166,9 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 #endif
     centralWidget->addWidget(parkPage);
     centralWidget->addWidget(votePage);
-    setCentralWidget(centralWidget);
+
+    // Create dedicated vertical sidebar and integrate with mainContainer
+    createToolBars();
 
     // Create status bar
     statusBar();
@@ -242,13 +267,13 @@ void BitcoinGUI::createActions()
 #endif
     tabGroup->addAction(messageAction);
 
-    parkAction = new QAction(QIcon(":/icons/tx_mined"), tr("&Park / Earn"), this);
+    parkAction = new QAction(QIcon(":/icons/tx_mined"), tr("&Park"), this);
     parkAction->setToolTip(tr("Park coins for yield"));
     parkAction->setCheckable(true);
     parkAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
     tabGroup->addAction(parkAction);
 
-    voteAction = new QAction(QIcon(":/icons/edit"), tr("&Vote / DAO"), this);
+    voteAction = new QAction(QIcon(":/icons/edit"), tr("&Vote"), this);
     voteAction->setToolTip(tr("Change your vote in the DAO"));
     voteAction->setCheckable(true);
     voteAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
@@ -360,39 +385,69 @@ void BitcoinGUI::createMenuBar()
 
 void BitcoinGUI::createToolBars()
 {
-    // Currency switcher card (top of sidebar)
-    QPushButton* toolbarSpacer = new QPushButton();
-    toolbarSpacer->setMinimumWidth(180);
-    toolbarSpacer->setMaximumWidth(210);
-    toolbarSpacer->setMinimumHeight(60);
+    // Main container holding the sidebar and pages
+    QWidget *mainContainer = new QWidget(this);
+    mainContainer->setObjectName("mainContainer");
+    mainContainer->setAttribute(Qt::WA_StyledBackground, true);
+    mainContainer->setAutoFillBackground(true);
+
+    QHBoxLayout *mainLayout = new QHBoxLayout(mainContainer);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+
+    // Dedicated modern dark sidebar
+    QFrame *sidebar = new QFrame(mainContainer);
+    sidebar->setObjectName("sidebar");
+    sidebar->setFixedWidth(205);
+    sidebar->setAttribute(Qt::WA_StyledBackground, true);
+    sidebar->setAutoFillBackground(true);
+
+    QVBoxLayout *sidebarLayout = new QVBoxLayout(sidebar);
+    sidebarLayout->setContentsMargins(10, 14, 10, 14);
+    sidebarLayout->setSpacing(4);
+
+    // Currency Switcher Card (NuBits NBT / NuShares NSR)
+    QPushButton* toolbarSpacer = new QPushButton(sidebar);
+    toolbarSpacer->setObjectName("switchUnitBtn");
     toolbarSpacer->setProperty("class", "toolbarSpacer");
     toolbarSpacer->setCursor(Qt::PointingHandCursor);
     toolbarSpacer->setToolTip(tr("Clique para alternar moeda (NuBits NBT / NuShares NSR)"));
+    toolbarSpacer->setFixedHeight(54);
     connect(toolbarSpacer, SIGNAL(clicked()), this, SLOT(switchUnitButtonClicked()));
+    sidebarLayout->addWidget(toolbarSpacer);
+    sidebarLayout->addSpacing(8);
 
-    // Navigation sidebar
-    QToolBar *toolbar = new QToolBar(tr("Navigation"), this);
-    addToolBar(Qt::LeftToolBarArea, toolbar);
-    toolbar->setObjectName("navigationToolBar");
-    toolbar->setStyle(QStyleFactory::create("Fusion"));
-    toolbar->setOrientation(Qt::Vertical);
-    toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    toolbar->setMovable(false);
-    toolbar->setFloatable(false);
-    toolbar->setAllowedAreas(Qt::LeftToolBarArea);
-    toolbar->setIconSize(QSize(18, 18));
+    // Navigation buttons helper
+    auto addNavButton = [sidebar, sidebarLayout](QAction *action) {
+        QToolButton *btn = new QToolButton(sidebar);
+        btn->setDefaultAction(action);
+        btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        btn->setIconSize(QSize(18, 18));
+        btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        btn->setFixedHeight(40);
+        btn->setCursor(Qt::PointingHandCursor);
+        sidebarLayout->addWidget(btn);
+        return btn;
+    };
 
-    toolbar->addWidget(toolbarSpacer);
-    toolbar->addAction(overviewAction);
-    toolbar->addAction(sendCoinsAction);
-    toolbar->addAction(receiveCoinsAction);
-    toolbar->addAction(historyAction);
-    toolbar->addAction(addressBookAction);
+    addNavButton(overviewAction);
+    addNavButton(sendCoinsAction);
+    addNavButton(receiveCoinsAction);
+    addNavButton(historyAction);
+    addNavButton(addressBookAction);
 #ifdef FIRST_CLASS_MESSAGING
-    toolbar->addAction(messageAction);
+    addNavButton(messageAction);
 #endif
-    toolbar->addAction(parkAction);
-    toolbar->addAction(voteAction);
+    addNavButton(parkAction);
+    addNavButton(voteAction);
+
+    // Push buttons neatly to top
+    sidebarLayout->addStretch(1);
+
+    mainLayout->addWidget(sidebar);
+    mainLayout->addWidget(centralWidget, 1);
+
+    setCentralWidget(mainContainer);
 }
 
 void BitcoinGUI::setClientModel(ClientModel *clientModel)
