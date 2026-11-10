@@ -6,24 +6,26 @@
     <message>
         <location filename="../forms/aboutdialog.ui" line="14" />
         <source>About Nu</source>
-        <translation type="unfinished" />
+        <translation>Sobre o Nu</translation>
     </message>
     <message>
         <location filename="../forms/aboutdialog.ui" line="53" />
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-weight:600;"&gt;Nu&lt;/span&gt; version&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation type="unfinished" />
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Versão do &lt;span style=" font-weight:600;"&gt;Nu&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../forms/aboutdialog.ui" line="91" />
         <source>Copyright © 2014 Nu Developers</source>
-        <translation type="unfinished" />
+        <translation>Copyright © 2014 Desenvolvedores Nu</translation>
     </message>
     <message>
         <location filename="../forms/aboutdialog.ui" line="98" />
         <source>
 
 This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/) and cryptographic software written by Eric Young (eay@cryptsoft.com) and UPnP software written by Thomas Bernard.</source>
-        <translation type="unfinished" />
+        <translation>
+
+Este produto inclui software desenvolvido pelo OpenSSL Project para uso no OpenSSL Toolkit (http://www.openssl.org/), software criptográfico escrito por Eric Young (eay@cryptsoft.com) e software UPnP escrito por Thomas Bernard.</translation>
     </message>
 </context>
 <context>
@@ -36,7 +38,7 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location filename="../forms/addressbookpage.ui" line="20" />
         <source>These are your receiving addresses.  You may want to give a different one to each sender so you can keep track of who is sending to you.</source>
-        <translation type="unfinished" />
+        <translation>Estes são os seus endereços de recebimento. Você pode fornecer um diferente para cada remetente para acompanhar quem está enviando moedas para você.</translation>
     </message>
     <message>
         <location filename="../forms/addressbookpage.ui" line="33" />
@@ -66,17 +68,17 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location filename="../forms/addressbookpage.ui" line="77" />
         <source>Show &amp;QR Code</source>
-        <translation type="unfinished" />
+        <translation>Exibir código &amp;QR</translation>
     </message>
     <message>
         <location filename="../forms/addressbookpage.ui" line="84" />
         <source>Sign a message to prove you own this Nu address</source>
-        <translation type="unfinished" />
+        <translation>Assine uma mensagem para provar que você é dono deste endereço Nu</translation>
     </message>
     <message>
         <location filename="../forms/addressbookpage.ui" line="87" />
         <source>&amp;Sign Message</source>
-        <translation type="unfinished" />
+        <translation>&amp;Assinar Mensagem</translation>
     </message>
     <message>
         <location filename="../forms/addressbookpage.ui" line="94" />
@@ -91,22 +93,22 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location filename="../addressbookpage.cpp" line="65" />
         <source>Copy address</source>
-        <translation>Copy address</translation>
+        <translation>Copiar endereço</translation>
     </message>
     <message>
         <location filename="../addressbookpage.cpp" line="66" />
         <source>Copy label</source>
-        <translation>Copy label</translation>
+        <translation>Copiar rótulo</translation>
     </message>
     <message>
         <location filename="../addressbookpage.cpp" line="67" />
         <source>Edit</source>
-        <translation type="unfinished" />
+        <translation>Editar</translation>
     </message>
     <message>
         <location filename="../addressbookpage.cpp" line="68" />
         <source>Delete</source>
-        <translation type="unfinished" />
+        <translation>Excluir</translation>
     </message>
     <message>
         <location filename="../addressbookpage.cpp" line="275" />
@@ -126,7 +128,7 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location filename="../addressbookpage.cpp" line="289" />
         <source>Could not write to file %1.</source>
-        <translation>Could not write to file %1.</translation>
+        <translation>Não foi possível gravar no arquivo %1.</translation>
     </message>
 </context>
 <context>
@@ -144,7 +146,7 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location filename="../addresstablemodel.cpp" line="86" />
         <source>Dividend address</source>
-        <translation type="unfinished" />
+        <translation>Endereço de dividendos</translation>
     </message>
     <message>
         <location filename="../addresstablemodel.cpp" line="122" />
@@ -182,32 +184,32 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location filename="../askpassphrasedialog.cpp" line="35" />
         <source>Enter the new passphrase to the wallet.&lt;br/&gt;Please use a passphrase of &lt;b&gt;10 or more random characters&lt;/b&gt;, or &lt;b&gt;eight or more words&lt;/b&gt;.</source>
-        <translation type="unfinished" />
+        <translation>Digite a nova frase de segurança para a carteira.&lt;br/&gt;Use uma frase de segurança com &lt;b&gt;10 ou mais caracteres aleatórios&lt;/b&gt;, ou &lt;b&gt;oito ou mais palavras&lt;/b&gt;.</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="36" />
         <source>Encrypt wallet</source>
-        <translation type="unfinished" />
+        <translation>Criptografar carteira</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="39" />
         <source>This operation needs your wallet passphrase to unlock the wallet.</source>
-        <translation type="unfinished" />
+        <translation>Esta operação requer a frase de segurança da carteira para desbloqueá-la.</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="44" />
         <source>Unlock wallet</source>
-        <translation type="unfinished" />
+        <translation>Desbloquear carteira</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="47" />
         <source>This operation needs your wallet passphrase to decrypt the wallet.</source>
-        <translation type="unfinished" />
+        <translation>Esta operação requer a frase de segurança da carteira para descriptografá-la.</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="52" />
         <source>Decrypt wallet</source>
-        <translation type="unfinished" />
+        <translation>Descriptografar carteira</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="55" />
@@ -217,29 +219,30 @@ This product includes software developed by the OpenSSL Project for use in the O
     <message>
         <location filename="../askpassphrasedialog.cpp" line="56" />
         <source>Enter the old and new passphrase to the wallet.</source>
-        <translation type="unfinished" />
+        <translation>Digite a frase de segurança antiga e a nova para a carteira.</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="102" />
         <source>Confirm wallet encryption</source>
-        <translation type="unfinished" />
+        <translation>Confirmar criptografia da carteira</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="103" />
         <source>WARNING: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR %1&lt;/b&gt;!
 Are you sure you wish to encrypt your wallet?</source>
-        <translation type="unfinished" />
+        <translation>AVISO: Se você criptografar sua carteira e perder sua frase de segurança, você &lt;b&gt;PERDERÁ TODAS AS SUAS MOEDAS %1&lt;/b&gt;!
+Tem certeza de que deseja criptografar sua carteira?</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="112" />
         <location filename="../askpassphrasedialog.cpp" line="161" />
         <source>Wallet encrypted</source>
-        <translation type="unfinished" />
+        <translation>Carteira criptografada</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="113" />
         <source>Nu will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your %1 from being stolen by malware infecting your computer.</source>
-        <translation type="unfinished" />
+        <translation>O Nu fechará agora para concluir o processo de criptografia. Lembre-se de que a criptografia não protege totalmente seu saldo contra malwares no seu computador.</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="118" />
@@ -247,34 +250,34 @@ Are you sure you wish to encrypt your wallet?</source>
         <location filename="../askpassphrasedialog.cpp" line="167" />
         <location filename="../askpassphrasedialog.cpp" line="173" />
         <source>Wallet encryption failed</source>
-        <translation type="unfinished" />
+        <translation>Falha na criptografia da carteira</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="119" />
         <source>Wallet encryption failed due to an internal error. Your wallet was not encrypted.</source>
-        <translation type="unfinished" />
+        <translation>A criptografia da carteira falhou devido a um erro interno. Sua carteira não foi criptografada.</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="137" />
         <source>Wallet unlock failed</source>
-        <translation type="unfinished" />
+        <translation>Falha no desbloqueio da carteira</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="138" />
         <location filename="../askpassphrasedialog.cpp" line="149" />
         <location filename="../askpassphrasedialog.cpp" line="168" />
         <source>The passphrase entered for the wallet decryption was incorrect.</source>
-        <translation type="unfinished" />
+        <translation>A frase de segurança digitada para a descriptografia da carteira estava incorreta.</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="148" />
         <source>Wallet decryption failed</source>
-        <translation type="unfinished" />
+        <translation>Falha na descriptografia da carteira</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="162" />
         <source>Wallet passphrase was succesfully changed.</source>
-        <translation type="unfinished" />
+        <translation>A frase de segurança da carteira foi alterada com sucesso.</translation>
     </message>
     <message>
         <location filename="../askpassphrasedialog.cpp" line="209" />
@@ -286,7 +289,7 @@ Are you sure you wish to encrypt your wallet?</source>
         <location filename="../askpassphrasedialog.cpp" line="126" />
         <location filename="../askpassphrasedialog.cpp" line="174" />
         <source>The supplied passphrases do not match.</source>
-        <translation>A frase de segurança fornecida não confere.</translation>
+        <translation>As frases de segurança informadas não coincidem.</translation>
     </message>
 </context>
 <context>
@@ -294,27 +297,27 @@ Are you sure you wish to encrypt your wallet?</source>
     <message>
         <location filename="../bitcoin.cpp" line="133" />
         <source>A fatal error occured. Nu can no longer continue safely and will quit.</source>
-        <translation type="unfinished" />
+        <translation>Ocorreu um erro fatal. O Nu não pode mais continuar com segurança e será encerrado.</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="84" />
         <source>Nu</source>
-        <translation type="unfinished" />
+        <translation>Nu</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="203" />
         <source>&amp;Overview</source>
-        <translation type="unfinished">&amp;Visão geral</translation>
+        <translation>&amp;Visão geral</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="204" />
         <source>Show general overview of holdings</source>
-        <translation type="unfinished" />
+        <translation>Exibir visão geral das moedas e saldo</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="209" />
         <source>&amp;Transactions</source>
-        <translation type="unfinished">&amp;Transações</translation>
+        <translation>&amp;Transações</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="210" />
@@ -511,12 +514,12 @@ Are you sure you wish to encrypt your wallet?</source>
     <message>
         <location filename="../bitcoingui.cpp" line="306" />
         <source>&amp;Distribute dividends...</source>
-        <translation type="unfinished" />
+        <translation>&amp;Distribuir dividendos...</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="307" />
         <source>Distribute dividends to share holders</source>
-        <translation type="unfinished" />
+        <translation>Distribuir dividendos aos acionistas NuShares</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="334" />
@@ -556,22 +559,22 @@ Are you sure you wish to encrypt your wallet?</source>
     <message>
         <location filename="../bitcoingui.cpp" line="522" />
         <source>NuBits</source>
-        <translation type="unfinished" />
+        <translation>NuBits</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="527" />
         <source>NuShares</source>
-        <translation type="unfinished" />
+        <translation>NuShares</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="559" />
         <source>Nu client</source>
-        <translation type="unfinished" />
+        <translation>Cliente Nu</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="587" />
         <source>Nu-qt</source>
-        <translation type="unfinished" />
+        <translation>Nu-qt</translation>
     </message>
     <message numerus="yes">
         <location filename="../bitcoingui.cpp" line="651" />
@@ -597,7 +600,7 @@ Are you sure you wish to encrypt your wallet?</source>
     <message>
         <location filename="../bitcoingui.cpp" line="688" />
         <source>Downloaded %1 of %2 blocks of transaction history (%3% done).</source>
-        <translation type="unfinished" />
+        <translation>Carregados %1 de %2 blocos do histórico de transações (%3% concluído).</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="700" />
@@ -654,22 +657,22 @@ Are you sure you wish to encrypt your wallet?</source>
     <message>
         <location filename="../bitcoingui.cpp" line="802" />
         <source>This transaction requires a network fee of %1. Do you want to pay the fee and continue?</source>
-        <translation type="unfinished" />
+        <translation>Esta transação requer uma taxa de rede de %1. Deseja pagar a taxa e continuar?</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="806" />
         <source>Sending...</source>
-        <translation type="unfinished">Sending...</translation>
+        <translation>Enviando...</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="833" />
         <source>Sent transaction</source>
-        <translation type="unfinished">Sent transaction</translation>
+        <translation>Transação enviada</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="834" />
         <source>Incoming transaction</source>
-        <translation type="unfinished">Incoming transaction</translation>
+        <translation>Transação recebida</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="835" />
@@ -686,37 +689,37 @@ Endereço: %4</translation>
     <message>
         <location filename="../bitcoingui.cpp" line="975" />
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked for block minting only&lt;/b&gt;</source>
-        <translation type="unfinished" />
+        <translation>A carteira está &lt;b&gt;criptografada&lt;/b&gt; e atualmente &lt;b&gt;desbloqueada apenas para minting&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="975" />
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation type="unfinished" />
+        <translation>A carteira está &lt;b&gt;criptografada&lt;/b&gt; e atualmente &lt;b&gt;desbloqueada&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="985" />
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation type="unfinished" />
+        <translation>A carteira está &lt;b&gt;criptografada&lt;/b&gt; e atualmente &lt;b&gt;bloqueada&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="1042" />
         <source>Backup Portfolio</source>
-        <translation type="unfinished" />
+        <translation>Backup da Carteira</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="1042" />
         <source>Portfolio Data (*.dat)</source>
-        <translation type="unfinished" />
+        <translation>Dados da Carteira (*.dat)</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="1045" />
         <source>Backup Failed</source>
-        <translation type="unfinished" />
+        <translation>Falha no Backup</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="1045" />
         <source>There was an error trying to save the portfolio data to the new location.</source>
-        <translation type="unfinished" />
+        <translation>Ocorreu um erro ao tentar salvar os dados da carteira no novo local.</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="1074" />
@@ -756,7 +759,7 @@ Do you want to proceed?</translation>
     <message>
         <location filename="../bitcoingui.cpp" line="1109" />
         <source>Error: %1</source>
-        <translation type="unfinished" />
+        <translation>Erro: %1</translation>
     </message>
 </context>
 <context>
@@ -764,7 +767,7 @@ Do you want to proceed?</translation>
     <message>
         <location filename="../forms/coincontroldialog.ui" line="14" />
         <source>Coin Control</source>
-        <translation>Controle de Moedas (Coin Control)</translation>
+        <translation>Controle de Moedas</translation>
     </message>
     <message>
         <location filename="../forms/coincontroldialog.ui" line="45" />
@@ -808,18 +811,18 @@ Do you want to proceed?</translation>
     <message>
         <location filename="../forms/coincontroldialog.ui" line="240" />
         <source>Low Output:</source>
-        <translation>Saída Baixa:</translation>
+        <translation>Saída baixa:</translation>
     </message>
     <message>
         <location filename="../forms/coincontroldialog.ui" line="262" />
         <location filename="../coincontroldialog.cpp" line="597" />
         <source>no</source>
-        <translation type="unfinished" />
+        <translation>não</translation>
     </message>
     <message>
         <location filename="../forms/coincontroldialog.ui" line="291" />
         <source>After Fee:</source>
-        <translation>Após Taxa:</translation>
+        <translation>Após taxa:</translation>
     </message>
     <message>
         <location filename="../forms/coincontroldialog.ui" line="326" />
@@ -829,7 +832,7 @@ Do you want to proceed?</translation>
     <message>
         <location filename="../forms/coincontroldialog.ui" line="395" />
         <source>(un)select all</source>
-        <translation>(Des)marcar todos</translation>
+        <translation>(des)marcar todos</translation>
     </message>
     <message>
         <location filename="../forms/coincontroldialog.ui" line="408" />
@@ -874,17 +877,17 @@ Do you want to proceed?</translation>
     <message>
         <location filename="../forms/coincontroldialog.ui" line="502" />
         <source>Priority</source>
-        <translation type="unfinished" />
+        <translation>Prioridade</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="36" />
         <source>Copy address</source>
-        <translation type="unfinished">Copy address</translation>
+        <translation>Copiar endereço</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="37" />
         <source>Copy label</source>
-        <translation type="unfinished">Copy label</translation>
+        <translation>Copiar rótulo</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="38" />
@@ -895,7 +898,7 @@ Do you want to proceed?</translation>
     <message>
         <location filename="../coincontroldialog.cpp" line="39" />
         <source>Copy transaction ID</source>
-        <translation type="unfinished" />
+        <translation>Copiar ID da transação</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="63" />
@@ -935,47 +938,47 @@ Do you want to proceed?</translation>
     <message>
         <location filename="../coincontroldialog.cpp" line="388" />
         <source>highest</source>
-        <translation type="unfinished" />
+        <translation>altíssima</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="389" />
         <source>high</source>
-        <translation type="unfinished" />
+        <translation>alta</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="390" />
         <source>medium-high</source>
-        <translation type="unfinished" />
+        <translation>média-alta</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="391" />
         <source>medium</source>
-        <translation type="unfinished" />
+        <translation>média</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="395" />
         <source>low-medium</source>
-        <translation type="unfinished" />
+        <translation>baixa-média</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="396" />
         <source>low</source>
-        <translation type="unfinished" />
+        <translation>baixa</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="397" />
         <source>lowest</source>
-        <translation type="unfinished" />
+        <translation>baixíssima</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="597" />
         <source>DUST</source>
-        <translation type="unfinished" />
+        <translation>POEIRA</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="597" />
         <source>yes</source>
-        <translation type="unfinished" />
+        <translation>sim</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="607" />
@@ -1020,12 +1023,12 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../coincontroldialog.cpp" line="704" />
         <source>change from %1 (%2)</source>
-        <translation type="unfinished" />
+        <translation>troco de %1 (%2)</translation>
     </message>
     <message>
         <location filename="../coincontroldialog.cpp" line="705" />
         <source>(change)</source>
-        <translation type="unfinished" />
+        <translation>(troco)</translation>
     </message>
 </context>
 <context>
@@ -1033,7 +1036,7 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../forms/custodianvotedialog.ui" line="14" />
         <source>Dialog</source>
-        <translation type="unfinished">Diálogo</translation>
+        <translation>Voto em Custodiante</translation>
     </message>
     <message>
         <location filename="../forms/custodianvotedialog.ui" line="32" />
@@ -1048,12 +1051,12 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../custodianvotedialog.cpp" line="79" />
         <source>Error</source>
-        <translation type="unfinished" />
+        <translation>Erro</translation>
     </message>
     <message>
         <location filename="../custodianvotedialog.cpp" line="101" />
         <source>Invalid address on row %1: %2</source>
-        <translation type="unfinished" />
+        <translation>Endereço inválido na linha %1: %2</translation>
     </message>
     <message>
         <location filename="../custodianvotedialog.cpp" line="115" />
@@ -1066,17 +1069,17 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../optionsdialog.cpp" line="256" />
         <source>&amp;Unit to show amounts in: </source>
-        <translation>&amp;Unit to show amounts in: </translation>
+        <translation>&amp;Unidade para exibir valores: </translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="260" />
         <source>Choose the default subdivision unit to show in the interface, and when sending coins</source>
-        <translation>Choose the default subdivision unit to show in the interface, and when sending coins</translation>
+        <translation>Escolha a unidade padrão para exibir na interface e ao enviar moedas</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="267" />
         <source>&amp;Display addresses in transaction list</source>
-        <translation type="unfinished" />
+        <translation>&amp;Exibir endereços na lista de transações</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="268" />
@@ -1099,12 +1102,12 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../forms/distributedivdialog.ui" line="29" />
         <source>Distribute Dividends</source>
-        <translation type="unfinished" />
+        <translation>Distribuir Dividendos</translation>
     </message>
     <message>
         <location filename="../forms/distributedivdialog.ui" line="53" />
         <source>Calculate Dividends</source>
-        <translation type="unfinished" />
+        <translation>Calcular Dividendos</translation>
     </message>
     <message>
         <location filename="../forms/distributedivdialog.ui" line="60" />
@@ -1114,7 +1117,7 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../forms/distributedivdialog.ui" line="89" />
         <source>Record date (local time):</source>
-        <translation type="unfinished" />
+        <translation>Data de registro (horário local):</translation>
     </message>
     <message>
         <location filename="../forms/distributedivdialog.ui" line="105" />
@@ -1142,52 +1145,52 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../forms/editaddressdialog.ui" line="14" />
         <source>Edit Address</source>
-        <translation>Edit Address</translation>
+        <translation>Editar Endereço</translation>
     </message>
     <message>
         <location filename="../forms/editaddressdialog.ui" line="25" />
         <source>&amp;Label</source>
-        <translation>&amp;Label</translation>
+        <translation>&amp;Rótulo</translation>
     </message>
     <message>
         <location filename="../forms/editaddressdialog.ui" line="35" />
         <source>The label associated with this address book entry</source>
-        <translation>The label associated with this address book entry</translation>
+        <translation>O rótulo associado a esta entrada do catálogo</translation>
     </message>
     <message>
         <location filename="../forms/editaddressdialog.ui" line="42" />
         <source>&amp;Address</source>
-        <translation>&amp;Address</translation>
+        <translation>&amp;Endereço</translation>
     </message>
     <message>
         <location filename="../forms/editaddressdialog.ui" line="52" />
         <source>The address associated with this address book entry. This can only be modified for sending addresses.</source>
-        <translation>The address associated with this address book entry. This can only be modified for sending addresses.</translation>
+        <translation>O endereço associado a esta entrada. Só pode ser alterado para endereços de envio.</translation>
     </message>
     <message>
         <location filename="../editaddressdialog.cpp" line="21" />
         <source>New receiving address</source>
-        <translation>New receiving address</translation>
+        <translation>Novo endereço de recebimento</translation>
     </message>
     <message>
         <location filename="../editaddressdialog.cpp" line="25" />
         <source>New sending address</source>
-        <translation>New sending address</translation>
+        <translation>Novo endereço de envio</translation>
     </message>
     <message>
         <location filename="../editaddressdialog.cpp" line="28" />
         <source>Edit receiving address</source>
-        <translation>Edit receiving address</translation>
+        <translation>Editar endereço de recebimento</translation>
     </message>
     <message>
         <location filename="../editaddressdialog.cpp" line="32" />
         <source>Edit sending address</source>
-        <translation>Edit sending address</translation>
+        <translation>Editar endereço de envio</translation>
     </message>
     <message>
         <location filename="../editaddressdialog.cpp" line="92" />
         <source>The entered address "%1" is already in the address book.</source>
-        <translation>The entered address "%1" is already in the address book.</translation>
+        <translation>O endereço digitado "%1" já está no catálogo de endereços.</translation>
     </message>
     <message>
         <location filename="../editaddressdialog.cpp" line="97" />
@@ -1197,12 +1200,12 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../editaddressdialog.cpp" line="102" />
         <source>Could not unlock wallet.</source>
-        <translation type="unfinished" />
+        <translation>Não foi possível desbloquear a carteira.</translation>
     </message>
     <message>
         <location filename="../editaddressdialog.cpp" line="107" />
         <source>New key generation failed.</source>
-        <translation>New key generation failed.</translation>
+        <translation>Falha na geração de nova chave.</translation>
     </message>
 </context>
 <context>
@@ -1210,17 +1213,17 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../optionsdialog.cpp" line="176" />
         <source>&amp;Minimize to the tray instead of the taskbar</source>
-        <translation>&amp;Minimize to the tray instead of the taskbar</translation>
+        <translation>&amp;Minimizar para a bandeja do sistema</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="177" />
         <source>Show only a tray icon after minimizing the window</source>
-        <translation>Show only a tray icon after minimizing the window</translation>
+        <translation>Exibir apenas ícone na bandeja após minimizar a janela</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="185" />
         <source>Map port using &amp;UPnP</source>
-        <translation>Map port using &amp;UPnP</translation>
+        <translation>Mapear porta usando &amp;UPnP</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="180" />
@@ -1293,17 +1296,17 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../forms/motionvotedialog.ui" line="14" />
         <source>Dialog</source>
-        <translation type="unfinished">Diálogo</translation>
+        <translation>Voto em Moção</translation>
     </message>
     <message>
         <location filename="../forms/motionvotedialog.ui" line="32" />
         <source>Motion hash</source>
-        <translation type="unfinished" />
+        <translation>Hash da moção</translation>
     </message>
     <message>
         <location filename="../motionvotedialog.cpp" line="72" />
         <source>Error</source>
-        <translation type="unfinished" />
+        <translation>Erro</translation>
     </message>
     <message>
         <location filename="../motionvotedialog.cpp" line="96" />
@@ -1316,17 +1319,17 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../optionsdialog.cpp" line="80" />
         <source>Main</source>
-        <translation>Main</translation>
+        <translation>Principal</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="85" />
         <source>Display</source>
-        <translation>Display</translation>
+        <translation>Exibição</translation>
     </message>
     <message>
         <location filename="../optionsdialog.cpp" line="105" />
         <source>Options</source>
-        <translation>Options</translation>
+        <translation>Opções</translation>
     </message>
 </context>
 <context>
@@ -1334,32 +1337,32 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../forms/overviewpage.ui" line="14" />
         <source>Form</source>
-        <translation>Form</translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <location filename="../forms/overviewpage.ui" line="47" />
         <source>Wallet</source>
-        <translation type="unfinished" />
+        <translation>Carteira</translation>
     </message>
     <message>
         <location filename="../forms/overviewpage.ui" line="54" />
         <source>Balance:</source>
-        <translation>Saldo:</translation>
+        <translation>Saldo disponível:</translation>
     </message>
     <message>
         <location filename="../forms/overviewpage.ui" line="68" />
         <source>Stake:</source>
-        <translation type="unfinished" />
+        <translation>Em Stake (PoS):</translation>
     </message>
     <message>
         <location filename="../forms/overviewpage.ui" line="110" />
         <source>Parked:</source>
-        <translation type="unfinished" />
+        <translation>Em rendimento (Park):</translation>
     </message>
     <message>
         <location filename="../forms/overviewpage.ui" line="89" />
         <source>Number of transactions:</source>
-        <translation>Number of transactions:</translation>
+        <translation>Total de transações:</translation>
     </message>
     <message>
         <location filename="../forms/overviewpage.ui" line="96" />
@@ -1369,37 +1372,37 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../forms/overviewpage.ui" line="103" />
         <source>Unconfirmed:</source>
-        <translation>Unconfirmed:</translation>
+        <translation>Não confirmado:</translation>
     </message>
     <message>
         <location filename="../forms/overviewpage.ui" line="153" />
         <source>&lt;b&gt;Recent transactions&lt;/b&gt;</source>
-        <translation>&lt;b&gt;Recent transactions&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;Transações recentes&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../overviewpage.cpp" line="104" />
         <source>Your current balance</source>
-        <translation>Your current balance</translation>
+        <translation>Seu saldo disponível</translation>
     </message>
     <message>
         <location filename="../overviewpage.cpp" line="109" />
         <source>Your current stake</source>
-        <translation type="unfinished" />
+        <translation>Seu saldo em stake</translation>
     </message>
     <message>
         <location filename="../overviewpage.cpp" line="114" />
         <source>Total of transactions that have yet to be confirmed, and do not yet count toward the current balance</source>
-        <translation>Total of transactions that have yet to be confirmed, and do not yet count toward the current balance</translation>
+        <translation>Total de transações pendentes de confirmação que ainda não contam no saldo</translation>
     </message>
     <message>
         <location filename="../overviewpage.cpp" line="119" />
         <source>Your current parked amount</source>
-        <translation type="unfinished" />
+        <translation>Seu saldo estacionado em rendimento</translation>
     </message>
     <message>
         <location filename="../overviewpage.cpp" line="122" />
         <source>Total number of transactions in wallet</source>
-        <translation type="unfinished" />
+        <translation>Número total de transações na carteira</translation>
     </message>
 </context>
 <context>
@@ -1407,17 +1410,17 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../forms/parkdialog.ui" line="14" />
         <source>Dialog</source>
-        <translation type="unfinished">Diálogo</translation>
+        <translation>Estacionar Moedas (Yield)</translation>
     </message>
     <message>
         <location filename="../forms/parkdialog.ui" line="28" />
         <source>Park data</source>
-        <translation type="unfinished" />
+        <translation>Dados de Rendimento</translation>
     </message>
     <message>
         <location filename="../forms/parkdialog.ui" line="37" />
         <source>Amount to park</source>
-        <translation type="unfinished" />
+        <translation>Quantia a estacionar</translation>
     </message>
     <message>
         <location filename="../forms/parkdialog.ui" line="44" />
@@ -1472,7 +1475,7 @@ This label turns red, if the priority is smaller than "medium".
     <message>
         <location filename="../parkdialog.cpp" line="55" />
         <source>Annual interest rate</source>
-        <translation type="unfinished" />
+        <translation>Taxa de juros anual</translation>
     </message>
     <message>
         <location filename="../parkdialog.cpp" line="132" />
@@ -1519,17 +1522,17 @@ Are you sure?</source>
     <message>
         <location filename="../forms/parkpage.ui" line="14" />
         <source>Dialog</source>
-        <translation type="unfinished">Diálogo</translation>
+        <translation>Janela</translation>
     </message>
     <message>
         <location filename="../forms/parkpage.ui" line="25" />
         <source>Create a new address</source>
-        <translation type="unfinished">Criar um novo endereço</translation>
+        <translation>Criar um novo endereço</translation>
     </message>
     <message>
         <location filename="../forms/parkpage.ui" line="28" />
         <source>&amp;Park...</source>
-        <translation type="unfinished" />
+        <translation>&amp;Estacionar...</translation>
     </message>
 </context>
 <context>
@@ -1537,17 +1540,17 @@ Are you sure?</source>
     <message>
         <location filename="../forms/parkratevotedialog.ui" line="14" />
         <source>Dialog</source>
-        <translation type="unfinished">Diálogo</translation>
+        <translation>Votação de Taxas de Rendimento</translation>
     </message>
     <message>
         <location filename="../forms/parkratevotedialog.ui" line="32" />
         <source>Approximate duration</source>
-        <translation type="unfinished" />
+        <translation>Duração aproximada</translation>
     </message>
     <message>
         <location filename="../forms/parkratevotedialog.ui" line="37" />
         <source>Annual interest rate</source>
-        <translation type="unfinished" />
+        <translation>Taxa de juros anual</translation>
     </message>
     <message>
         <location filename="../forms/parkratevotedialog.ui" line="47" />
@@ -1580,17 +1583,17 @@ Are you sure?</source>
     <message>
         <location filename="../parktablemodel.cpp" line="292" />
         <source>Est. time left</source>
-        <translation type="unfinished" />
+        <translation>Tempo est. restante</translation>
     </message>
     <message>
         <location filename="../parktablemodel.cpp" line="292" />
         <source>Premium</source>
-        <translation type="unfinished" />
+        <translation>Rendimento (Prêmio)</translation>
     </message>
     <message>
         <location filename="../parktablemodel.cpp" line="292" />
         <source>Unpark address</source>
-        <translation type="unfinished" />
+        <translation>Endereço de resgate</translation>
     </message>
 </context>
 <context>
@@ -1603,12 +1606,12 @@ Are you sure?</source>
     <message>
         <location filename="../forms/qrcodedialog.ui" line="32" />
         <source>QR Code</source>
-        <translation type="unfinished" />
+        <translation>Código QR</translation>
     </message>
     <message>
         <location filename="../forms/qrcodedialog.ui" line="55" />
         <source>Request Payment</source>
-        <translation type="unfinished" />
+        <translation>Requisitar Pagamento</translation>
     </message>
     <message>
         <location filename="../forms/qrcodedialog.ui" line="70" />
@@ -1618,7 +1621,7 @@ Are you sure?</source>
     <message>
         <location filename="../forms/qrcodedialog.ui" line="105" />
         <source>shares</source>
-        <translation type="unfinished" />
+        <translation>ações</translation>
     </message>
     <message>
         <location filename="../forms/qrcodedialog.ui" line="121" />
@@ -1661,17 +1664,17 @@ Are you sure?</source>
     <message>
         <location filename="../forms/rpcconsole.ui" line="14" />
         <source>Nu debug window</source>
-        <translation type="unfinished" />
+        <translation>Janela de Depuração do Nu</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="24" />
         <source>Information</source>
-        <translation type="unfinished" />
+        <translation>Informações</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="33" />
         <source>Client name</source>
-        <translation type="unfinished" />
+        <translation>Nome do cliente</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="40" />
@@ -1688,7 +1691,7 @@ Are you sure?</source>
     <message>
         <location filename="../forms/rpcconsole.ui" line="53" />
         <source>Client version</source>
-        <translation type="unfinished" />
+        <translation>Versão do cliente</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="79" />
@@ -1698,12 +1701,12 @@ Are you sure?</source>
     <message>
         <location filename="../forms/rpcconsole.ui" line="92" />
         <source>Network</source>
-        <translation type="unfinished" />
+        <translation>Rede</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="99" />
         <source>Number of connections</source>
-        <translation type="unfinished" />
+        <translation>Número de conexões</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="119" />
@@ -1713,32 +1716,32 @@ Are you sure?</source>
     <message>
         <location filename="../forms/rpcconsole.ui" line="142" />
         <source>Block chain</source>
-        <translation type="unfinished" />
+        <translation>Blockchain</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="149" />
         <source>Current number of blocks</source>
-        <translation type="unfinished" />
+        <translation>Número atual de blocos</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="169" />
         <source>Estimated total blocks</source>
-        <translation type="unfinished" />
+        <translation>Total estimado de blocos</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="189" />
         <source>Last block time</source>
-        <translation type="unfinished" />
+        <translation>Data/hora do último bloco</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="222" />
         <source>Build date</source>
-        <translation type="unfinished" />
+        <translation>Data de compilação</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="237" />
         <source>Console</source>
-        <translation type="unfinished" />
+        <translation>Console</translation>
     </message>
     <message>
         <location filename="../forms/rpcconsole.ui" line="270" />
@@ -1748,7 +1751,7 @@ Are you sure?</source>
     <message>
         <location filename="../forms/rpcconsole.ui" line="286" />
         <source>Clear console</source>
-        <translation type="unfinished" />
+        <translation>Limpar console</translation>
     </message>
     <message>
         <location filename="../rpcconsole.cpp" line="320" />
@@ -1761,7 +1764,7 @@ Are you sure?</source>
     <message>
         <location filename="../rpcconsole.cpp" line="59" />
         <source>Switched to %1 wallet</source>
-        <translation type="unfinished" />
+        <translation>Alternado para carteira %1</translation>
     </message>
 </context>
 <context>
@@ -1807,7 +1810,7 @@ Are you sure?</source>
         <location filename="../forms/sendcoinsdialog.ui" line="235" />
         <location filename="../forms/sendcoinsdialog.ui" line="270" />
         <source>0</source>
-        <translation type="unfinished">0</translation>
+        <translation>0</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="251" />
@@ -1825,7 +1828,7 @@ Are you sure?</source>
         <location filename="../forms/sendcoinsdialog.ui" line="496" />
         <location filename="../forms/sendcoinsdialog.ui" line="528" />
         <source>0.00 BTC</source>
-        <translation type="unfinished">123.456 BTC {0.00 ?}</translation>
+        <translation>0.00</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="337" />
@@ -1835,7 +1838,7 @@ Are you sure?</source>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="356" />
         <source>medium</source>
-        <translation type="unfinished" />
+        <translation>média</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="388" />
@@ -1845,32 +1848,32 @@ Are you sure?</source>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="423" />
         <source>Low Output:</source>
-        <translation>Saída Baixa:</translation>
+        <translation>Saída baixa:</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="442" />
         <source>no</source>
-        <translation type="unfinished" />
+        <translation>não</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="474" />
         <source>After Fee:</source>
-        <translation>Após Taxa:</translation>
+        <translation>Após taxa:</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="509" />
         <source>Change</source>
-        <translation type="unfinished" />
+        <translation>Troco:</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="559" />
         <source>custom change address</source>
-        <translation>endereço personalizado para troco</translation>
+        <translation>endereço personalizado de troco</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="674" />
         <source>Send to multiple recipients at once</source>
-        <translation>Enviar para múltiplos destinatários</translation>
+        <translation>Enviar para múltiplos destinatários de uma vez</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="677" />
@@ -1880,7 +1883,7 @@ Are you sure?</source>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="690" />
         <source>Remove all transaction fields</source>
-        <translation>Limpar todos os campos</translation>
+        <translation>Limpar todos os campos da transação</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="693" />
@@ -1890,12 +1893,12 @@ Are you sure?</source>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="708" />
         <source>Balance:</source>
-        <translation>Saldo:</translation>
+        <translation>Saldo disponível:</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="715" />
         <source>123.456 BTC</source>
-        <translation>123.456 BTC</translation>
+        <translation>123.456</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="746" />
@@ -1920,7 +1923,7 @@ Are you sure?</source>
     <message>
         <location filename="../sendcoinsdialog.cpp" line="150" />
         <source> and </source>
-        <translation> and </translation>
+        <translation> e </translation>
     </message>
     <message>
         <location filename="../sendcoinsdialog.cpp" line="177" />
@@ -2028,7 +2031,7 @@ Are you sure?</source>
     <message>
         <location filename="../forms/sendcoinsentry.ui" line="14" />
         <source>Form</source>
-        <translation>Form</translation>
+        <translation>Formulário</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsentry.ui" line="29" />
@@ -2039,7 +2042,7 @@ Are you sure?</source>
         <location filename="../forms/sendcoinsentry.ui" line="66" />
         <location filename="../sendcoinsentry.cpp" line="26" />
         <source>Enter a label for this address to add it to your address book</source>
-        <translation>Digite um rótulo para adicionar ao catálogo</translation>
+        <translation>Digite um rótulo para este endereço para adicioná-lo ao catálogo</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsentry.ui" line="75" />
@@ -2059,7 +2062,7 @@ Are you sure?</source>
     <message>
         <location filename="../forms/sendcoinsentry.ui" line="103" />
         <source>Choose address from address book</source>
-        <translation>Escolher do catálogo de endereços</translation>
+        <translation>Escolher endereço do catálogo</translation>
     </message>
     <message>
         <location filename="../forms/sendcoinsentry.ui" line="113" />
@@ -2079,7 +2082,7 @@ Are you sure?</source>
     <message>
         <location filename="../forms/sendcoinsentry.ui" line="137" />
         <source>Remove this recipient</source>
-        <translation>Remover destinatário</translation>
+        <translation>Remover este destinatário</translation>
     </message>
     <message>
         <location filename="../sendcoinsentry.cpp" line="25" />
@@ -2092,17 +2095,17 @@ Are you sure?</source>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="14" />
         <source>Signatures - Sign / Verify a Message</source>
-        <translation type="unfinished" />
+        <translation>Assinaturas - Assinar / Verificar Mensagem</translation>
     </message>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="24" />
         <source>&amp;Sign Message</source>
-        <translation type="unfinished" />
+        <translation>&amp;Assinar Mensagem</translation>
     </message>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="30" />
         <source>You can sign messages with your addresses to prove you own them. Be careful not to sign anything vague, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation type="unfinished" />
+        <translation>Você pode assinar mensagens com seus endereços para provar que é dono deles. Assine apenas declarações detalhadas com as quais você concorda.</translation>
     </message>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="48" />
@@ -2119,7 +2122,7 @@ Are you sure?</source>
         <location filename="../forms/signverifymessagedialog.ui" line="65" />
         <location filename="../forms/signverifymessagedialog.ui" line="275" />
         <source>Alt+A</source>
-        <translation type="unfinished">Alt+A</translation>
+        <translation>Alt+A</translation>
     </message>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="75" />
@@ -2129,12 +2132,12 @@ Are you sure?</source>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="85" />
         <source>Alt+P</source>
-        <translation type="unfinished">Alt+P</translation>
+        <translation>Alt+P</translation>
     </message>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="97" />
         <source>Enter the message you want to sign here</source>
-        <translation type="unfinished" />
+        <translation>Digite a mensagem que deseja assinar aqui</translation>
     </message>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="104" />
@@ -2144,7 +2147,7 @@ Are you sure?</source>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="131" />
         <source>Copy the current signature to the system clipboard</source>
-        <translation type="unfinished" />
+        <translation>Copiar a assinatura atual para a área de transferência</translation>
     </message>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="152" />
@@ -2159,23 +2162,23 @@ Are you sure?</source>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="169" />
         <source>Reset all sign message fields</source>
-        <translation type="unfinished" />
+        <translation>Limpar todos os campos de assinatura</translation>
     </message>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="172" />
         <location filename="../forms/signverifymessagedialog.ui" line="315" />
         <source>Clear &amp;All</source>
-        <translation type="unfinished" />
+        <translation>Limpar &amp;Tudo</translation>
     </message>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="231" />
         <source>&amp;Verify Message</source>
-        <translation type="unfinished" />
+        <translation>&amp;Verificar Mensagem</translation>
     </message>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="237" />
         <source>Enter the signing address, message (ensure you copy line breaks, spaces, tabs, etc. exactly) and signature below to verify the message. Be careful not to read more into the signature than what is in the signed message itself, to avoid being tricked by a man-in-the-middle attack.</source>
-        <translation type="unfinished" />
+        <translation>Digite o endereço de assinatura, mensagem e assinatura abaixo para verificar a mensagem.</translation>
     </message>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="258" />
@@ -2195,7 +2198,7 @@ Are you sure?</source>
     <message>
         <location filename="../forms/signverifymessagedialog.ui" line="312" />
         <source>Reset all verify message fields</source>
-        <translation type="unfinished" />
+        <translation>Limpar todos os campos de verificação</translation>
     </message>
     <message>
         <location filename="../signverifymessagedialog.cpp" line="29" />
@@ -2217,7 +2220,7 @@ Are you sure?</source>
         <location filename="../signverifymessagedialog.cpp" line="115" />
         <location filename="../signverifymessagedialog.cpp" line="195" />
         <source>The entered address is invalid.</source>
-        <translation>O endereço inserido é inválido.</translation>
+        <translation>O endereço digitado é inválido.</translation>
     </message>
     <message>
         <location filename="../signverifymessagedialog.cpp" line="115" />
@@ -2225,13 +2228,13 @@ Are you sure?</source>
         <location filename="../signverifymessagedialog.cpp" line="195" />
         <location filename="../signverifymessagedialog.cpp" line="203" />
         <source>Please check the address and try again.</source>
-        <translation>Por favor verifique o endereço e tente novamente.</translation>
+        <translation>Verifique o endereço e tente novamente.</translation>
     </message>
     <message>
         <location filename="../signverifymessagedialog.cpp" line="123" />
         <location filename="../signverifymessagedialog.cpp" line="203" />
         <source>The entered address does not refer to a key.</source>
-        <translation>O endereço inserido não se refere a uma chave.</translation>
+        <translation>O endereço digitado não se refere a uma chave.</translation>
     </message>
     <message>
         <location filename="../signverifymessagedialog.cpp" line="131" />
@@ -2241,17 +2244,17 @@ Are you sure?</source>
     <message>
         <location filename="../signverifymessagedialog.cpp" line="139" />
         <source>Private key for the entered address is not available.</source>
-        <translation>A chave privada do endereço inserido não está disponível.</translation>
+        <translation>A chave privada para o endereço informado não está disponível.</translation>
     </message>
     <message>
         <location filename="../signverifymessagedialog.cpp" line="151" />
         <source>Message signing failed.</source>
-        <translation>Falha ao assinar a mensagem.</translation>
+        <translation>Falha na assinatura da mensagem.</translation>
     </message>
     <message>
         <location filename="../signverifymessagedialog.cpp" line="156" />
         <source>Message signed.</source>
-        <translation>Mensagem assinada com sucesso.</translation>
+        <translation>Mensagem assinada.</translation>
     </message>
     <message>
         <location filename="../signverifymessagedialog.cpp" line="214" />
@@ -2262,7 +2265,7 @@ Are you sure?</source>
         <location filename="../signverifymessagedialog.cpp" line="214" />
         <location filename="../signverifymessagedialog.cpp" line="227" />
         <source>Please check the signature and try again.</source>
-        <translation>Por favor verifique a assinatura e tente novamente.</translation>
+        <translation>Verifique a assinatura e tente novamente.</translation>
     </message>
     <message>
         <location filename="../signverifymessagedialog.cpp" line="227" />
@@ -2285,12 +2288,12 @@ Are you sure?</source>
     <message>
         <location filename="../transactiondesc.cpp" line="21" />
         <source>Open for %1 blocks</source>
-        <translation>Open for %1 blocks</translation>
+        <translation>Aberto para %1 blocos</translation>
     </message>
     <message>
         <location filename="../transactiondesc.cpp" line="23" />
         <source>Open until %1</source>
-        <translation>Open until %1</translation>
+        <translation>Aberto até %1</translation>
     </message>
     <message>
         <location filename="../transactiondesc.cpp" line="29" />
@@ -2300,12 +2303,12 @@ Are you sure?</source>
     <message>
         <location filename="../transactiondesc.cpp" line="31" />
         <source>%1/unconfirmed</source>
-        <translation>%1/unconfirmed</translation>
+        <translation>%1/não confirmado</translation>
     </message>
     <message>
         <location filename="../transactiondesc.cpp" line="33" />
         <source>%1 confirmations</source>
-        <translation>%1 confirmations</translation>
+        <translation>%1 confirmações</translation>
     </message>
     <message>
         <location filename="../transactiondesc.cpp" line="51" />
@@ -2351,7 +2354,7 @@ Are you sure?</source>
     <message>
         <location filename="../transactiondesc.cpp" line="98" />
         <source>unknown</source>
-        <translation>unknown</translation>
+        <translation>desconhecido</translation>
     </message>
     <message>
         <location filename="../transactiondesc.cpp" line="99" />
@@ -2436,12 +2439,12 @@ Are you sure?</source>
     <message>
         <location filename="../forms/transactiondescdialog.ui" line="14" />
         <source>Transaction details</source>
-        <translation>Transaction details</translation>
+        <translation>Detalhes da transação</translation>
     </message>
     <message>
         <location filename="../forms/transactiondescdialog.ui" line="20" />
         <source>This pane shows a detailed description of the transaction</source>
-        <translation>This pane shows a detailed description of the transaction</translation>
+        <translation>Este painel exibe uma descrição detalhada da transação</translation>
     </message>
 </context>
 <context>
@@ -2454,7 +2457,7 @@ Are you sure?</source>
     <message>
         <location filename="../transactiontablemodel.cpp" line="214" />
         <source>Type</source>
-        <translation>Type</translation>
+        <translation>Tipo</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="214" />
@@ -2477,22 +2480,22 @@ Are you sure?</source>
     <message>
         <location filename="../transactiontablemodel.cpp" line="287" />
         <source>Open until %1</source>
-        <translation>Open until %1</translation>
+        <translation>Aberto até %1</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="290" />
         <source>Offline (%1 confirmations)</source>
-        <translation>Offline (%1 confirmations)</translation>
+        <translation>Offline (%1 confirmações)</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="293" />
         <source>Unconfirmed (%1 of %2 confirmations)</source>
-        <translation>Unconfirmed (%1 of %2 confirmations)</translation>
+        <translation>Não confirmado (%1 de %2 confirmações)</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="296" />
         <source>Confirmed (%1 confirmations)</source>
-        <translation>Confirmed (%1 confirmations)</translation>
+        <translation>Confirmado (%1 confirmações)</translation>
     </message>
     <message numerus="yes">
         <location filename="../transactiontablemodel.cpp" line="304" />
@@ -2505,37 +2508,37 @@ Are you sure?</source>
     <message>
         <location filename="../transactiontablemodel.cpp" line="310" />
         <source>This block was not received by any other nodes and will probably not be accepted!</source>
-        <translation>This block was not received by any other nodes and will probably not be accepted!</translation>
+        <translation>Este bloco não foi recebido por outros nós e provavelmente não será aceito!</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="313" />
         <source>Generated but not accepted</source>
-        <translation>Generated but not accepted</translation>
+        <translation>Gerado mas não aceito</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="356" />
         <source>Received with</source>
-        <translation>Received with</translation>
+        <translation>Recebido com</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="358" />
         <source>Received from</source>
-        <translation type="unfinished" />
+        <translation>Recebido de</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="361" />
         <source>Sent to</source>
-        <translation>Sent to</translation>
+        <translation>Enviado para</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="363" />
         <source>Payment to yourself</source>
-        <translation>Payment to yourself</translation>
+        <translation>Pagamento para você mesmo</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="365" />
         <source>Mined</source>
-        <translation>Mined</translation>
+        <translation>Minerado</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="367" />
@@ -2555,7 +2558,7 @@ Are you sure?</source>
     <message>
         <location filename="../transactiontablemodel.cpp" line="413" />
         <source>(n/a)</source>
-        <translation>(n/a)</translation>
+        <translation>(n/d)</translation>
     </message>
     <message>
         <location filename="../transactiontablemodel.cpp" line="615" />
@@ -2589,57 +2592,57 @@ Are you sure?</source>
         <location filename="../transactionview.cpp" line="55" />
         <location filename="../transactionview.cpp" line="71" />
         <source>All</source>
-        <translation>All</translation>
+        <translation>Todas</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="56" />
         <source>Today</source>
-        <translation>Today</translation>
+        <translation>Hoje</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="57" />
         <source>This week</source>
-        <translation>This week</translation>
+        <translation>Esta semana</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="58" />
         <source>This month</source>
-        <translation>This month</translation>
+        <translation>Este mês</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="59" />
         <source>Last month</source>
-        <translation>Last month</translation>
+        <translation>Mês passado</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="60" />
         <source>This year</source>
-        <translation>This year</translation>
+        <translation>Este ano</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="61" />
         <source>Range...</source>
-        <translation>Range...</translation>
+        <translation>Intervalo...</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="72" />
         <source>Received with</source>
-        <translation>Received with</translation>
+        <translation>Recebido com</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="74" />
         <source>Sent to</source>
-        <translation>Sent to</translation>
+        <translation>Enviado para</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="76" />
         <source>To yourself</source>
-        <translation>To yourself</translation>
+        <translation>Para você mesmo</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="77" />
         <source>Mined</source>
-        <translation>Mined</translation>
+        <translation>Minerado</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="78" />
@@ -2649,27 +2652,27 @@ Are you sure?</source>
     <message>
         <location filename="../transactionview.cpp" line="79" />
         <source>Other</source>
-        <translation>Other</translation>
+        <translation>Outro</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="85" />
         <source>Enter address or label to search</source>
-        <translation>Enter address or label to search</translation>
+        <translation>Digite endereço ou rótulo para pesquisar</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="91" />
         <source>Min amount</source>
-        <translation>Min amount</translation>
+        <translation>Quantia mínima</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="125" />
         <source>Copy address</source>
-        <translation>Copy address</translation>
+        <translation>Copiar endereço</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="126" />
         <source>Copy label</source>
-        <translation>Copy label</translation>
+        <translation>Copiar rótulo</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="127" />
@@ -2679,7 +2682,7 @@ Are you sure?</source>
     <message>
         <location filename="../transactionview.cpp" line="128" />
         <source>Edit label</source>
-        <translation>Edit label</translation>
+        <translation>Editar rótulo</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="129" />
@@ -2689,17 +2692,17 @@ Are you sure?</source>
     <message>
         <location filename="../transactionview.cpp" line="269" />
         <source>Export Transaction Data</source>
-        <translation>Export Transaction Data</translation>
+        <translation>Exportar Dados da Transação</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="270" />
         <source>Comma separated file (*.csv)</source>
-        <translation>Comma separated file (*.csv)</translation>
+        <translation>Arquivo separado por vírgulas (*.csv)</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="278" />
         <source>Confirmed</source>
-        <translation>Confirmed</translation>
+        <translation>Confirmado</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="279" />
@@ -2709,12 +2712,12 @@ Are you sure?</source>
     <message>
         <location filename="../transactionview.cpp" line="280" />
         <source>Type</source>
-        <translation>Type</translation>
+        <translation>Tipo</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="281" />
         <source>Label</source>
-        <translation>Label</translation>
+        <translation>Rótulo</translation>
     </message>
     <message>
         <location filename="../transactionview.cpp" line="282" />
@@ -2757,12 +2760,12 @@ Are you sure?</source>
     <message>
         <location filename="../forms/votepage.ui" line="14" />
         <source>Form</source>
-        <translation type="unfinished">Form</translation>
+        <translation>Governança e Votação</translation>
     </message>
     <message>
         <location filename="../forms/votepage.ui" line="31" />
         <source>Elected custodians</source>
-        <translation type="unfinished" />
+        <translation>Custodiantes eleitos</translation>
     </message>
     <message>
         <location filename="../forms/votepage.ui" line="44" />
@@ -2782,7 +2785,7 @@ Are you sure?</source>
     <message>
         <location filename="../forms/votepage.ui" line="71" />
         <source>Park rates</source>
-        <translation type="unfinished" />
+        <translation>Taxas de rendimento</translation>
     </message>
     <message>
         <location filename="../forms/votepage.ui" line="84" />
@@ -2835,7 +2838,7 @@ Are you sure?</source>
     <message>
         <location filename="../walletmodel.cpp" line="218" />
         <source>Sending...</source>
-        <translation type="unfinished">Sending...</translation>
+        <translation>Enviando...</translation>
     </message>
 </context>
 <context>
@@ -2843,84 +2846,77 @@ Are you sure?</source>
     <message>
         <location filename="../bitcoinstrings.cpp" line="8" />
         <source>Unable to bind to port %d on this computer.  Nu is probably already running.</source>
-        <translation type="unfinished" />
+        <translation>Não foi possível vincular à porta %d neste computador. O Nu provavelmente já está em execução.</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="11" />
         <source>Warning: Disk space is low  </source>
-        <translation type="unfinished">Warning: Disk space is low  </translation>
+        <translation>Aviso: O espaço em disco está baixo  </translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="12" />
         <source>Nu version</source>
-        <translation type="unfinished" />
+        <translation>Versão do Nu</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="13" />
         <source>Usage:</source>
-        <translation type="unfinished">Usage:</translation>
+        <translation>Uso:</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="14" />
         <source>Send command to -server or nud</source>
-        <translation type="unfinished" />
+        <translation>Enviar comando para -server ou nud</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="15" />
         <source>List commands</source>
-        <translation type="unfinished">List commands
-</translation>
+        <translation>Listar comandos</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="16" />
         <source>Get help for a command</source>
-        <translation type="unfinished">Get help for a command
-</translation>
+        <translation>Obter ajuda para um comando</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="17" />
         <source>Options:</source>
-        <translation type="unfinished">Options:
-</translation>
+        <translation>Opções:</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="18" />
         <source>Specify configuration file (default: nu.conf)</source>
-        <translation type="unfinished" />
+        <translation>Especificar arquivo de configuração (padrão: nu.conf)</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="19" />
         <source>Specify pid file (default: nud.pid)</source>
-        <translation type="unfinished" />
+        <translation>Especificar arquivo pid (padrão: nud.pid)</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="20" />
         <source>Generate coins</source>
-        <translation type="unfinished">Generate coins
-</translation>
+        <translation>Gerar moedas</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="21" />
         <source>Don't generate coins</source>
-        <translation type="unfinished">Don't generate coins
-</translation>
+        <translation>Não gerar moedas</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="22" />
         <source>Start minimized</source>
-        <translation type="unfinished">Start minimized
-</translation>
+        <translation>Iniciar minimizado</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="23" />
         <source>Show splash screen on startup (default: 1)</source>
-        <translation type="unfinished" />
+        <translation>Exibir tela de abertura ao iniciar (padrão: 1)</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="24" />
         <source>Specify data directory</source>
-        <translation type="unfinished">Specify data directory
-</translation>
+        <translation>Especificar diretório de dados</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="25" />
@@ -2941,8 +2937,7 @@ Are you sure?</source>
     <message>
         <location filename="../bitcoinstrings.cpp" line="28" />
         <source>Connect through socks4 proxy</source>
-        <translation type="unfinished">Connect through socks4 proxy
-</translation>
+        <translation>Conectar através de proxy socks4</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="29" />
@@ -2958,7 +2953,7 @@ Are you sure?</source>
     <message>
         <location filename="../bitcoinstrings.cpp" line="31" />
         <source>Maintain at most &lt;n&gt; connections to peers (default: 125)</source>
-        <translation type="unfinished" />
+        <translation>Manter no máximo &lt;n&gt; conexões com pares (padrão: 125)</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="32" />
@@ -2994,7 +2989,7 @@ Are you sure?</source>
     <message>
         <location filename="../bitcoinstrings.cpp" line="38" />
         <source>Threshold for disconnecting misbehaving peers (default: 100)</source>
-        <translation type="unfinished" />
+        <translation>Limite para desconectar pares com mau comportamento (padrão: 100)</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="39" />
@@ -3179,7 +3174,7 @@ SSL options: (see the Bitcoin Wiki for SSL setup instructions)</source>
     <message>
         <location filename="../bitcoinstrings.cpp" line="82" />
         <source>Loading addresses...</source>
-        <translation type="unfinished">Loading addresses...</translation>
+        <translation>Carregando endereços...</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="83" />
@@ -3189,27 +3184,27 @@ SSL options: (see the Bitcoin Wiki for SSL setup instructions)</source>
     <message>
         <location filename="../bitcoinstrings.cpp" line="84" />
         <source>Loading block index...</source>
-        <translation type="unfinished">Loading block index...</translation>
+        <translation>Carregando índice de blocos...</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="85" />
         <source>Error loading blkindex.dat</source>
-        <translation type="unfinished" />
+        <translation>Erro ao carregar blkindex.dat</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="86" />
         <source>Loading wallet...</source>
-        <translation type="unfinished" />
+        <translation>Carregando carteira...</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="87" />
         <source>Error loading wallet.dat: Wallet corrupted</source>
-        <translation type="unfinished" />
+        <translation>Erro ao carregar wallet.dat: Carteira corrompida</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="88" />
         <source>Error loading wallet.dat: Wallet requires newer version of Nu</source>
-        <translation type="unfinished" />
+        <translation>Erro ao carregar wallet.dat: Carteira requer versão mais recente do Nu</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="89" />
@@ -3219,7 +3214,7 @@ SSL options: (see the Bitcoin Wiki for SSL setup instructions)</source>
     <message>
         <location filename="../bitcoinstrings.cpp" line="90" />
         <source>Error loading wallet.dat</source>
-        <translation type="unfinished" />
+        <translation>Erro ao carregar wallet.dat</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="91" />
@@ -3239,12 +3234,12 @@ SSL options: (see the Bitcoin Wiki for SSL setup instructions)</source>
     <message>
         <location filename="../bitcoinstrings.cpp" line="94" />
         <source>Rescanning...</source>
-        <translation type="unfinished">Rescanning...</translation>
+        <translation>Reescanando blockchain...</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="95" />
         <source>Done loading</source>
-        <translation type="unfinished">Done loading</translation>
+        <translation>Carregamento concluído</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="96" />
@@ -3286,7 +3281,7 @@ If the file does not exist, create it with owner-readable-only file permissions.
     <message>
         <location filename="../bitcoinstrings.cpp" line="112" />
         <source>Error</source>
-        <translation type="unfinished" />
+        <translation>Erro</translation>
     </message>
     <message>
         <location filename="../bitcoinstrings.cpp" line="113" />

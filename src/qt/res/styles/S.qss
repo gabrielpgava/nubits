@@ -174,7 +174,7 @@ QLineEdit, QDoubleSpinBox, QSpinBox, QComboBox, QPlainTextEdit, QTextEdit {
     padding: 6px 10px;
     font-size: 13px;
     selection-background-color: #ee5253;
-    selection-color: #ffffff;
+    selection-color: #000000;
 }
 
 QLineEdit:hover, QDoubleSpinBox:hover, QSpinBox:hover, QComboBox:hover {

@@ -411,7 +411,7 @@ void BitcoinGUI::createToolBars()
     toolbarSpacer->setObjectName("switchUnitBtn");
     toolbarSpacer->setProperty("class", "toolbarSpacer");
     toolbarSpacer->setCursor(Qt::PointingHandCursor);
-    toolbarSpacer->setToolTip(tr("Clique para alternar moeda (NuBits NBT / NuShares NSR)"));
+    toolbarSpacer->setToolTip(tr("Click to switch unit (NuBits NBT / NuShares NSR)"));
     toolbarSpacer->setFixedHeight(54);
     connect(toolbarSpacer, SIGNAL(clicked()), this, SLOT(switchUnitButtonClicked()));
     sidebarLayout->addWidget(toolbarSpacer);
@@ -426,6 +426,7 @@ void BitcoinGUI::createToolBars()
         btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         btn->setFixedHeight(40);
         btn->setCursor(Qt::PointingHandCursor);
+        connect(btn, SIGNAL(clicked()), action, SLOT(trigger()));
         sidebarLayout->addWidget(btn);
         return btn;
     };
@@ -582,16 +583,16 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
                 switchUnitTarget = "B";
                 break;
             case 'B':
-                switchUnitTarget = "Y";
+                switchUnitTarget = "S";
                 break;
             case 'Y':
-                switchUnitTarget = "E";
+                switchUnitTarget = "B";
                 break;
             case 'E':
-                switchUnitTarget = "X";
+                switchUnitTarget = "B";
                 break;
             case 'X':
-                switchUnitTarget = "S";
+                switchUnitTarget = "B";
                 break;
         }
     }

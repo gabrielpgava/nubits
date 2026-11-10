@@ -55,11 +55,21 @@
         <file alias="Y">res/images/Y.png</file>
         <file alias="E">res/images/E.png</file>
         <file alias="X">res/images/X.png</file>
+        <file alias="S@2x">res/images/S@2x.png</file>
+        <file alias="B@2x">res/images/B@2x.png</file>
+        <file alias="Y@2x">res/images/Y@2x.png</file>
+        <file alias="E@2x">res/images/E@2x.png</file>
+        <file alias="X@2x">res/images/X@2x.png</file>
         <file>res/images/S.png</file>
         <file>res/images/B.png</file>
         <file>res/images/Y.png</file>
         <file>res/images/E.png</file>
         <file>res/images/X.png</file>
+        <file>res/images/S@2x.png</file>
+        <file>res/images/B@2x.png</file>
+        <file>res/images/Y@2x.png</file>
+        <file>res/images/E@2x.png</file>
+        <file>res/images/X@2x.png</file>
     </qresource>
     <qresource prefix="/movies">
         <file alias="update_spinner">res/movies/update_spinner.mng</file>
