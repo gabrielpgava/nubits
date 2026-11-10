@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QDoubleValidator>
 #include <QFont>
+#include <QFontDatabase>
 #include <QLineEdit>
 #include <QUrl>
 #if QT_VERSION >= 0x050000
@@ -37,13 +38,17 @@ QString dateTimeStr(qint64 nTime)
 
 QFont bitcoinAddressFont()
 {
+#if QT_VERSION >= 0x050200
+    return QFontDatabase::systemFont(QFontDatabase::FixedFont);
+#elif QT_VERSION >= 0x040800
     QFont font("Monospace");
-#if QT_VERSION >= 0x040800
     font.setStyleHint(QFont::Monospace);
-#else
-    font.setStyleHint(QFont::TypeWriter);
-#endif
     return font;
+#else
+    QFont font("Monospace");
+    font.setStyleHint(QFont::TypeWriter);
+    return font;
+#endif
 }
 
 void setupAddressWidget(QLineEdit *widget, QWidget *parent)

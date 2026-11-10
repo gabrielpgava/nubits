@@ -50,6 +50,11 @@
         <file alias="about">res/images/about.png</file>
         <file alias="splash">res/images/nu_splash.png</file>
         <file alias="qrcode">res/images/qrcode.png</file>
+        <file alias="S">res/images/S.png</file>
+        <file alias="B">res/images/B.png</file>
+        <file alias="Y">res/images/Y.png</file>
+        <file alias="E">res/images/E.png</file>
+        <file alias="X">res/images/X.png</file>
         <file>res/images/S.png</file>
         <file>res/images/B.png</file>
         <file>res/images/Y.png</file>
@@ -94,5 +99,7 @@
     </qresource>
     <qresource prefix="/fonts">
         <file alias="rob_l">res/fonts/Roboto-Light.ttf</file>
+        <file alias="rob_r">res/fonts/Roboto-Regular.ttf</file>
+        <file alias="rob_m">res/fonts/Roboto-Medium.ttf</file>
     </qresource>
 </RCC>

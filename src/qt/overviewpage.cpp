@@ -104,22 +104,18 @@ OverviewPage::OverviewPage(QWidget *parent) :
     ui->setupUi(this);
 
     // Balance: <balance>
-    ui->labelBalance->setFont(QFont("Monospace", -1, QFont::Bold));
     ui->labelBalance->setToolTip(tr("Your current balance"));
     ui->labelBalance->setTextInteractionFlags(Qt::TextSelectableByMouse|Qt::TextSelectableByKeyboard);
 
     // ppcoin: stake: <stake>
-    ui->labelStake->setFont(QFont("Monospace", -1, QFont::Bold));
     ui->labelStake->setToolTip(tr("Your current stake"));
     ui->labelStake->setTextInteractionFlags(Qt::TextSelectableByMouse|Qt::TextSelectableByKeyboard);
 
     // Unconfirmed balance: <balance>
-    ui->labelUnconfirmed->setFont(QFont("Monospace", -1, QFont::Bold));
     ui->labelUnconfirmed->setToolTip(tr("Total of transactions that have yet to be confirmed, and do not yet count toward the current balance"));
     ui->labelUnconfirmed->setTextInteractionFlags(Qt::TextSelectableByMouse|Qt::TextSelectableByKeyboard);
 
     // nubit: parked: <parked>
-    ui->labelParked->setFont(QFont("Monospace", -1, QFont::Bold));
     ui->labelParked->setToolTip(tr("Your current parked amount"));
     ui->labelParked->setTextInteractionFlags(Qt::TextSelectableByMouse|Qt::TextSelectableByKeyboard);
 

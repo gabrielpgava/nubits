@@ -68,6 +68,7 @@
 #include <iostream>
 
 #include <QFont>
+#include <QFontDatabase>
 #include <QStyleFactory>
 
 BitcoinGUI::BitcoinGUI(QWidget *parent):
@@ -83,9 +84,10 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     notificator(0),
     rpcConsole(0)
 {
-    resize(850, 550);
+    resize(980, 620);
+    setMinimumSize(880, 560);
     setWindowTitle(tr("Nu"));
-    setStyle(QStyleFactory::create("cleanlooks"));
+    setStyle(QStyleFactory::create("Fusion"));
 #ifndef Q_WS_MAC
     setWindowIcon(QIcon(":icons/nu"));
 #else
@@ -203,31 +205,31 @@ void BitcoinGUI::createActions()
 {
     QActionGroup *tabGroup = new QActionGroup(this);
 
-    overviewAction = new QAction(tr("&Overview"), this);
+    overviewAction = new QAction(QIcon(":/icons/overview"), tr("&Overview"), this);
     overviewAction->setToolTip(tr("Show general overview of holdings"));
     overviewAction->setCheckable(true);
     overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     tabGroup->addAction(overviewAction);
 
-    historyAction = new QAction(tr("&Transactions"), this);
+    historyAction = new QAction(QIcon(":/icons/history"), tr("&Transactions"), this);
     historyAction->setToolTip(tr("Browse transaction history"));
     historyAction->setCheckable(true);
     historyAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
     tabGroup->addAction(historyAction);
 
-    addressBookAction = new QAction(tr("&Address Book"), this);
+    addressBookAction = new QAction(QIcon(":/icons/address-book"), tr("&Address Book"), this);
     addressBookAction->setToolTip(tr("Edit the list of stored addresses and labels"));
     addressBookAction->setCheckable(true);
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
-    receiveCoinsAction = new QAction(tr("&Receive"), this);
+    receiveCoinsAction = new QAction(QIcon(":/icons/receiving_addresses"), tr("&Receive"), this);
     receiveCoinsAction->setToolTip(tr("Show the list of addresses for receiving %1").arg(BitcoinUnits::baseName()));
     receiveCoinsAction->setCheckable(true);
     receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
     tabGroup->addAction(receiveCoinsAction);
 
-    sendCoinsAction = new QAction(tr("&Send"), this);
+    sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Send"), this);
     sendCoinsAction->setToolTip(tr("Send coins to a %1 address").arg(BitcoinUnits::baseName()));
     sendCoinsAction->setCheckable(true);
     sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
@@ -240,14 +242,14 @@ void BitcoinGUI::createActions()
 #endif
     tabGroup->addAction(messageAction);
 
-    parkAction = new QAction(tr("&Park"), this);
-    parkAction->setToolTip(tr("Park coins"));
+    parkAction = new QAction(QIcon(":/icons/tx_mined"), tr("&Park / Earn"), this);
+    parkAction->setToolTip(tr("Park coins for yield"));
     parkAction->setCheckable(true);
     parkAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
     tabGroup->addAction(parkAction);
 
-    voteAction = new QAction(tr("&Vote"), this);
-    voteAction->setToolTip(tr("Change your vote"));
+    voteAction = new QAction(QIcon(":/icons/edit"), tr("&Vote / DAO"), this);
+    voteAction->setToolTip(tr("Change your vote in the DAO"));
     voteAction->setCheckable(true);
     voteAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
     tabGroup->addAction(voteAction);
@@ -358,18 +360,28 @@ void BitcoinGUI::createMenuBar()
 
 void BitcoinGUI::createToolBars()
 {
-    // spacer for the left-hand side of the toolbar frame used to display the
-    // selected unit's icon and logo text
+    // Currency switcher card (top of sidebar)
     QPushButton* toolbarSpacer = new QPushButton();
-    toolbarSpacer->setMinimumWidth(125);
+    toolbarSpacer->setMinimumWidth(180);
+    toolbarSpacer->setMaximumWidth(210);
+    toolbarSpacer->setMinimumHeight(60);
     toolbarSpacer->setProperty("class", "toolbarSpacer");
-    connect(toolbarSpacer, SIGNAL(clicked()), this, SLOT (switchUnitButtonClicked()));
+    toolbarSpacer->setCursor(Qt::PointingHandCursor);
+    toolbarSpacer->setToolTip(tr("Clique para alternar moeda (NuBits NBT / NuShares NSR)"));
+    connect(toolbarSpacer, SIGNAL(clicked()), this, SLOT(switchUnitButtonClicked()));
 
-    // toolbar
-    QToolBar *toolbar = addToolBar(tr("Tabs toolbar"));
-    toolbar->setStyle(QStyleFactory::create("cleanlooks"));
-    toolbar->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    // Navigation sidebar
+    QToolBar *toolbar = new QToolBar(tr("Navigation"), this);
+    addToolBar(Qt::LeftToolBarArea, toolbar);
+    toolbar->setObjectName("navigationToolBar");
+    toolbar->setStyle(QStyleFactory::create("Fusion"));
+    toolbar->setOrientation(Qt::Vertical);
+    toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolbar->setMovable(false);
+    toolbar->setFloatable(false);
+    toolbar->setAllowedAreas(Qt::LeftToolBarArea);
+    toolbar->setIconSize(QSize(18, 18));
+
     toolbar->addWidget(toolbarSpacer);
     toolbar->addAction(overviewAction);
     toolbar->addAction(sendCoinsAction);
@@ -470,13 +482,23 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
 
         // nubit: change the client stylesheet when the unit context changes
         QFile stylesheet(QString(":/styles/%1.qss").arg(QString(walletModel->getUnit())));
-        stylesheet.open(QFile::ReadOnly);
-        QString setSheet = QLatin1String(stylesheet.readAll());
-        QWidget::setStyleSheet(setSheet);
+        if (stylesheet.open(QFile::ReadOnly))
+        {
+            QString setSheet = QLatin1String(stylesheet.readAll());
+            qApp->setStyleSheet(setSheet);
+        }
 
         // Embed application fonts
-        QFont newFont(":/fonts/Roboto-Regular.ttf", 14, true);
-        setFont(newFont);
+        int fontId = QFontDatabase::addApplicationFont(":/fonts/rob_r");
+        if (fontId != -1)
+        {
+            QStringList families = QFontDatabase::applicationFontFamilies(fontId);
+            if (!families.isEmpty())
+            {
+                QFont appFont(families.at(0), 12);
+                qApp->setFont(appFont);
+            }
+        }
 
         changeUnitActions.clear();
         QSignalMapper *mapper = new QSignalMapper();

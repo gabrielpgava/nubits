@@ -53,7 +53,7 @@
         <widget class="QLabel" name="labelCoinControlQuantity">
          <property name="font">
           <font>
-           <family>Monospace</family>
+           
            <pointsize>10</pointsize>
           </font>
          </property>
@@ -88,7 +88,7 @@
         <widget class="QLabel" name="labelCoinControlBytes">
          <property name="font">
           <font>
-           <family>Monospace</family>
+           
            <pointsize>10</pointsize>
           </font>
          </property>
@@ -139,7 +139,7 @@
         <widget class="QLabel" name="labelCoinControlAmount">
          <property name="font">
           <font>
-           <family>Monospace</family>
+           
            <pointsize>10</pointsize>
           </font>
          </property>
@@ -174,7 +174,7 @@
         <widget class="QLabel" name="labelCoinControlPriority">
          <property name="font">
           <font>
-           <family>Monospace</family>
+           
            <pointsize>10</pointsize>
           </font>
          </property>
@@ -225,7 +225,7 @@
         <widget class="QLabel" name="labelCoinControlFee">
          <property name="font">
           <font>
-           <family>Monospace</family>
+           
            <pointsize>10</pointsize>
           </font>
          </property>
@@ -266,7 +266,7 @@
          </property>
          <property name="font">
           <font>
-           <family>Monospace</family>
+           
            <pointsize>10</pointsize>
           </font>
          </property>
@@ -317,7 +317,7 @@
         <widget class="QLabel" name="labelCoinControlAfterFee">
          <property name="font">
           <font>
-           <family>Monospace</family>
+           
            <pointsize>10</pointsize>
           </font>
          </property>
@@ -358,7 +358,7 @@
          </property>
          <property name="font">
           <font>
-           <family>Monospace</family>
+           
            <pointsize>10</pointsize>
           </font>
          </property>
