@@ -91,19 +91,37 @@ void CNode::PushGetBlocks(CBlockIndex* pindexBegin, uint256 hashEnd)
 
 bool RecvLine(SOCKET hSocket, string& strLine)
 {
-    strLine = "";
+    strLine.clear();
     loop
     {
-        char c;
-        int nBytes = recv(hSocket, &c, 1, 0);
+        char buf[1024];
+        int nBytes = recv(hSocket, buf, sizeof(buf), MSG_PEEK);
         if (nBytes > 0)
         {
-            if (c == '\n')
-                continue;
-            if (c == '\r')
-                return true;
-            strLine += c;
-            if (strLine.size() >= 9000)
+            int nConsume = 0;
+            bool fFoundEnd = false;
+            for (; nConsume < nBytes; nConsume++)
+            {
+                char c = buf[nConsume];
+                if (c == '\n')
+                    continue;
+                if (c == '\r')
+                {
+                    nConsume++;
+                    fFoundEnd = true;
+                    break;
+                }
+                strLine += c;
+                if (strLine.size() >= 9000)
+                {
+                    nConsume++;
+                    fFoundEnd = true;
+                    break;
+                }
+            }
+            if (nConsume > 0)
+                recv(hSocket, buf, nConsume, 0);
+            if (fFoundEnd)
                 return true;
         }
         else if (nBytes <= 0)
@@ -1025,6 +1043,7 @@ void MapPort(bool /* unused fMapPort */)
 // The second name should resolve to a list of seed addresses.
 // testnet dns seed begins with 't', all else are peershares dns seeds.
 static const char *strDNSSeed[][2] = {
+    {NULL, NULL}
 };
 
 void ThreadDNSAddressSeed(void* parg)
@@ -1056,6 +1075,7 @@ void ThreadDNSAddressSeed2(void* parg)
         printf("Loading addresses from DNS seeds (could take a while)\n");
 
         for (unsigned int seed_idx = 0; seed_idx < ARRAYLEN(strDNSSeed); seed_idx++) {
+            if (!strDNSSeed[seed_idx][0] || !strDNSSeed[seed_idx][1]) continue;
             if (fTestNet && strDNSSeed[seed_idx][1][0] != 't') continue;
             if ((!fTestNet) && strDNSSeed[seed_idx][1][0] == 't') continue;
 
@@ -1197,10 +1217,10 @@ void ThreadOpenConnections2(void* parg)
         if (fShutdown)
             return;
 
-        // Add seed nodes if IRC isn't working
+        // Add seed nodes if IRC isn't working (disabled by default since 2014 seed IPs are offline; enable with -seednodes=1)
         bool fTOR = (fUseProxy && addrProxy.GetPort() == 9050);
         // nubit: do not wait 60s because IRC is disabled
-        if (addrman.size()==0 && (GetTime() - nStart > 0 || fTOR) && !fTestNet)
+        if (GetBoolArg("-seednodes", false) && addrman.size()==0 && (GetTime() - nStart > 0 || fTOR) && !fTestNet)
         {
             std::vector<CAddress> vAdd;
             for (unsigned int i = 0; i < ARRAYLEN(pnSeed); i++)
@@ -1646,7 +1666,7 @@ void StartNode(void* parg)
 #endif
     printf("addrLocalHost = %s\n", addrLocalHost.ToString().c_str());
 
-    if (fUseProxy || mapArgs.count("-connect") || fNoListen)
+    if (fUseProxy || mapArgs.count("-connect") || fNoListen || fLocalNet)
     {
         // Proxies can't take incoming connections
         addrLocalHost.SetIP(CNetAddr("0.0.0.0"));

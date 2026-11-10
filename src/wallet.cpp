@@ -1127,7 +1127,8 @@ bool CWallet::SelectCoinsMinConf(int64 nTargetValue, unsigned int nSpendTime, in
        vCoins.reserve(mapWallet.size());
        for (map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
            vCoins.push_back(&(*it).second);
-       random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);
+       for (size_t i = vCoins.size(); i > 1; --i)
+           std::swap(vCoins[i - 1], vCoins[GetRandInt(i)]);
 
        BOOST_FOREACH(const CWalletTx* pcoin, vCoins)
        {

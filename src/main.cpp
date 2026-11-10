@@ -599,6 +599,8 @@ int CMerkleTx::SetMerkleBranch(const CBlock* pblock)
 bool CTransaction::CheckTransaction() const
 {
     // Basic checks that don't depend on any context
+    if (cUnit == '?' || cUnit == 0)
+        return DoS(10, error("CTransaction::CheckTransaction() : invalid unit"));
     if (vin.empty())
         return DoS(10, error("CTransaction::CheckTransaction() : vin empty"));
     if (vout.empty())
@@ -1060,7 +1062,7 @@ int CMerkleTx::GetBlocksToMaturity() const
 #ifdef TESTING
     return max(0, (GetMaturity(IsCoinStake())+1 ) - GetDepthInMainChain());
 #else
-    return max(0, (GetMaturity(IsCoinStake())+20) - GetDepthInMainChain());
+    return max(0, (GetMaturity(IsCoinStake()) + (fLocalNet ? 1 : 20)) - GetDepthInMainChain());
 #endif
 }
 
@@ -1303,6 +1305,8 @@ bool IsInitialBlockDownload()
 #ifdef TESTING
     return false;
 #else
+    if (fLocalNet)
+        return false;
     if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
         return true;
     static int64 nLastUpdate;
@@ -2942,7 +2946,18 @@ FILE* AppendBlockFile(unsigned int& nFileRet)
 
 bool LoadBlockIndex(bool fAllowNew)
 {
-    if (fTestNet)
+    if (fLocalNet)
+    {
+        hashGenesisBlock = hashGenesisBlockTestNet;
+        bnProofOfWorkLimit = CBigNum(~uint256(0) >> 12);
+        nStakeMinAge = 60;
+        nCoinbaseMaturity = 2;
+        nCoinstakeMaturity = 2;
+        bnInitialHashTarget = CBigNum(~uint256(0) >> 12);
+        bnInitialProofOfStakeHashTarget = CBigNum(~uint256(0) >> 16);
+        nModifierInterval = 3;
+    }
+    else if (fTestNet)
     {
         hashGenesisBlock = hashGenesisBlockTestNet;
 #ifdef TESTING
@@ -3015,7 +3030,7 @@ bool LoadBlockIndex(bool fAllowNew)
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
         block.nTime    = nTimeGenesis;
-        block.nBits    = bnProofOfWorkLimit.GetCompact();
+        block.nBits    = CBigNum(~uint256(0) >> 20).GetCompact();
         block.nNonce   = nNonceGenesis;
 
         CBigNum bnTarget;
@@ -4399,7 +4414,7 @@ CBlock* CreateNewBlock(CReserveKey& reservekey, CWallet* pwallet, bool fProofOfS
     //CReserveKey reservekey(pwallet);
 
     // Create new block
-    auto_ptr<CBlock> pblock(new CBlock());
+    std::unique_ptr<CBlock> pblock(new CBlock());
     if (!pblock.get())
         return NULL;
     
@@ -4838,7 +4853,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
     {
         if (fShutdown)
             return;
-        while (vNodes.empty() || IsInitialBlockDownload())
+        while ((!fLocalNet && vNodes.empty()) || IsInitialBlockDownload())
         {
             Sleep(1000);
             if (fShutdown)
@@ -4854,13 +4869,19 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
         }
         SetMintWarning("");
 
+        if (fProofOfStake && nBestHeight < PROOF_OF_WORK_BLOCKS)
+        {
+            Sleep(1000);
+            continue;
+        }
+
         //
         // Create new block
         //
         unsigned int nTransactionsUpdatedLast = nTransactionsUpdated;
         CBlockIndex* pindexPrev = pindexBest;
 
-        auto_ptr<CBlock> pblock(CreateNewBlock(reservekey, pwallet, fProofOfStake));
+        std::unique_ptr<CBlock> pblock(CreateNewBlock(reservekey, pwallet, fProofOfStake));
         if (!pblock.get())
             return;
 
@@ -4990,7 +5011,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
                 return;
             if (fLimitProcessors && vnThreadsRunning[THREAD_MINER] > nLimitProcessors)
                 return;
-            if (vNodes.empty())
+            if (!fLocalNet && vNodes.empty())
                 break;
             if (nBlockNonce >= 0xffff0000)
                 break;

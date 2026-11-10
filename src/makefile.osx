@@ -15,18 +15,18 @@ CXX ?= clang++
 BREW_PREFIX ?= $(shell brew --prefix 2>/dev/null || echo /opt/homebrew)
 BOOST_PREFIX ?= $(shell brew --prefix boost@1.85 2>/dev/null || brew --prefix boost 2>/dev/null || echo $(BREW_PREFIX))
 BDB_PREFIX ?= $(shell brew --prefix berkeley-db@5 2>/dev/null || brew --prefix berkeley-db@4 2>/dev/null || brew --prefix berkeley-db 2>/dev/null || echo $(BREW_PREFIX))
-OPENSSL_DIR ?= $(abspath $(CURDIR)/../deps/openssl)
+OPENSSL_PREFIX ?= $(shell brew --prefix openssl@3 2>/dev/null || brew --prefix openssl 2>/dev/null || echo $(BREW_PREFIX)/opt/openssl@3)
 
 INCLUDEPATHS = \
  -I"$(CURDIR)" \
  -I"$(CURDIR)/obj" \
- -I"$(OPENSSL_DIR)/include" \
+ -I"$(OPENSSL_PREFIX)/include" \
  -I"$(BOOST_PREFIX)/include" \
  -I"$(BDB_PREFIX)/include" \
  -I"$(BREW_PREFIX)/include"
 
 LIBPATHS = \
- -L"$(OPENSSL_DIR)/lib" \
+ -L"$(OPENSSL_PREFIX)/lib" \
  -L"$(BOOST_PREFIX)/lib" \
  -L"$(BDB_PREFIX)/lib" \
  -L"$(BREW_PREFIX)/lib"
@@ -60,15 +60,15 @@ endif
 ifdef RELEASE
 CFLAGS = -O3
 else
-CFLAGS = -g
+CFLAGS = -O2 -g
 endif
 
 ifdef ARCH
 CFLAGS += -arch $(ARCH)
 endif
 
-CFLAGS += -std=c++14 \
- -Wextra -Wno-sign-compare -Wno-invalid-offsetof -Wformat-security \
+CFLAGS += -std=c++17 \
+ -Wextra -Wno-sign-compare -Wno-invalid-offsetof -Wno-unused-parameter -Wformat-security \
  -Wno-reserved-user-defined-literal -Wno-deprecated-declarations \
  $(DEBUGFLAGS) $(DEFS) $(INCLUDEPATHS)
 
@@ -109,11 +109,6 @@ obj:
 obj-test:
 	@mkdir -p obj-test
 
-# Ensure OpenSSL static libraries are built
-$(OPENSSL_DIR)/lib/libcrypto.a:
-	@echo "OpenSSL dependency missing. Building via deps/build_openssl.sh..."
-	@bash $(CURDIR)/../deps/build_openssl.sh
-
 # Auto-generated dependencies:
 -include obj/*.P
 -include obj-test/*.P
@@ -124,7 +119,7 @@ obj/build.h: FORCE | obj
 version.cpp: obj/build.h
 DEFS += -DHAVE_BUILD_INFO
 
-obj/%.o: %.cpp $(OPENSSL_DIR)/lib/libcrypto.a | obj
+obj/%.o: %.cpp | obj
 	$(CXX) -c $(CFLAGS) -MMD -o $@ $<
 	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
@@ -136,7 +131,7 @@ nud: $(OBJS)
 
 TESTOBJS := $(patsubst test/%.cpp,obj-test/%.o,$(wildcard test/*.cpp))
 
-obj-test/%.o: test/%.cpp $(OPENSSL_DIR)/lib/libcrypto.a | obj-test
+obj-test/%.o: test/%.cpp | obj-test
 	$(CXX) -c $(TESTDEFS) $(CFLAGS) -MMD -o $@ $<
 	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \

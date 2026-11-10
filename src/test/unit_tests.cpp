@@ -118,8 +118,10 @@ BOOST_AUTO_TEST_CASE(test_changing_unit_invalidates_signature)
 
 BOOST_AUTO_TEST_CASE(address_use_unit)
 {
-    // Invalid unit
-    BOOST_CHECK_THROW(CBitcoinAddress(CKeyID(1), '?'), runtime_error);
+    // Invalid unit produces an address with UNKNOWN_UNIT_VERSION ('?')
+    BOOST_CHECK_EQUAL(CBitcoinAddress(CKeyID(1), '?').GetUnit(), '?');
+    BOOST_CHECK(!CBitcoinAddress(CKeyID(1), '?').IsValid('S'));
+    BOOST_CHECK(!CBitcoinAddress(CKeyID(1), '?').IsValid('B'));
 
     BOOST_CHECK_EQUAL(CBitcoinAddress(CKeyID(0), 'B').ToString(), "B4T5ciTCkWauSqVAcVKy88ofjcSasUkSYU");
     BOOST_CHECK_EQUAL(CBitcoinAddress(CKeyID(0), 'S').ToString(), "SMJ12qn9jNCCXJnTYRz5Yu9ZenERqvYwfg");

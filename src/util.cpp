@@ -77,6 +77,7 @@ bool fServer = false;
 bool fCommandLine = false;
 string strMiscWarning;
 bool fTestNet = false;
+bool fLocalNet = false;
 bool fNoListen = false;
 bool fLogTimestamps = false;
 CMedianFilter<int64> vTimeOffsets(200,0);
@@ -965,7 +966,9 @@ const boost::filesystem::path &GetDataDir(bool fNetSpecific)
     } else {
         path = GetDefaultDataDir();
     }
-    if (fNetSpecific && GetBoolArg("-testnet", false))
+    if (fNetSpecific && (GetBoolArg("-localnet", false) || GetBoolArg("-regtest", false)))
+        path /= "localnet";
+    else if (fNetSpecific && GetBoolArg("-testnet", false))
         path /= "testnet";
 
     fs::create_directory(path);
@@ -1000,7 +1003,9 @@ const boost::filesystem::path &GetPeercoinDataDir(bool fNetSpecific)
     } else {
         path = GetDefaultPeercoinDataDir();
     }
-    if (fNetSpecific && GetBoolArg("-testnet", false))
+    if (fNetSpecific && (GetBoolArg("-localnet", false) || GetBoolArg("-regtest", false)))
+        path /= "localnet";
+    else if (fNetSpecific && GetBoolArg("-testnet", false))
         path /= "testnet";
 
     cachedPath[fNetSpecific]=true;

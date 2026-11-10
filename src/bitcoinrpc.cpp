@@ -700,7 +700,7 @@ Value setgenerate(const Array& params, bool fHelp)
     }
     mapArgs["-gen"] = (fGenerate ? "1" : "0");
 
-    GenerateBitcoins(fGenerate, pwalletMain);
+    GenerateBitcoins(fGenerate, GetWallet('S'));
     return Value::null;
 }
 
@@ -2489,7 +2489,7 @@ Value getwork(const Array& params, bool fHelp)
             "  \"target\" : little endian hash target\n"
             "If [data] is specified, tries to solve the block and returns true if it was successful.");
 
-    if (vNodes.empty())
+    if (!fLocalNet && vNodes.empty())
         throw JSONRPCError(-9, "Nu is not connected!");
 
     if (IsInitialBlockDownload())
@@ -2622,7 +2622,7 @@ Value getblocktemplate(const Array& params, bool fHelp)
         throw JSONRPCError(-8, "Invalid mode");
 
     {
-        if (vNodes.empty())
+        if (!fLocalNet && vNodes.empty())
             throw JSONRPCError(-9, "Nu is not connected!");
 
         if (IsInitialBlockDownload())
@@ -4859,7 +4859,7 @@ Value duplicateblock(const Array& params, bool fHelp)
     bool fProofOfStake = true;
     unsigned int nExtraNonce = 0;
 
-    auto_ptr<CBlock> pblock(new CBlock());
+    std::unique_ptr<CBlock> pblock(new CBlock());
     if (!pblock.get())
         throw JSONRPCError(-3, "Unable to allocate block");
 

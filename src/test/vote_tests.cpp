@@ -99,7 +99,8 @@ BOOST_AUTO_TEST_CASE(reload_park_rates_from_script_tests)
 template< class T >
 static void shuffle(vector<T> v)
 {
-    random_shuffle(v.begin(), v.end());
+    for (size_t i = v.size(); i > 1; --i)
+        std::swap(v[i - 1], v[GetRandInt(i)]);
 }
 
 BOOST_AUTO_TEST_CASE(rate_calculation_from_votes_in_protocol_2)
@@ -664,7 +665,7 @@ BOOST_AUTO_TEST_CASE(vote_validity_tests)
     BOOST_CHECK(!vote.IsValid(PROTOCOL_VERSION));
 
     // Park rate with duration and 0 rate is valid
-    vote.vParkRateVote.erase(vote.vParkRateVote.end());
+    vote.vParkRateVote.pop_back();
     CParkRate parkRate;
     parkRate.nCompactDuration = 0;
     parkRate.nRate = 0;

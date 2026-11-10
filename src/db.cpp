@@ -88,10 +88,10 @@ CDB::CDB(const char *pszFile, const char* pszMode) : pdb(NULL)
         {
             if (fShutdown)
                 return;
-            filesystem::path pathDataDir = GetDataDir();
-            filesystem::path pathLogDir = pathDataDir / "database";
-            filesystem::create_directory(pathLogDir);
-            filesystem::path pathErrorFile = pathDataDir / "db.log";
+            boost::filesystem::path pathDataDir = GetDataDir();
+            boost::filesystem::path pathLogDir = pathDataDir / "database";
+            boost::filesystem::create_directory(pathLogDir);
+            boost::filesystem::path pathErrorFile = pathDataDir / "db.log";
             printf("dbenv.open LogDir=%s ErrorFile=%s\n", pathLogDir.string().c_str(), pathErrorFile.string().c_str());
 
             int nDbCache = GetArg("-dbcache", 25);

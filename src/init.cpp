@@ -238,6 +238,7 @@ bool AppInit2(int argc, char* argv[])
             "  -daemon          \t\t  " + _("Run in the background as a daemon and accept commands") + "\n" +
 #endif
             "  -testnet         \t\t  " + _("Use the test network") + "\n" +
+            "  -localnet        \t\t  " + _("Use the standalone local test network (regtest)") + "\n" +
             "  -debug           \t\t  " + _("Output extra debugging information") + "\n" +
             "  -debugmint       \t\t  " + _("Display the reasons why a block was not found during minting") + "\n" +
             "  -logtimestamps   \t  "   + _("Prepend debug output with timestamp") + "\n" +
@@ -257,7 +258,7 @@ bool AppInit2(int argc, char* argv[])
             "  -keypool=<n>     \t  "   + _("Set key pool size to <n> (default: 100)") + "\n" +
             "  -rescan          \t  "   + _("Rescan the block chain for missing wallet transactions") + "\n" +
             "  -checkblocks=<n> \t\t  " + _("How many blocks to check at startup (default: 2500, 0 = all)") + "\n" +
-            "  -checklevel=<n>  \t\t  " + _("How thorough the block verification is (0-6, default: 1)") + "\n";
+            "  -checklevel=<n>  \t\t  " + _("How thorough the block verification is (0-6, default: 1)") + "\n" +
             "  -stakegen        \t\t  " + _("Enable Proof of Stake mining (default: 1)") + "\n";
 
         strUsage += string() +
@@ -288,8 +289,15 @@ bool AppInit2(int argc, char* argv[])
         nTimeShift = GetArg("-timetravel", 0);
 #endif
 
-    fTestNet = GetBoolArg("-testnet");
-    if (fTestNet)
+    fLocalNet = GetBoolArg("-localnet") || GetBoolArg("-regtest");
+    fTestNet = GetBoolArg("-testnet") || fLocalNet;
+    if (fLocalNet)
+    {
+        SoftSetBoolArg("-irc", false);
+        SoftSetBoolArg("-dnsseed", false);
+        SoftSetBoolArg("-upnp", false);
+    }
+    else if (fTestNet)
     {
         SoftSetBoolArg("-irc", true);
     }

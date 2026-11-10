@@ -131,6 +131,9 @@ bool CLiquidityInfo::ProcessLiquidityInfo()
 
 bool CUnsignedLiquidityInfo::IsValid() const
 {
+    if (cUnit == 'S' || cUnit == '?')
+        return false;
+
     if (sIdentifier.length() > 255)
         return false;
 

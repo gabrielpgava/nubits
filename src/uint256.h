@@ -286,9 +286,15 @@ public:
 
     std::string GetHex() const
     {
+        static const char hexmap[] = "0123456789abcdef";
         char psz[sizeof(pn)*2 + 1];
         for (unsigned int i = 0; i < sizeof(pn); i++)
-            sprintf(psz + i*2, "%02x", ((unsigned char*)pn)[sizeof(pn) - i - 1]);
+        {
+            unsigned char val = ((const unsigned char*)pn)[sizeof(pn) - i - 1];
+            psz[i*2]     = hexmap[val >> 4];
+            psz[i*2 + 1] = hexmap[val & 0x0f];
+        }
+        psz[sizeof(pn)*2] = '\0';
         return std::string(psz, psz + sizeof(pn)*2);
     }
 

@@ -137,6 +137,7 @@ extern bool fServer;
 extern bool fCommandLine;
 extern std::string strMiscWarning;
 extern bool fTestNet;
+extern bool fLocalNet;
 extern bool fNoListen;
 extern bool fLogTimestamps;
 
@@ -733,7 +734,7 @@ inline void SetThreadPriority(int nPriority)
 inline pthread_t CreateThread(void(*pfn)(void*), void* parg, bool fWantHandle=false)
 {
     pthread_t hthread = 0;
-    int ret = pthread_create(&hthread, NULL, (void*(*)(void*))pfn, parg);
+    int ret = pthread_create(&hthread, NULL, reinterpret_cast<void*(*)(void*)>(reinterpret_cast<uintptr_t>(pfn)), parg);
     if (ret != 0)
     {
         printf("Error: pthread_create() returned %d\n", ret);
