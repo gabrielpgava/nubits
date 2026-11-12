@@ -17,8 +17,19 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <cctype>
+#include <limits.h>
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
+
+#ifdef WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
 const std::string CAutoUpdate::OFFICIAL_REPO = "gabrielpgava/nubits";
 
@@ -29,6 +40,92 @@ boost::thread* CAutoUpdate::pUpdateThread = NULL;
 
 namespace
 {
+    boost::filesystem::path GetExecutablePath()
+    {
+#ifdef WIN32
+        char modulePath[MAX_PATH + 1];
+        DWORD length = GetModuleFileNameA(NULL, modulePath, MAX_PATH);
+        if (length == 0 || length >= MAX_PATH)
+            return boost::filesystem::current_path() / "nud.exe";
+        return boost::filesystem::path(std::string(modulePath, length));
+#elif defined(__linux__)
+        char modulePath[PATH_MAX + 1];
+        ssize_t length = readlink("/proc/self/exe", modulePath, PATH_MAX);
+        if (length <= 0 || length >= PATH_MAX)
+            return boost::filesystem::current_path() / "nud";
+        modulePath[length] = '\0';
+        return boost::filesystem::path(modulePath);
+#else
+        return boost::filesystem::current_path() / "Nu";
+#endif
+    }
+
+    unsigned long GetUpdateProcessId()
+    {
+#ifdef WIN32
+        return static_cast<unsigned long>(GetCurrentProcessId());
+#else
+        return static_cast<unsigned long>(getpid());
+#endif
+    }
+
+    bool IsSha256(const std::string& digest)
+    {
+        if (digest.size() != SHA256_DIGEST_LENGTH * 2)
+            return false;
+        for (size_t i = 0; i < digest.size(); ++i)
+        {
+            if (!std::isxdigit(static_cast<unsigned char>(digest[i])))
+                return false;
+        }
+        return true;
+    }
+
+    std::string FindSha256InManifest(const std::string& manifest, const std::string& assetName)
+    {
+        std::istringstream lines(manifest);
+        std::string digest;
+        std::string fileName;
+        while (lines >> digest >> fileName)
+        {
+            if (!fileName.empty() && fileName[0] == '*')
+                fileName.erase(0, 1);
+            if (fileName == assetName)
+            {
+                boost::algorithm::to_lower(digest);
+                return IsSha256(digest) ? digest : "";
+            }
+            std::string remainder;
+            std::getline(lines, remainder);
+        }
+        return "";
+    }
+
+    void ConfigureCurlTls(CURL* curl)
+    {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
+#ifdef WIN32
+        static const std::string caBundle = (GetExecutablePath().parent_path() / "cacert.pem").string();
+        if (boost::filesystem::exists(caBundle))
+            curl_easy_setopt(curl, CURLOPT_CAINFO, caBundle.c_str());
+#endif
+    }
+
+    std::string ShellQuote(const std::string& value)
+    {
+        std::string quoted("'");
+        for (size_t i = 0; i < value.size(); ++i)
+        {
+            if (value[i] == '\'')
+                quoted += "'\\''";
+            else
+                quoted += value[i];
+        }
+        quoted += "'";
+        return quoted;
+    }
+
     size_t WriteStringCallback(void* contents, size_t size, size_t nmemb, void* userp)
     {
         size_t total = size * nmemb;
@@ -62,7 +159,7 @@ namespace
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, nTimeoutSeconds);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteStringCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &strResponse);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+        ConfigureCurlTls(curl);
 
         if (fUseProxy)
         {
@@ -72,14 +169,6 @@ namespace
         }
 
         CURLcode res = curl_easy_perform(curl);
-        if (res != CURLE_OK)
-        {
-            // Retry once without SSL peer verification if system lacks CA certs
-            strResponse.clear();
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-            res = curl_easy_perform(curl);
-        }
-
         if (res != CURLE_OK)
         {
             strError = curl_easy_strerror(res);
@@ -107,11 +196,23 @@ namespace
 std::string CAutoUpdate::GetPlatformAssetPattern()
 {
 #if defined(WIN32)
-    return "win";
+#if defined(__aarch64__) || defined(_M_ARM64)
+    return "-windows-arm64-runtime.zip";
+#elif defined(__x86_64__) || defined(_WIN64) || defined(_M_X64)
+    return "-windows-x64-runtime.zip";
+#else
+    return "-windows-x86-runtime.zip";
+#endif
 #elif defined(__APPLE__)
-    return "mac";
+    return "";
 #elif defined(__linux__)
-    return "linux";
+#if defined(__aarch64__)
+    return "-linux-arm64-server.tar.gz";
+#elif defined(__x86_64__)
+    return "-linux-x64-server.tar.gz";
+#else
+    return "";
+#endif
 #else
     return "";
 #endif
@@ -178,7 +279,7 @@ bool CAutoUpdate::CheckForUpdates(bool fSilent, std::string* pstrError)
 {
     std::string currentVersion = strprintf("%d.%d.%d", CLIENT_VERSION_MAJOR, CLIENT_VERSION_MINOR, CLIENT_VERSION_REVISION);
 
-    std::string url = "https://api.github.com/repos/" + OFFICIAL_REPO + "/releases/latest";
+    std::string url = "https://api.github.com/repos/" + OFFICIAL_REPO + "/releases?per_page=20";
     std::string jsonResponse;
     std::string httpErr;
     long httpCode = 0;
@@ -213,8 +314,50 @@ bool CAutoUpdate::CheckForUpdates(bool fSilent, std::string* pstrError)
             return false;
         }
 
-        const json_spirit::Object& obj = parsed.get_obj();
-        std::string tag_name = json_spirit::find_value(obj, "tag_name").get_str();
+        if (parsed.type() != json_spirit::array_type)
+        {
+            if (pstrError)
+                *pstrError = "GitHub releases response is not an array";
+            return false;
+        }
+
+        const json_spirit::Array& releases = parsed.get_array();
+        const json_spirit::Object* latestRelease = NULL;
+        std::string tag_name;
+        bool latestIsPrerelease = true;
+        for (size_t i = 0; i < releases.size(); ++i)
+        {
+            if (releases[i].type() != json_spirit::obj_type)
+                continue;
+            const json_spirit::Object& release = releases[i].get_obj();
+            json_spirit::Value draftValue = json_spirit::find_value(release, "draft");
+            if (draftValue.type() == json_spirit::bool_type && draftValue.get_bool())
+                continue;
+
+            json_spirit::Value tagValue = json_spirit::find_value(release, "tag_name");
+            if (tagValue.type() != json_spirit::str_type)
+                continue;
+            std::string candidateTag = tagValue.get_str();
+            json_spirit::Value prereleaseValue = json_spirit::find_value(release, "prerelease");
+            bool candidateIsPrerelease = prereleaseValue.type() == json_spirit::bool_type && prereleaseValue.get_bool();
+
+            if (!latestRelease || IsNewerVersion(candidateTag, tag_name) ||
+                (!IsNewerVersion(tag_name, candidateTag) && latestIsPrerelease && !candidateIsPrerelease))
+            {
+                latestRelease = &release;
+                tag_name = candidateTag;
+                latestIsPrerelease = candidateIsPrerelease;
+            }
+        }
+
+        if (!latestRelease)
+        {
+            if (pstrError)
+                *pstrError = "No published GitHub release found";
+            return false;
+        }
+
+        const json_spirit::Object& obj = *latestRelease;
         std::string name = json_spirit::find_value(obj, "name").get_str();
         std::string html_url = json_spirit::find_value(obj, "html_url").get_str();
         std::string body;
@@ -222,9 +365,11 @@ bool CAutoUpdate::CheckForUpdates(bool fSilent, std::string* pstrError)
         if (bodyVal.type() == json_spirit::str_type)
             body = bodyVal.get_str();
 
-        std::string platformPattern = GetPlatformAssetPattern();
+        std::string platformPattern = boost::algorithm::to_lower_copy(GetPlatformAssetPattern());
         std::string downloadUrl = "";
         std::string assetName = "";
+        std::string expectedSha256 = "";
+        std::string checksumsUrl = "";
         int64_t assetSize = 0;
 
         json_spirit::Value assetsVal = json_spirit::find_value(obj, "assets");
@@ -237,16 +382,49 @@ bool CAutoUpdate::CheckForUpdates(bool fSilent, std::string* pstrError)
                 std::string aName = json_spirit::find_value(asset, "name").get_str();
                 std::string aLower = boost::algorithm::to_lower_copy(aName);
 
-                if (aLower.find(platformPattern) != std::string::npos)
+                if (aLower == "sha256sums" || aLower == "sha256sums.txt")
                 {
+                    json_spirit::Value checksumsValue = json_spirit::find_value(asset, "browser_download_url");
+                    if (checksumsValue.type() == json_spirit::str_type)
+                        checksumsUrl = checksumsValue.get_str();
+                    continue;
+                }
+
+                if (!platformPattern.empty() && aLower.size() >= platformPattern.size() &&
+                    aLower.compare(aLower.size() - platformPattern.size(), platformPattern.size(), platformPattern) == 0 &&
+                    aName.find('/') == std::string::npos && aName.find('\\') == std::string::npos)
+                {
+                    json_spirit::Value digestValue = json_spirit::find_value(asset, "digest");
+                    if (digestValue.type() == json_spirit::str_type)
+                    {
+                        expectedSha256 = digestValue.get_str();
+                        if (boost::algorithm::istarts_with(expectedSha256, "sha256:"))
+                            expectedSha256 = expectedSha256.substr(7);
+                        boost::algorithm::to_lower(expectedSha256);
+                    }
+                    if (!IsSha256(expectedSha256))
+                        continue;
+
+                    json_spirit::Value downloadValue = json_spirit::find_value(asset, "browser_download_url");
+                    if (downloadValue.type() != json_spirit::str_type)
+                        continue;
+
                     assetName = aName;
-                    downloadUrl = json_spirit::find_value(asset, "browser_download_url").get_str();
+                    downloadUrl = downloadValue.get_str();
                     json_spirit::Value sz = json_spirit::find_value(asset, "size");
                     if (sz.type() == json_spirit::int_type)
                         assetSize = sz.get_int64();
                     break;
                 }
             }
+        }
+
+        if (!assetName.empty() && !IsSha256(expectedSha256) && !checksumsUrl.empty())
+        {
+            std::string checksumsText;
+            std::string checksumsError;
+            if (HttpGet(checksumsUrl, checksumsText, checksumsError, 20L))
+                expectedSha256 = FindSha256InManifest(checksumsText, assetName);
         }
 
         bool newer = IsNewerVersion(tag_name, currentVersion);
@@ -261,6 +439,7 @@ bool CAutoUpdate::CheckForUpdates(bool fSilent, std::string* pstrError)
             updateInfo.strHtmlUrl = html_url;
             updateInfo.strDownloadUrl = downloadUrl;
             updateInfo.strAssetName = assetName;
+            updateInfo.strExpectedSha256 = expectedSha256;
             updateInfo.nSize = assetSize;
             updateInfo.nCheckTime = GetTime();
         }
@@ -389,7 +568,21 @@ bool CAutoUpdate::ApplyUpdate(std::string& strMessage)
 
     if (currentInfo.strDownloadUrl.empty())
     {
-        strMessage = "No compatible download binary found for platform (" + GetPlatformAssetPattern() + ") in release " + currentInfo.strLatestVersion;
+        strMessage = "No compatible, SHA-256 verified runtime package found for platform (" + GetPlatformAssetPattern() + ") in release " + currentInfo.strLatestVersion;
+        return false;
+    }
+
+    if (!IsSha256(currentInfo.strExpectedSha256))
+    {
+        strMessage = "Release asset does not provide a valid SHA-256 digest; refusing to install it";
+        return false;
+    }
+
+    if (currentInfo.strAssetName.empty() ||
+        currentInfo.strAssetName.find('/') != std::string::npos ||
+        currentInfo.strAssetName.find('\\') != std::string::npos)
+    {
+        strMessage = "Release asset has an invalid filename";
         return false;
     }
 
@@ -421,38 +614,92 @@ bool CAutoUpdate::ApplyUpdate(std::string& strMessage)
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 300L);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteFileCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); // Allow CDN redirection
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+    ConfigureCurlTls(curl);
+
+    if (fUseProxy)
+    {
+        curl_easy_setopt(curl, CURLOPT_PROXY, addrProxy.ToStringIP().c_str());
+        curl_easy_setopt(curl, CURLOPT_PROXYPORT, addrProxy.GetPort());
+        curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS4);
+    }
 
     CURLcode res = curl_easy_perform(curl);
+    long httpCode = 0;
+    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
     fclose(fp);
     curl_easy_cleanup(curl);
 
-    if (res != CURLE_OK)
+    if (res != CURLE_OK || httpCode != 200)
     {
-        strMessage = strprintf("Download error: %s", curl_easy_strerror(res));
+        boost::filesystem::remove(targetFile);
+        strMessage = res != CURLE_OK
+            ? strprintf("Download error: %s", curl_easy_strerror(res))
+            : strprintf("Download failed with HTTP response code %ld", httpCode);
         return false;
     }
 
     std::string computedHash = ComputeFileSHA256(targetFile.string());
     printf("AutoUpdate: Download complete (%s). SHA256: %s\n", targetFile.string().c_str(), computedHash.c_str());
-
-    // Prepare updater execution
-#if defined(WIN32)
-    boost::filesystem::path scriptPath = GetDataDir() / "update_windows.bat";
-    if (!boost::filesystem::exists(scriptPath))
+    boost::algorithm::to_lower(computedHash);
+    if (computedHash != currentInfo.strExpectedSha256)
     {
-        // Try application root directory
-        scriptPath = boost::filesystem::current_path() / "update_windows.bat";
+        boost::filesystem::remove(targetFile);
+        strMessage = "Downloaded update failed SHA-256 verification; refusing to install it";
+        return false;
     }
 
-    std::string cmd = strprintf("cmd.exe /c start \"\" \"%s\" \"%s\"", scriptPath.string().c_str(), targetFile.string().c_str());
+    if (currentInfo.nSize > 0 && static_cast<int64_t>(boost::filesystem::file_size(targetFile)) != currentInfo.nSize)
+    {
+        boost::filesystem::remove(targetFile);
+        strMessage = "Downloaded update size does not match the GitHub release metadata";
+        return false;
+    }
+
+    // Prepare updater execution
+    boost::filesystem::path executablePath = GetExecutablePath();
+    boost::filesystem::path applicationDirectory = executablePath.parent_path();
+#if defined(WIN32)
+    boost::filesystem::path scriptPath = applicationDirectory / "update_windows.bat";
+    if (!boost::filesystem::exists(scriptPath))
+    {
+        boost::filesystem::remove(targetFile);
+        strMessage = "Windows updater script is missing next to the application";
+        return false;
+    }
+
+    const std::string exeName = boost::algorithm::to_lower_copy(executablePath.filename().string());
+    const char* target = exeName == "nu.exe" ? "gui" : "daemon";
+    std::string cmd = strprintf("cmd.exe /d /c start \"\" /min \"%s\" \"%s\" %lu %s",
+                                scriptPath.string().c_str(), targetFile.string().c_str(), GetUpdateProcessId(), target);
     printf("AutoUpdate: Launching updater script: %s\n", cmd.c_str());
-    system(cmd.c_str());
+    if (system(cmd.c_str()) != 0)
+    {
+        boost::filesystem::remove(targetFile);
+        strMessage = "Failed to launch the Windows updater script";
+        return false;
+    }
 #else
-    boost::filesystem::path scriptPath = boost::filesystem::current_path() / "update_posix.sh";
-    std::string cmd = strprintf("/bin/bash \"%s\" \"%s\" &", scriptPath.string().c_str(), targetFile.string().c_str());
+    boost::filesystem::path scriptPath = applicationDirectory / "update_posix.sh";
+    if (!boost::filesystem::exists(scriptPath))
+    {
+        boost::filesystem::remove(targetFile);
+        strMessage = "POSIX updater script is missing next to the application";
+        return false;
+    }
+
+    std::ostringstream command;
+    command << "/bin/bash " << ShellQuote(scriptPath.string()) << " "
+            << ShellQuote(targetFile.string()) << " " << GetUpdateProcessId()
+            << " >/dev/null 2>&1 &";
+    const std::string cmd = command.str();
     printf("AutoUpdate: Launching updater script: %s\n", cmd.c_str());
-    system(cmd.c_str());
+    if (system(cmd.c_str()) != 0)
+    {
+        boost::filesystem::remove(targetFile);
+        strMessage = "Failed to launch the POSIX updater script";
+        return false;
+    }
 #endif
 
     strMessage = "Update downloaded successfully (" + currentInfo.strLatestVersion + "). Initiating restart...";
@@ -560,6 +807,7 @@ json_spirit::Value checkupdate(const json_spirit::Array& params, bool fHelp)
     obj.push_back(json_spirit::Pair("release_url", info.strHtmlUrl));
     obj.push_back(json_spirit::Pair("download_url", info.strDownloadUrl));
     obj.push_back(json_spirit::Pair("asset_name", info.strAssetName));
+    obj.push_back(json_spirit::Pair("sha256", info.strExpectedSha256));
     obj.push_back(json_spirit::Pair("asset_size_bytes", info.nSize));
 
     return obj;

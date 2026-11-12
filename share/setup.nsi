@@ -1,11 +1,13 @@
 Name Nu
 
-RequestExecutionLevel highest
+RequestExecutionLevel user
 SetCompressor /SOLID lzma
 
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\$(^Name)"
-!define VERSION 5.3.0
+!ifndef VERSION
+!define VERSION 5.3.1
+!endif
 !define COMPANY "Nu project"
 !define URL http://www.NuBits.com/
 
@@ -16,7 +18,7 @@ SetCompressor /SOLID lzma
 !define MUI_HEADERIMAGE_RIGHT
 !define MUI_HEADERIMAGE_BITMAP "../share/pixmaps/nsis-header.bmp"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
-!define MUI_STARTMENUPAGE_REGISTRY_ROOT HKLM
+!define MUI_STARTMENUPAGE_REGISTRY_ROOT HKCU
 !define MUI_STARTMENUPAGE_REGISTRY_KEY ${REGKEY}
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME StartMenuGroup
 !define MUI_STARTMENUPAGE_DEFAULTFOLDER Nu
@@ -48,12 +50,8 @@ Var StartMenuGroup
 !insertmacro MUI_LANGUAGE English
 
 # Installer attributes
-OutFile Nu-${VERSION}-win-setup.exe
-!if "" == "64"
-InstallDir $PROGRAMFILES64\Nu
-!else
-InstallDir $PROGRAMFILES\Nu
-!endif
+OutFile ../dist/Nu-${VERSION}-windows-x64-setup.exe
+InstallDir "$LOCALAPPDATA\Programs\Nu"
 CRCCheck on
 XPStyle on
 BrandingText " "
@@ -66,23 +64,15 @@ VIAddVersionKey CompanyWebsite "${URL}"
 VIAddVersionKey FileVersion "${VERSION}"
 VIAddVersionKey FileDescription ""
 VIAddVersionKey LegalCopyright ""
-InstallDirRegKey HKCU "${REGKEY}" Path
 ShowUninstDetails show
 
 # Installer sections
 Section -Main SEC0000
     SetOutPath $INSTDIR
     SetOverwrite on
-    File ../release/nu.exe
+    File /r "../dist/windows-runtime/*"
     File /oname=license.txt ../COPYING
     File /oname=readme.txt ../doc/README_windows.txt
-    SetOutPath $INSTDIR\daemon
-    File ../release/nud.exe
-#    SetOutPath $INSTDIR\doc
-#    File /r ../doc\*.*
-#    SetOutPath $INSTDIR\src
-#    File /r /x *.exe /x *.o ../src\*.*
-    SetOutPath $INSTDIR
     WriteRegStr HKCU "${REGKEY}\Components" Main 1
 
     # Remove old wxwidgets-based-bitcoin executable and locales:
@@ -126,10 +116,12 @@ done${UNSECTION_ID}:
 # Uninstaller sections
 Section /o -un.Main UNSEC0000
     Delete /REBOOTOK $INSTDIR\nu.exe
+    Delete /REBOOTOK $INSTDIR\nud.exe
+    Delete /REBOOTOK $INSTDIR\update_windows.bat
+    Delete /REBOOTOK $INSTDIR\cacert.pem
     Delete /REBOOTOK $INSTDIR\license.txt
     Delete /REBOOTOK $INSTDIR\readme.txt
-    RMDir /r /REBOOTOK $INSTDIR\daemon
-#    RMDir /r /REBOOTOK $INSTDIR\src
+    RMDir /r /REBOOTOK $INSTDIR
     DeleteRegValue HKCU "${REGKEY}\Components" Main
 SectionEnd
 
@@ -158,15 +150,7 @@ SectionEnd
 # Installer functions
 Function .onInit
     InitPluginsDir
-    !if "" == "64"
-    ${If} ${RunningX64}
-      ; disable registry redirection (enable access to 64-bit portion of registry)
-      SetRegView 64
-    ${Else}
-      MessageBox MB_OK|MB_ICONSTOP "Cannot install 64-bit version on a 32-bit system."
-      Abort
-    ${EndIf}
-    !endif
+    SetShellVarContext current
 FunctionEnd
 
 # Uninstaller functions
@@ -174,4 +158,5 @@ Function un.onInit
     ReadRegStr $INSTDIR HKCU "${REGKEY}" Path
     !insertmacro MUI_STARTMENU_GETFOLDER Application $StartMenuGroup
     !insertmacro SELECT_UNSECTION Main ${UNSEC0000}
+    SetShellVarContext current
 FunctionEnd
