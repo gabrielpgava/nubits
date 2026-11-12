@@ -1,0 +1,1428 @@
+/*
+ * Qt4 Peershares GUI.
+ *
+ * W.J. van der Laan 2011-2012
+ * The Bitcoin Developers 2011-2012
+ * The PPCoin developers 2011-2013
+ * The Peershares Developers 2013-2014
+ */
+#include "bitcoingui.h"
+#include "transactiontablemodel.h"
+#include "addressbookpage.h"
+#include "sendcoinsdialog.h"
+#include "signverifymessagedialog.h"
+#include "optionsdialog.h"
+#include "aboutdialog.h"
+#include "clientmodel.h"
+#include "walletmodel.h"
+#include "editaddressdialog.h"
+#include "optionsmodel.h"
+#include "transactiondescdialog.h"
+#include "addresstablemodel.h"
+#include "transactionview.h"
+#include "overviewpage.h"
+#include "bitcoinunits.h"
+#include "guiconstants.h"
+#include "askpassphrasedialog.h"
+#include "notificator.h"
+#include "guiutil.h"
+#include "rpcconsole.h"
+#include "addnodesdialog.h"
+#include "wallet.h"
+#include "distributedivdialog.h"
+#include "parkpage.h"
+#include "votepage.h"
+#include "autoupdate.h"
+
+#ifdef Q_WS_MAC
+#include "macdockiconhandler.h"
+#endif
+
+#include <QApplication>
+#include <QMainWindow>
+#if QT_VERSION >= 0x050000
+#include <QStandardPaths>
+#endif
+#include <QMenuBar>
+#include <QMenu>
+#include <QIcon>
+#include <QTabWidget>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QToolButton>
+#include <QToolBar>
+#include <QStatusBar>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QLocale>
+#include <QMessageBox>
+#include <QProgressBar>
+#include <QStackedWidget>
+#include <QDateTime>
+#include <QMovie>
+#include <QFileDialog>
+#include <QDesktopServices>
+#include <QTimer>
+#include <QSignalMapper>
+
+#include <QDragEnterEvent>
+#include <QMouseEvent>
+#include <QUrl>
+
+#include <iostream>
+
+#include <QFont>
+#include <QFontDatabase>
+#include <QStyleFactory>
+
+BitcoinGUI::BitcoinGUI(QWidget *parent):
+    QMainWindow(parent),
+    clientModel(0),
+    walletModel(0),
+    exportPeercoinKeysAction(0),
+    encryptWalletAction(0),
+    unlockForMintingAction(0),
+    changePassphraseAction(0),
+    aboutQtAction(0),
+    trayIcon(0),
+    notificator(0),
+    rpcConsole(0),
+    addNodesDialog(0),
+    fPromptedNoPeers(false),
+    fNoPeersTimerStarted(false)
+{
+    resize(980, 620);
+    setMinimumSize(880, 560);
+    setWindowTitle(tr("Nu"));
+    setStyle(QStyleFactory::create("Fusion"));
+#ifndef Q_WS_MAC
+    setWindowIcon(QIcon(":icons/nu"));
+#else
+    // nu: setting this breaks the visual styles for the toolbar, so turning off
+    setUnifiedTitleAndToolBarOnMac(false);
+    QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
+#endif
+
+    // Accept D&D of URIs
+    setAcceptDrops(true);
+
+    // Create actions for the toolbar, menu bar and tray/dock icon
+    createActions();
+
+    // Create application menu bar
+    createMenuBar();
+
+    // Create the tray icon (or setup the dock icon)
+    createTrayIcon();
+
+    // Create tabs
+    overviewPage = new OverviewPage();
+
+    transactionsPage = new QWidget(this);
+    QVBoxLayout *vbox = new QVBoxLayout();
+    vbox->setContentsMargins(20, 20, 20, 20);
+    transactionView = new TransactionView(this);
+    vbox->addWidget(transactionView);
+    transactionsPage->setLayout(vbox);
+
+    addressBookPage = new AddressBookPage(AddressBookPage::ForEditing, AddressBookPage::SendingTab);
+
+    receiveCoinsPage = new AddressBookPage(AddressBookPage::ForEditing, AddressBookPage::ReceivingTab);
+
+    sendCoinsPage = new SendCoinsDialog(this);
+
+    messagePage = new SignVerifyMessageDialog(this);
+
+    parkPage = new ParkPage(this);
+
+    votePage = new VotePage(this);
+
+    centralWidget = new QStackedWidget(this);
+    centralWidget->setObjectName("centralWidget");
+    centralWidget->setAttribute(Qt::WA_StyledBackground, true);
+    centralWidget->setAutoFillBackground(true);
+
+    overviewPage->setAttribute(Qt::WA_StyledBackground, true);
+    overviewPage->setAutoFillBackground(true);
+    transactionsPage->setAttribute(Qt::WA_StyledBackground, true);
+    transactionsPage->setAutoFillBackground(true);
+    addressBookPage->setAttribute(Qt::WA_StyledBackground, true);
+    addressBookPage->setAutoFillBackground(true);
+    receiveCoinsPage->setAttribute(Qt::WA_StyledBackground, true);
+    receiveCoinsPage->setAutoFillBackground(true);
+    sendCoinsPage->setAttribute(Qt::WA_StyledBackground, true);
+    sendCoinsPage->setAutoFillBackground(true);
+#ifdef FIRST_CLASS_MESSAGING
+    messagePage->setAttribute(Qt::WA_StyledBackground, true);
+    messagePage->setAutoFillBackground(true);
+#endif
+    parkPage->setAttribute(Qt::WA_StyledBackground, true);
+    parkPage->setAutoFillBackground(true);
+    votePage->setAttribute(Qt::WA_StyledBackground, true);
+    votePage->setAutoFillBackground(true);
+
+    centralWidget->addWidget(overviewPage);
+    centralWidget->addWidget(transactionsPage);
+    centralWidget->addWidget(addressBookPage);
+    centralWidget->addWidget(receiveCoinsPage);
+    centralWidget->addWidget(sendCoinsPage);
+#ifdef FIRST_CLASS_MESSAGING
+    centralWidget->addWidget(messagePage);
+#endif
+    centralWidget->addWidget(parkPage);
+    centralWidget->addWidget(votePage);
+
+    // Create dedicated vertical sidebar and integrate with mainContainer
+    createToolBars();
+
+    // Create status bar
+    statusBar();
+
+    // Status bar notification icons
+    QFrame *frameBlocks = new QFrame();
+    frameBlocks->setContentsMargins(0,0,0,0);
+    frameBlocks->setMinimumWidth(56);
+    frameBlocks->setMaximumWidth(56);
+    QHBoxLayout *frameBlocksLayout = new QHBoxLayout(frameBlocks);
+    frameBlocksLayout->setContentsMargins(3,0,3,0);
+    frameBlocksLayout->setSpacing(3);
+    labelEncryptionIcon = new QLabel();
+    labelConnectionsIcon = new QLabel();
+    labelConnectionsIcon->installEventFilter(this);
+    labelConnectionsIcon->setCursor(Qt::PointingHandCursor);
+    labelBlocksIcon = new QLabel();
+    frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelEncryptionIcon);
+    frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelConnectionsIcon);
+    frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelBlocksIcon);
+    frameBlocksLayout->addStretch();
+
+    // Progress bar and label for blocks download
+    progressBarLabel = new QLabel();
+    progressBarLabel->setVisible(false);
+    progressBarLabel->setProperty("class", "progressBarLabel");
+    progressBar = new QProgressBar();
+    progressBar->setAlignment(Qt::AlignCenter);
+    progressBar->setVisible(false);
+    progressBar->setProperty("class", "statusBarStyle");
+
+    statusBar()->addWidget(progressBarLabel);
+    statusBar()->addWidget(progressBar);
+    statusBar()->addPermanentWidget(frameBlocks);
+
+    syncIconMovie = new QMovie(":/movies/update_spinner", "mng", this);
+
+    // Clicking on a transaction on the overview page simply sends you to transaction history page
+    connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), this, SLOT(gotoHistoryPage()));
+
+    // Doubleclicking on a transaction on the transaction history page shows details
+    connect(transactionView, SIGNAL(doubleClicked(QModelIndex)), transactionView, SLOT(showDetails()));
+
+    rpcConsole = new RPCConsole(this);
+    connect(openRPCConsoleAction, SIGNAL(triggered()), rpcConsole, SLOT(show()));
+
+    gotoOverviewPage();
+}
+
+BitcoinGUI::~BitcoinGUI()
+{
+#ifdef Q_WS_MAC
+    delete appMenuBar;
+#endif
+}
+
+void BitcoinGUI::createActions()
+{
+    QActionGroup *tabGroup = new QActionGroup(this);
+
+    overviewAction = new QAction(QIcon(":/icons/overview"), tr("&Overview"), this);
+    overviewAction->setToolTip(tr("Show general overview of holdings"));
+    overviewAction->setCheckable(true);
+    overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
+    tabGroup->addAction(overviewAction);
+
+    historyAction = new QAction(QIcon(":/icons/history"), tr("&Transactions"), this);
+    historyAction->setToolTip(tr("Browse transaction history"));
+    historyAction->setCheckable(true);
+    historyAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
+    tabGroup->addAction(historyAction);
+
+    addressBookAction = new QAction(QIcon(":/icons/address-book"), tr("&Address Book"), this);
+    addressBookAction->setToolTip(tr("Edit the list of stored addresses and labels"));
+    addressBookAction->setCheckable(true);
+    addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
+    tabGroup->addAction(addressBookAction);
+
+    receiveCoinsAction = new QAction(QIcon(":/icons/receiving_addresses"), tr("&Receive"), this);
+    receiveCoinsAction->setToolTip(tr("Show the list of addresses for receiving %1").arg(BitcoinUnits::baseName()));
+    receiveCoinsAction->setCheckable(true);
+    receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
+    tabGroup->addAction(receiveCoinsAction);
+
+    sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Send"), this);
+    sendCoinsAction->setToolTip(tr("Send coins to a %1 address").arg(BitcoinUnits::baseName()));
+    sendCoinsAction->setCheckable(true);
+    sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
+    tabGroup->addAction(sendCoinsAction);
+
+    messageAction = new QAction(QIcon(":/icons/edit"), tr("Sign/Verify &message"), this);
+    messageAction->setToolTip(tr("Prove you control an address"));
+#ifdef FIRST_CLASS_MESSAGING
+    messageAction->setCheckable(true);
+#endif
+    tabGroup->addAction(messageAction);
+
+    parkAction = new QAction(QIcon(":/icons/tx_mined"), tr("&Park"), this);
+    parkAction->setToolTip(tr("Park coins for yield"));
+    parkAction->setCheckable(true);
+    parkAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    tabGroup->addAction(parkAction);
+
+    voteAction = new QAction(QIcon(":/icons/edit"), tr("&Vote"), this);
+    voteAction->setToolTip(tr("Change your vote in the DAO"));
+    voteAction->setCheckable(true);
+    voteAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
+    tabGroup->addAction(voteAction);
+
+    connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
+    connect(historyAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
+    connect(addressBookAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
+    connect(receiveCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(receiveCoinsAction, SIGNAL(triggered()), this, SLOT(gotoReceiveCoinsPage()));
+    connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(gotoSendCoinsPage()));
+    connect(messageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(messageAction, SIGNAL(triggered()), this, SLOT(gotoMessagePage()));
+    connect(parkAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(parkAction, SIGNAL(triggered()), this, SLOT(gotoParkPage()));
+    connect(voteAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(voteAction, SIGNAL(triggered()), this, SLOT(gotoVotePage()));
+
+    quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
+    quitAction->setToolTip(tr("Quit application"));
+    quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
+    quitAction->setMenuRole(QAction::QuitRole);
+    aboutAction = new QAction(QIcon(":/icons/nu"), tr("&About %1").arg(qApp->applicationName()), this);
+    aboutAction->setToolTip(tr("Show information about Nu"));
+    aboutAction->setMenuRole(QAction::AboutRole);
+    aboutQtAction = new QAction(tr("About &Qt"), this);
+    aboutQtAction->setToolTip(tr("Show information about Qt"));
+    aboutQtAction->setMenuRole(QAction::AboutQtRole);
+    checkUpdatesAction = new QAction(tr("Check for &Updates..."), this);
+    checkUpdatesAction->setToolTip(tr("Check GitHub for newer versions of NuBits"));
+    optionsAction = new QAction(QIcon(":/icons/options"), tr("&Options..."), this);
+    optionsAction->setToolTip(tr("Modify configuration options for Nu"));
+    optionsAction->setMenuRole(QAction::PreferencesRole);
+    addNodesAction = new QAction(QIcon(":/icons/connect_4"), tr("&Servidores / Nós (Peers)..."), this);
+    addNodesAction->setToolTip(tr("Gerenciar servidores da rede e adicionar nós manualmente"));
+    toggleHideAction = new QAction(QIcon(":/icons/nu"), tr("Show/Hide &Nu"), this);
+    toggleHideAction->setToolTip(tr("Show or hide the Nu window"));
+    exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
+    exportAction->setToolTip(tr("Export the data in the current tab to a file"));
+    encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Portfolio"), this);
+    encryptWalletAction->setToolTip(tr("Encrypt or decrypt portfolio"));
+    encryptWalletAction->setCheckable(true);
+    unlockForMintingAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Unlock Wallet for Minting Only"), this);
+    unlockForMintingAction->setToolTip(tr("Unlock wallet only for minting. Sending NuShares will still require the passphrase."));
+    unlockForMintingAction->setCheckable(true);
+    backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup Wallet"), this);
+    backupWalletAction->setToolTip(tr("Backup portfolio to another location"));
+    changePassphraseAction = new QAction(QIcon(":/icons/key"), tr("&Change Passphrase"), this);
+    changePassphraseAction->setToolTip(tr("Change the passphrase used for portfolio encryption"));
+    openRPCConsoleAction = new QAction(tr("&Debug window"), this);
+    openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
+    exportPeercoinKeysAction = new QAction(QIcon(":/icons/export"), tr("&Export NuBits keys..."), this);
+    exportPeercoinKeysAction->setToolTip(tr("Export NuBits private keys via RPC"));
+    distributeDividendsAction = new QAction(tr("&Distribute dividends..."), this);
+    distributeDividendsAction->setToolTip(tr("Distribute dividends to share holders"));
+
+    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
+    connect(addNodesAction, SIGNAL(triggered()), this, SLOT(addNodesClicked()));
+    connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
+    connect(aboutQtAction, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+    connect(checkUpdatesAction, SIGNAL(triggered()), this, SLOT(checkForUpdatesClicked()));
+    connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
+    connect(encryptWalletAction, SIGNAL(triggered(bool)), this, SLOT(encryptWallet(bool)));
+    connect(unlockForMintingAction, SIGNAL(triggered(bool)), this, SLOT(unlockForMinting(bool)));
+    connect(backupWalletAction, SIGNAL(triggered()), this, SLOT(backupWallet()));
+    connect(changePassphraseAction, SIGNAL(triggered()), this, SLOT(changePassphrase()));
+    connect(exportPeercoinKeysAction, SIGNAL(triggered()), this, SLOT(exportPeercoinKeys()));
+    connect(distributeDividendsAction, SIGNAL(triggered()), this, SLOT(distributeDividendsClicked()));
+}
+
+void BitcoinGUI::createMenuBar()
+{
+#ifdef Q_WS_MAC
+    // Create a decoupled menu bar on Mac which stays even if the window is closed
+    appMenuBar = new QMenuBar();
+#else
+    // Get the main window's menu bar on other platforms
+    appMenuBar = menuBar();
+#endif
+
+    // Configure the menus
+    QMenu *file = appMenuBar->addMenu(tr("&File"));
+    file->addAction(backupWalletAction);
+    file->addAction(exportAction);
+#ifndef FIRST_CLASS_MESSAGING
+    file->addAction(messageAction);
+#endif
+    file->addSeparator();
+    file->addAction(quitAction);
+
+    sharesMenu = appMenuBar->addMenu(tr("Sh&ares"));
+    sharesMenu->addAction(exportPeercoinKeysAction);
+    sharesMenu->addAction(distributeDividendsAction);
+
+    unitMenu = appMenuBar->addMenu(tr("&Unit"));
+
+    QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
+    settings->addAction(encryptWalletAction);
+    settings->addAction(unlockForMintingAction);
+    settings->addAction(changePassphraseAction);
+    settings->addSeparator();
+    settings->addAction(addNodesAction);
+    settings->addAction(optionsAction);
+
+    QMenu *help = appMenuBar->addMenu(tr("&Help"));
+    help->addAction(openRPCConsoleAction);
+    help->addSeparator();
+    help->addAction(checkUpdatesAction);
+    help->addAction(aboutAction);
+    help->addAction(aboutQtAction);
+}
+
+void BitcoinGUI::createToolBars()
+{
+    // Main container holding the sidebar and pages
+    QWidget *mainContainer = new QWidget(this);
+    mainContainer->setObjectName("mainContainer");
+    mainContainer->setAttribute(Qt::WA_StyledBackground, true);
+    mainContainer->setAutoFillBackground(true);
+
+    QHBoxLayout *mainLayout = new QHBoxLayout(mainContainer);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
+
+    // Dedicated modern dark sidebar
+    QFrame *sidebar = new QFrame(mainContainer);
+    sidebar->setObjectName("sidebar");
+    sidebar->setFixedWidth(205);
+    sidebar->setAttribute(Qt::WA_StyledBackground, true);
+    sidebar->setAutoFillBackground(true);
+
+    QVBoxLayout *sidebarLayout = new QVBoxLayout(sidebar);
+    sidebarLayout->setContentsMargins(10, 14, 10, 14);
+    sidebarLayout->setSpacing(4);
+
+    // Currency Switcher Card (NuBits NBT / NuShares NSR)
+    QPushButton* toolbarSpacer = new QPushButton(sidebar);
+    toolbarSpacer->setObjectName("switchUnitBtn");
+    toolbarSpacer->setProperty("class", "toolbarSpacer");
+    toolbarSpacer->setCursor(Qt::PointingHandCursor);
+    toolbarSpacer->setToolTip(tr("Click to switch unit (NuBits NBT / NuShares NSR)"));
+    toolbarSpacer->setFixedHeight(54);
+    connect(toolbarSpacer, SIGNAL(clicked()), this, SLOT(switchUnitButtonClicked()));
+    sidebarLayout->addWidget(toolbarSpacer);
+    sidebarLayout->addSpacing(8);
+
+    // Navigation buttons helper
+    auto addNavButton = [sidebar, sidebarLayout](QAction *action) {
+        QToolButton *btn = new QToolButton(sidebar);
+        btn->setDefaultAction(action);
+        btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        btn->setIconSize(QSize(18, 18));
+        btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        btn->setFixedHeight(40);
+        btn->setCursor(Qt::PointingHandCursor);
+        connect(btn, SIGNAL(clicked()), action, SLOT(trigger()));
+        sidebarLayout->addWidget(btn);
+        return btn;
+    };
+
+    addNavButton(overviewAction);
+    addNavButton(sendCoinsAction);
+    addNavButton(receiveCoinsAction);
+    addNavButton(historyAction);
+    addNavButton(addressBookAction);
+#ifdef FIRST_CLASS_MESSAGING
+    addNavButton(messageAction);
+#endif
+    addNavButton(parkAction);
+    addNavButton(voteAction);
+
+    // Push buttons neatly to top
+    sidebarLayout->addStretch(1);
+
+    mainLayout->addWidget(sidebar);
+    mainLayout->addWidget(centralWidget, 1);
+
+    setCentralWidget(mainContainer);
+}
+
+void BitcoinGUI::setClientModel(ClientModel *clientModel)
+{
+    this->clientModel = clientModel;
+    if(clientModel)
+    {
+        if(clientModel->isTestNet())
+        {
+            QString title_testnet = windowTitle() + QString(" ") + tr("[testnet]");
+            setWindowTitle(title_testnet);
+#ifndef Q_WS_MAC
+            setWindowIcon(QIcon(":icons/nu_testnet"));
+#else
+            MacDockIconHandler::instance()->setIcon(QIcon(":icons/nu_testnet"));
+#endif
+            if(trayIcon)
+            {
+                trayIcon->setToolTip(title_testnet);
+                trayIcon->setIcon(QIcon(":/icons/toolbar_testnet"));
+            }
+        }
+
+        // Keep up to date with client
+        setNumConnections(clientModel->getNumConnections());
+        connect(clientModel, SIGNAL(numConnectionsChanged(int)), this, SLOT(setNumConnections(int)));
+
+        setNumBlocks(clientModel->getNumBlocks());
+        connect(clientModel, SIGNAL(numBlocksChanged(int)), this, SLOT(setNumBlocks(int)));
+
+        // Report errors from network/worker thread
+        connect(clientModel, SIGNAL(error(QString,QString, bool)), this, SLOT(error(QString,QString,bool)));
+
+        rpcConsole->setClientModel(clientModel);
+        votePage->setClientModel(clientModel);
+
+        if (!fNoPeersTimerStarted)
+        {
+            fNoPeersTimerStarted = true;
+            QTimer::singleShot(45000, this, SLOT(checkNoPeersOnStartup()));
+        }
+    }
+}
+
+void BitcoinGUI::setWalletModel(WalletModel *walletModel)
+{
+    this->walletModel = walletModel;
+    if(walletModel)
+    {
+        // nubit: set current base unit
+        BitcoinUnits::baseUnit = walletModel->getUnit();
+
+        // nubit: update the send and receive tooltip text to display the proper unit (NuShares/NuBits)
+        receiveCoinsAction->setToolTip(tr("Show the list of addresses for receiving %1").arg(BitcoinUnits::baseName()));
+        sendCoinsAction->setToolTip(tr("Send coins to a %1 address").arg(BitcoinUnits::baseName()));
+
+        // Report errors from wallet thread
+        connect(walletModel, SIGNAL(error(QString,QString,bool)), this, SLOT(error(QString,QString,bool)));
+
+        // Put transaction list in tabs
+        transactionView->setModel(walletModel);
+
+        overviewPage->setModel(walletModel);
+        addressBookPage->setModel(walletModel->getAddressTableModel());
+        receiveCoinsPage->setModel(walletModel->getAddressTableModel());
+        sendCoinsPage->setModel(walletModel);
+        messagePage->setModel(walletModel);
+        rpcConsole->setModel(walletModel);
+        parkPage->setModel(walletModel);
+        votePage->setModel(walletModel);
+
+        parkAction->setVisible(walletModel->getUnit() != 'S');
+
+        voteAction->setVisible(walletModel->getUnit() == 'S');
+
+        if (walletModel->getUnit() != 'S' && centralWidget->currentWidget() == votePage)
+            gotoOverviewPage();
+
+        if (walletModel->getUnit() == 'S' && centralWidget->currentWidget() == parkPage)
+            gotoOverviewPage();
+
+        sharesMenu->setEnabled(walletModel->getUnit() == 'S');
+
+        setEncryptionStatus(walletModel->getEncryptionStatus());
+        connect(walletModel, SIGNAL(encryptionStatusChanged(int)), this, SLOT(setEncryptionStatus(int)));
+
+        // Balloon popup for new transaction
+        connect(walletModel->getTransactionTableModel(), SIGNAL(rowsInserted(QModelIndex,int,int)),
+                this, SLOT(incomingTransaction(QModelIndex,int,int)));
+
+        // Ask for passphrase if needed
+        connect(walletModel, SIGNAL(requireUnlock()), this, SLOT(unlockWallet()));
+
+        if (isMinimized() || isHidden())
+            walletModel->setPollInterval(MODEL_UPDATE_DELAY_BACKGROUND);
+
+        // nubit: change the client stylesheet when the unit context changes
+        QFile stylesheet(QString(":/styles/%1.qss").arg(QString(walletModel->getUnit())));
+        if (stylesheet.open(QFile::ReadOnly))
+        {
+            QString setSheet = QLatin1String(stylesheet.readAll());
+            qApp->setStyleSheet(setSheet);
+        }
+
+        // Embed application fonts
+        int fontId = QFontDatabase::addApplicationFont(":/fonts/rob_r");
+        if (fontId != -1)
+        {
+            QStringList families = QFontDatabase::applicationFontFamilies(fontId);
+            if (!families.isEmpty())
+            {
+                QFont appFont(families.at(0), 12);
+                qApp->setFont(appFont);
+            }
+        }
+
+        changeUnitActions.clear();
+        QSignalMapper *mapper = new QSignalMapper();
+
+        BOOST_FOREACH(CWallet *wallet, setpwalletRegistered)
+        {
+            QString unitString(wallet->Unit());
+            QAction *action = new QAction(BitcoinUnits::baseName(wallet->Unit()), this);
+            action->setCheckable(true);
+            if (unitString == QString(walletModel->getWallet()->Unit()))
+                action->setChecked(true);
+
+            changeUnitActions.append(action);
+
+            connect(action, SIGNAL(triggered()), mapper, SLOT(map()));
+            mapper->setMapping(action, QString(wallet->Unit()));
+        }
+        connect(mapper, SIGNAL(mapped(const QString&)), this, SLOT(changeUnit(const QString&)));
+        unitMenu->clear();
+        for (int i=0; i < changeUnitActions.size(); ++i)
+            unitMenu->addAction(changeUnitActions[i]);
+
+        switch (walletModel->getUnit())
+        {
+            case 'S':
+                switchUnitTarget = "B";
+                break;
+            case 'B':
+                switchUnitTarget = "S";
+                break;
+            case 'Y':
+                switchUnitTarget = "B";
+                break;
+            case 'E':
+                switchUnitTarget = "B";
+                break;
+            case 'X':
+                switchUnitTarget = "B";
+                break;
+        }
+    }
+}
+
+void BitcoinGUI::changeUnit(const QString &unit)
+{
+    WalletModel *oldWalletModel = this->walletModel;
+    OptionsModel *optionsModel = oldWalletModel->getOptionsModel();
+    WalletModel *newWalletModel = NULL;
+
+    BOOST_FOREACH(CWallet *wallet, setpwalletRegistered)
+    {
+        if (QString(wallet->Unit()) == unit)
+        {
+            newWalletModel = new WalletModel(wallet, optionsModel);
+            break;
+        }
+    }
+    if (!newWalletModel)
+        throw std::runtime_error("Wallet not found");
+
+    setUpdatesEnabled(false);
+    setWalletModel(newWalletModel);
+    setUpdatesEnabled(true);
+    delete oldWalletModel;
+}
+
+void BitcoinGUI::createTrayIcon()
+{
+    QMenu *trayIconMenu;
+#ifndef Q_WS_MAC
+    trayIcon = new QSystemTrayIcon(this);
+    trayIconMenu = new QMenu(this);
+    trayIcon->setContextMenu(trayIconMenu);
+    trayIcon->setToolTip(tr("Nu client"));
+    trayIcon->setIcon(QIcon(":/icons/toolbar"));
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
+    trayIcon->show();
+#else
+    // Note: On Mac, the dock icon is used to provide the tray's functionality.
+    MacDockIconHandler *dockIconHandler = MacDockIconHandler::instance();
+    trayIconMenu = dockIconHandler->dockMenu();
+    dockIconHandler->setMainWindow((QMainWindow *)this);
+#endif
+
+    // Configuration of the tray icon (or dock icon) icon menu
+    trayIconMenu->addAction(toggleHideAction);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(messageAction);
+#ifndef FIRST_CLASS_MESSAGING
+    trayIconMenu->addSeparator();
+#endif
+    trayIconMenu->addAction(receiveCoinsAction);
+    trayIconMenu->addAction(sendCoinsAction);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(addNodesAction);
+    trayIconMenu->addAction(optionsAction);
+#ifndef Q_WS_MAC // This is built-in on Mac
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(quitAction);
+#endif
+
+    notificator = new Notificator(tr("Nu-qt"), trayIcon);
+
+    QTimer *updateCheckTimer = new QTimer(this);
+    connect(updateCheckTimer, SIGNAL(timeout()), this, SLOT(checkPeriodicUpdate()));
+    updateCheckTimer->start(60000); // Check update status every 60 seconds
+}
+
+#ifndef Q_WS_MAC
+void BitcoinGUI::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    if(reason == QSystemTrayIcon::Trigger)
+    {
+        // Click on system tray icon triggers "show/hide Peershares"
+        toggleHideAction->trigger();
+    }
+}
+#endif
+
+void BitcoinGUI::toggleHidden()
+{
+    // activateWindow() (sometimes) helps with keyboard focus on Windows
+    if (isHidden())
+    {
+        show();
+        activateWindow();
+    }
+    else if (isMinimized())
+    {
+        showNormal();
+        activateWindow();
+    }
+    else if (GUIUtil::isObscured(this))
+    {
+        raise();
+        activateWindow();
+    }
+    else
+        hide();
+}
+
+void BitcoinGUI::optionsClicked()
+{
+    if(!clientModel || !clientModel->getOptionsModel())
+        return;
+    OptionsDialog dlg;
+    dlg.setModel(clientModel->getOptionsModel());
+    dlg.exec();
+}
+
+void BitcoinGUI::addNodesClicked()
+{
+    if (!addNodesDialog)
+        addNodesDialog = new AddNodesDialog(this);
+    addNodesDialog->refreshPeers();
+    addNodesDialog->refreshCustomNodes();
+    addNodesDialog->show();
+    addNodesDialog->raise();
+    addNodesDialog->activateWindow();
+}
+
+bool BitcoinGUI::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == labelConnectionsIcon && event->type() == QEvent::MouseButtonRelease)
+    {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+        if (mouseEvent->button() == Qt::LeftButton)
+        {
+            addNodesClicked();
+            return true;
+        }
+    }
+    return QMainWindow::eventFilter(obj, event);
+}
+
+void BitcoinGUI::aboutClicked()
+{
+    AboutDialog dlg;
+    dlg.setModel(clientModel);
+    dlg.exec();
+}
+
+void BitcoinGUI::setNumConnections(int count)
+{
+    QString icon;
+    switch(count)
+    {
+    case 0: icon = ":/icons/connect_0"; break;
+    case 1: case 2: case 3: icon = ":/icons/connect_1"; break;
+    case 4: case 5: case 6: icon = ":/icons/connect_2"; break;
+    case 7: case 8: case 9: icon = ":/icons/connect_3"; break;
+    default: icon = ":/icons/connect_4"; break;
+    }
+    labelConnectionsIcon->setPixmap(QIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    labelConnectionsIcon->setToolTip(tr("%n active connection(s) to Nu network", "", count) + QString("\n") + tr("Clique para gerenciar servidores / nós"));
+}
+
+void BitcoinGUI::setNumBlocks(int count)
+{
+    // don't show / hide progressBar and it's label if we have no connection(s) to the network
+    if (!clientModel || clientModel->getNumConnections() == 0)
+    {
+        progressBarLabel->setVisible(false);
+        progressBar->setVisible(false);
+
+        return;
+    }
+
+    int nTotalBlocks = clientModel->getNumBlocksOfPeers();
+    QString tooltip;
+
+    if(count < nTotalBlocks)
+    {
+        int nRemainingBlocks = nTotalBlocks - count;
+        float nPercentageDone = count / (nTotalBlocks * 0.01f);
+
+        if (clientModel->getStatusBarWarnings() == "")
+        {
+            progressBarLabel->setText(tr("Synchronizing with network..."));
+            progressBarLabel->setVisible(true);
+            progressBar->setFormat(tr("~%n block(s) remaining", "", nRemainingBlocks));
+            progressBar->setMaximum(nTotalBlocks);
+            progressBar->setValue(count);
+            progressBar->setVisible(true);
+        }
+        else
+        {
+            progressBarLabel->setText(clientModel->getStatusBarWarnings());
+            progressBarLabel->setVisible(true);
+            progressBar->setVisible(false);
+        }
+        tooltip = tr("Downloaded %1 of %2 blocks of transaction history (%3% done).").arg(count).arg(nTotalBlocks).arg(nPercentageDone, 0, 'f', 2);
+    }
+    else
+    {
+        if (clientModel->getStatusBarWarnings() == "")
+            progressBarLabel->setVisible(false);
+        else
+        {
+            progressBarLabel->setText(clientModel->getStatusBarWarnings());
+            progressBarLabel->setVisible(true);
+        }
+        progressBar->setVisible(false);
+        tooltip = tr("Downloaded %1 blocks of transaction history.").arg(count);
+    }
+
+    QDateTime now = QDateTime::currentDateTime();
+    QDateTime lastBlockDate = clientModel->getLastBlockDate();
+    int secs = lastBlockDate.secsTo(now);
+    QString text;
+
+    // Represent time from last generated block in human readable text
+    if(secs <= 0)
+    {
+        // Fully up to date. Leave text empty.
+    }
+    else if(secs < 60)
+    {
+        text = tr("%n second(s) ago","",secs);
+    }
+    else if(secs < 60*60)
+    {
+        text = tr("%n minute(s) ago","",secs/60);
+    }
+    else if(secs < 24*60*60)
+    {
+        text = tr("%n hour(s) ago","",secs/(60*60));
+    }
+    else
+    {
+        text = tr("%n day(s) ago","",secs/(60*60*24));
+    }
+
+    // Set icon state: spinning if catching up, tick otherwise
+    if(secs < 90*60 && count >= nTotalBlocks)
+    {
+        tooltip = tr("Up to date") + QString(".\n") + tooltip;
+        labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+    }
+    else
+    {
+        tooltip = tr("Catching up...") + QString("\n") + tooltip;
+        labelBlocksIcon->setMovie(syncIconMovie);
+        syncIconMovie->start();
+        if (isMinimized() || isHidden())
+            syncIconMovie->setPaused(true);
+    }
+
+    if(!text.isEmpty())
+    {
+        tooltip += QString("\n");
+        tooltip += tr("Last received block was generated %1.").arg(text);
+    }
+
+    labelBlocksIcon->setToolTip(tooltip);
+    progressBarLabel->setToolTip(tooltip);
+    progressBar->setToolTip(tooltip);
+}
+
+void BitcoinGUI::error(const QString &title, const QString &message, bool modal)
+{
+    // Report errors from network/worker thread
+    if(modal)
+    {
+        QMessageBox::critical(this, title, message, QMessageBox::Ok, QMessageBox::Ok);
+    } else {
+        notificator->notify(Notificator::Critical, title, message);
+    }
+}
+
+void BitcoinGUI::updatePollingInterval(bool background)
+{
+    int interval = background ? MODEL_UPDATE_DELAY_BACKGROUND : MODEL_UPDATE_DELAY;
+
+    if (walletModel)
+        walletModel->setPollInterval(interval);
+
+    if (votePage)
+        votePage->setPollInterval(interval);
+
+    if (background)
+    {
+        // Pause sync icon spinner movie to eliminate continuous drawing/CPU load in background
+        if (syncIconMovie && syncIconMovie->state() == QMovie::Running)
+            syncIconMovie->setPaused(true);
+
+        // Pause unnecessary GUI updates and repaints while minimized / in tray
+        if (centralWidget)
+            centralWidget->setUpdatesEnabled(false);
+    }
+    else
+    {
+        // Re-enable interface updates and trigger a repaint
+        if (centralWidget)
+        {
+            centralWidget->setUpdatesEnabled(true);
+            centralWidget->update();
+        }
+
+        // Resume sync spinner movie if catching up
+        if (syncIconMovie && syncIconMovie->state() == QMovie::Paused)
+            syncIconMovie->setPaused(false);
+    }
+}
+
+void BitcoinGUI::changeEvent(QEvent *e)
+{
+    QMainWindow::changeEvent(e);
+#ifndef Q_WS_MAC // Ignored on Mac
+    if(e->type() == QEvent::WindowStateChange)
+    {
+        if(clientModel && clientModel->getOptionsModel()->getMinimizeToTray())
+        {
+            QWindowStateChangeEvent *wsevt = static_cast<QWindowStateChangeEvent*>(e);
+            if(!(wsevt->oldState() & Qt::WindowMinimized) && isMinimized())
+            {
+                QTimer::singleShot(0, this, SLOT(hide()));
+                e->ignore();
+            }
+        }
+
+        if (isMinimized())
+        {
+            updatePollingInterval(true);
+        }
+        else if (!isHidden())
+        {
+            updatePollingInterval(false);
+        }
+    }
+#endif
+}
+
+void BitcoinGUI::showEvent(QShowEvent *event)
+{
+    QMainWindow::showEvent(event);
+    if (!isMinimized())
+        updatePollingInterval(false);
+}
+
+void BitcoinGUI::hideEvent(QHideEvent *event)
+{
+    QMainWindow::hideEvent(event);
+    updatePollingInterval(true);
+}
+
+void BitcoinGUI::closeEvent(QCloseEvent *event)
+{
+    if(clientModel)
+    {
+#ifndef Q_WS_MAC // Ignored on Mac
+        if(!clientModel->getOptionsModel()->getMinimizeToTray() &&
+           !clientModel->getOptionsModel()->getMinimizeOnClose())
+        {
+            qApp->quit();
+        }
+#endif
+    }
+    QMainWindow::closeEvent(event);
+}
+
+void BitcoinGUI::askFee(qint64 nFeeRequired, bool *payFee)
+{
+    QString strMessage =
+        tr("This transaction requires a network fee of %1. "
+          "Do you want to pay the fee and continue?").arg(
+                BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, nFeeRequired));
+    QMessageBox::StandardButton retval = QMessageBox::question(
+          this, tr("Sending..."), strMessage,
+          QMessageBox::Yes|QMessageBox::Cancel, QMessageBox::Yes);
+    *payFee = (retval == QMessageBox::Yes);
+}
+
+void BitcoinGUI::incomingTransaction(const QModelIndex & parent, int start, int end)
+{
+    if(!walletModel || !clientModel)
+        return;
+    TransactionTableModel *ttm = walletModel->getTransactionTableModel();
+    qint64 amount = ttm->index(start, TransactionTableModel::Amount, parent)
+                    .data(Qt::EditRole).toULongLong();
+    if(!clientModel->inInitialBlockDownload())
+    {
+        // On new transaction, make an info balloon
+        // Unless the initial block download is in progress, to prevent balloon-spam
+        QString date = ttm->index(start, TransactionTableModel::Date, parent)
+                        .data().toString();
+        QString type = ttm->index(start, TransactionTableModel::Type, parent)
+                        .data().toString();
+        QString address = ttm->index(start, TransactionTableModel::ToAddress, parent)
+                        .data().toString();
+        QIcon icon = qvariant_cast<QIcon>(ttm->index(start,
+                            TransactionTableModel::ToAddress, parent)
+                        .data(Qt::DecorationRole));
+
+        notificator->notify(Notificator::Information,
+                            (amount)<0 ? tr("Sent transaction") :
+                                         tr("Incoming transaction"),
+                              tr("Date: %1\n"
+                                 "Amount: %2\n"
+                                 "Type: %3\n"
+                                 "Address: %4\n")
+                              .arg(date)
+                              .arg(BitcoinUnits::formatWithUnit(walletModel->getOptionsModel()->getDisplayUnit(), amount, true))
+                              .arg(type)
+                              .arg(address), icon);
+    }
+}
+
+void BitcoinGUI::gotoOverviewPage()
+{
+    overviewAction->setChecked(true);
+    centralWidget->setCurrentWidget(overviewPage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::gotoHistoryPage()
+{
+    historyAction->setChecked(true);
+    centralWidget->setCurrentWidget(transactionsPage);
+
+    exportAction->setEnabled(true);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+    connect(exportAction, SIGNAL(triggered()), transactionView, SLOT(exportClicked()));
+}
+
+void BitcoinGUI::gotoAddressBookPage()
+{
+    addressBookAction->setChecked(true);
+    centralWidget->setCurrentWidget(addressBookPage);
+
+    exportAction->setEnabled(true);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+    connect(exportAction, SIGNAL(triggered()), addressBookPage, SLOT(exportClicked()));
+}
+
+void BitcoinGUI::gotoReceiveCoinsPage()
+{
+    receiveCoinsAction->setChecked(true);
+    centralWidget->setCurrentWidget(receiveCoinsPage);
+
+    exportAction->setEnabled(true);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+    connect(exportAction, SIGNAL(triggered()), receiveCoinsPage, SLOT(exportClicked()));
+}
+
+void BitcoinGUI::gotoSendCoinsPage()
+{
+    sendCoinsAction->setChecked(true);
+    centralWidget->setCurrentWidget(sendCoinsPage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::gotoMessagePage()
+{
+#ifdef FIRST_CLASS_MESSAGING
+    messageAction->setChecked(true);
+    centralWidget->setCurrentWidget(messagePage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+#else
+    messagePage->show();
+    messagePage->setFocus();
+#endif
+}
+
+void BitcoinGUI::gotoParkPage()
+{
+    parkAction->setChecked(true);
+    centralWidget->setCurrentWidget(parkPage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::gotoVotePage()
+{
+    voteAction->setChecked(true);
+    centralWidget->setCurrentWidget(votePage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::dragEnterEvent(QDragEnterEvent *event)
+{
+    // Accept only URIs
+    if(event->mimeData()->hasUrls())
+        event->acceptProposedAction();
+}
+
+void BitcoinGUI::dropEvent(QDropEvent *event)
+{
+    if(event->mimeData()->hasUrls())
+    {
+        gotoSendCoinsPage();
+        QList<QUrl> uris = event->mimeData()->urls();
+        foreach(const QUrl &uri, uris)
+        {
+            sendCoinsPage->handleURI(uri.toString());
+        }
+    }
+
+    event->acceptProposedAction();
+}
+
+void BitcoinGUI::handleURI(QString strURI)
+{
+    gotoSendCoinsPage();
+    sendCoinsPage->handleURI(strURI);
+
+    if(!isActiveWindow())
+        activateWindow();
+
+    showNormalIfMinimized();
+}
+
+void BitcoinGUI::setEncryptionStatus(int status)
+{
+    bool fShares = (walletModel->getUnit() == 'S');
+    switch(status)
+    {
+    case WalletModel::Unencrypted:
+        labelEncryptionIcon->hide();
+        encryptWalletAction->setChecked(false);
+        changePassphraseAction->setEnabled(false);
+        encryptWalletAction->setEnabled(true);
+        unlockForMintingAction->setEnabled(false);
+        unlockForMintingAction->setChecked(false);
+        break;
+    case WalletModel::Unlocked:
+        labelEncryptionIcon->show();
+        labelEncryptionIcon->setPixmap(QIcon(":/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelEncryptionIcon->setToolTip(walletModel->isUnlockedForMintingOnly()? tr("Wallet is <b>encrypted</b> and currently <b>unlocked for block minting only</b>") : tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
+        encryptWalletAction->setChecked(true);
+        changePassphraseAction->setEnabled(true);
+        encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
+        unlockForMintingAction->setEnabled(fShares && walletModel->isUnlockedForMintingOnly());
+        unlockForMintingAction->setChecked(fShares && walletModel->isUnlockedForMintingOnly());
+        break;
+    case WalletModel::Locked:
+        labelEncryptionIcon->show();
+        labelEncryptionIcon->setPixmap(QIcon(":/icons/lock_closed").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
+        encryptWalletAction->setChecked(true);
+        changePassphraseAction->setEnabled(true);
+        encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
+        unlockForMintingAction->setEnabled(fShares);
+        unlockForMintingAction->setChecked(false);
+        break;
+    }
+}
+
+void BitcoinGUI::encryptWallet(bool status)
+{
+    if(!walletModel)
+        return;
+    AskPassphraseDialog dlg(status ? AskPassphraseDialog::Encrypt:
+                                     AskPassphraseDialog::Decrypt, this);
+    dlg.setModel(walletModel);
+    dlg.exec();
+
+    setEncryptionStatus(walletModel->getEncryptionStatus());
+}
+
+void BitcoinGUI::unlockForMinting(bool status)
+{
+    if(!walletModel)
+        return;
+
+    if (status)
+    {
+        if(walletModel->getEncryptionStatus() != WalletModel::Locked)
+            return;
+
+        AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
+        dlg.setModel(walletModel);
+        dlg.exec();
+
+        if(walletModel->getEncryptionStatus() != WalletModel::Unlocked)
+            return;
+
+        walletModel->setUnlockedForMintingOnly(true);
+    }
+    else
+    {
+        if(walletModel->getEncryptionStatus() != WalletModel::Unlocked)
+            return;
+
+        if (!walletModel->isUnlockedForMintingOnly())
+            return;
+
+        walletModel->setWalletLocked(true);
+        walletModel->setUnlockedForMintingOnly(false);
+    }
+}
+
+void BitcoinGUI::backupWallet()
+{
+#if QT_VERSION >= 0x050000
+    QString saveDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+#else
+    QString saveDir = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
+#endif
+    QString filename = QFileDialog::getSaveFileName(this, tr("Backup Portfolio"), saveDir, tr("Portfolio Data (*.dat)"));
+    if(!filename.isEmpty()) {
+        if(!walletModel->backupWallet(filename)) {
+            QMessageBox::warning(this, tr("Backup Failed"), tr("There was an error trying to save the portfolio data to the new location."));
+        }
+    }
+}
+
+void BitcoinGUI::changePassphrase()
+{
+    AskPassphraseDialog dlg(AskPassphraseDialog::ChangePass, this);
+    dlg.setModel(walletModel);
+    dlg.exec();
+}
+
+void BitcoinGUI::unlockWallet()
+{
+    if(!walletModel)
+        return;
+    // Unlock wallet when requested by wallet model
+    if(walletModel->getEncryptionStatus() == WalletModel::Locked)
+    {
+        AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
+        dlg.setModel(walletModel);
+        dlg.exec();
+    }
+}
+
+void BitcoinGUI::exportPeercoinKeys()
+{
+    QMessageBox::StandardButton reply;
+
+    QString sQuestion = tr("All your private keys will be converted and imported into your NuBits wallet.\n\nThe wallet must be running, unlocked (if it was encrypted) and accept RPC commands.\n\nThis process may take several minutes because the blockchain will be scanned for transactions on all the imported keys.\n\nDo you want to proceed?");
+    reply = QMessageBox::warning(this, tr("NuBits keys export confirmation"), sQuestion, QMessageBox::Yes | QMessageBox::No);
+    if (reply != QMessageBox::Yes)
+        return;
+
+    bool fMustLock = false;
+    if (walletModel->getEncryptionStatus() == WalletModel::Locked)
+    {
+        AskPassphraseDialog dlg(AskPassphraseDialog::Unlock, this);
+        dlg.setModel(walletModel);
+        dlg.exec();
+
+        if(walletModel->getEncryptionStatus() != WalletModel::Unlocked)
+            return;
+
+        fMustLock = true;
+    }
+
+    try {
+        int iExportedCount, iErrorCount;
+        walletModel->ExportPeercoinKeys(iExportedCount, iErrorCount);
+        if (fMustLock)
+            walletModel->setWalletLocked(true);
+        QMessageBox::information(this,
+                tr("NuBits keys export"),
+                tr("%1 key(s) were exported to NuBits.\n%2 key(s) were either already known or invalid.")
+                  .arg(iExportedCount)
+                  .arg(iErrorCount)
+                );
+    }
+    catch (std::runtime_error &e) {
+        if (fMustLock)
+            walletModel->setWalletLocked(true);
+        QMessageBox::critical(this,
+                tr("NuBits keys export"),
+                tr("Error: %1").arg(e.what()));
+    }
+}
+
+void BitcoinGUI::showNormalIfMinimized()
+{
+    if(!isVisible()) // Show, if hidden
+        show();
+    if(isMinimized()) // Unminimize, if minimized
+        showNormal();
+}
+
+void BitcoinGUI::distributeDividendsClicked()
+{
+    DistributeDivDialog dd(this);
+    dd.exec();
+}
+
+void BitcoinGUI::switchUnitButtonClicked()
+{
+    gotoOverviewPage();
+
+    changeUnit(switchUnitTarget);
+}
+
+void BitcoinGUI::checkForUpdatesClicked()
+{
+    std::string err;
+    bool success = CAutoUpdate::CheckForUpdates(false, &err);
+    UpdateInfo info = CAutoUpdate::GetUpdateInfo();
+    if (info.fUpdateAvailable)
+    {
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(tr("Atualização do NuBits"));
+        msgBox.setText(tr("Uma nova versão do NuBits está disponível (%1)!\n\nVersão atual: v%2\n\nDeseja baixar e atualizar agora?")
+            .arg(QString::fromStdString(info.strLatestVersion))
+            .arg(QString::fromStdString(info.strCurrentVersion)));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::Yes);
+        if (msgBox.exec() == QMessageBox::Yes)
+        {
+            std::string msg;
+            if (!CAutoUpdate::ApplyUpdate(msg))
+            {
+                QMessageBox::warning(this, tr("Erro na Atualização"), QString::fromStdString(msg));
+            }
+        }
+    }
+    else if (!success)
+    {
+        QMessageBox::warning(this, tr("Verificação de Atualização"), QString::fromStdString(err));
+    }
+    else
+    {
+        QMessageBox::information(this, tr("NuBits Atualizado"),
+            tr("Você já está executando a versão mais recente do NuBits (v%1).")
+            .arg(QString::fromStdString(info.strCurrentVersion)));
+    }
+}
+
+void BitcoinGUI::checkPeriodicUpdate()
+{
+    static bool fNotifiedOnce = false;
+    UpdateInfo info = CAutoUpdate::GetUpdateInfo();
+    if (info.fUpdateAvailable && !fNotifiedOnce)
+    {
+        fNotifiedOnce = true;
+        if (notificator)
+        {
+            notificator->notify(Notificator::Information,
+                tr("Atualização Disponível"),
+                tr("Uma nova versão do NuBits (%1) está disponível no GitHub.").arg(QString::fromStdString(info.strLatestVersion)));
+        }
+
+        QMessageBox msgBox(this);
+        msgBox.setWindowTitle(tr("Atualização do NuBits"));
+        msgBox.setText(tr("Uma nova versão do NuBits está disponível (%1)!\n\nVersão atual: v%2\n\nDeseja baixar e atualizar agora?")
+            .arg(QString::fromStdString(info.strLatestVersion))
+            .arg(QString::fromStdString(info.strCurrentVersion)));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::Yes);
+        if (msgBox.exec() == QMessageBox::Yes)
+        {
+            std::string msg;
+            if (!CAutoUpdate::ApplyUpdate(msg))
+            {
+                QMessageBox::warning(this, tr("Erro na Atualização"), QString::fromStdString(msg));
+            }
+        }
+    }
+}
+
+void BitcoinGUI::checkNoPeersOnStartup()
+{
+    if (fPromptedNoPeers || !clientModel)
+        return;
+
+    if (!clientModel->isTestNet() && clientModel->getNumConnections() == 0)
+    {
+        fPromptedNoPeers = true;
+
+        if (addNodesDialog && addNodesDialog->isVisible())
+            return;
+
+        if (notificator)
+        {
+            notificator->notify(Notificator::Warning,
+                tr("Rede NuBits sem conexões"),
+                tr("Nenhuma conexão encontrada na rede NuBits. Clique em Configurações -> Servidores / Nós para adicionar manualmente."));
+        }
+
+        QMessageBox *msgBox = new QMessageBox(
+            QMessageBox::Question,
+            tr("Nenhum Servidor Encontrado"),
+            tr("Nenhum servidor ativo foi encontrado na rede.\n\nDeseja abrir a janela para adicionar novos servidores (ex: nó de recuperação 188.68.55.35:7890)?"),
+            QMessageBox::Yes | QMessageBox::No,
+            this);
+        msgBox->setDefaultButton(QMessageBox::Yes);
+        msgBox->setWindowModality(Qt::NonModal);
+        msgBox->setAttribute(Qt::WA_DeleteOnClose);
+        connect(msgBox, SIGNAL(finished(int)), this, SLOT(onNoPeersPromptFinished(int)));
+        msgBox->show();
+    }
+}
+
+void BitcoinGUI::onNoPeersPromptFinished(int result)
+{
+    if (result == QMessageBox::Yes)
+        addNodesClicked();
+}
