@@ -1,1 +1,3 @@
 src/version.cpp export-subst
+*.sh text eol=lf
+*.bat text eol=crlf
