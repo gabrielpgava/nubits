@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "updated_at": "2026-11-12",
+  "description": "Lista dinamica de nos (seed nodes) oficiais da rede NuBits. Edite este arquivo no GitHub para atualizar os IPs sem precisar compilar ou lancar uma nova versao do cliente.",
+  "mainnet": [
+    "188.68.55.35:7890"
+  ],
+  "testnet": [
+  ]
+}

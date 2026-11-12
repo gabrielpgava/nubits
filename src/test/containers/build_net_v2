@@ -1,0 +1,96 @@
+#!/usr/bin/env ruby
+
+require File.expand_path('../boot', __FILE__)
+
+start_time = Time.at(1433858400) # Protocol v2 test switch time
+start_time_shift = (start_time - Time.now).to_i
+
+puts "Starting seed"
+seed = CoinContainer.new(
+  image: 'nunet/seed',
+  bind_code: false,
+  version: "2.0.3",
+  args: {
+    timetravel: start_time_shift,
+  },
+)
+
+node_names = %w( a b c d e )
+puts "Starting #{node_names.size} nodes: #{node_names.inspect}"
+nodes = []
+node_names.each do |name|
+  puts "Starting #{name}"
+  node = CoinContainer.new(
+    image: "nunet/#{name}",
+    bind_code: false,
+    version: "2.0.3",
+    links: [seed] + nodes,
+    args: {
+      timetravel: start_time_shift,
+    },
+  )
+  nodes << node
+end
+
+puts "Starting empty node"
+empty_node = CoinContainer.new(
+  image: 'nunet/empty',
+  bind_code: false,
+  version: "2.0.3",
+  links: [seed] + nodes,
+  delete_at_exit: true,
+  remove_wallet_after_shutdown: true,
+  args: {
+    timetravel: start_time_shift,
+  },
+)
+
+all = [seed] + nodes + [empty_node]
+
+all.each(&:wait_for_boot)
+
+puts "Waiting for protocol switch"
+loop do
+  all.each { |n| n.rpc("timetravel", 60) }
+  seed.generate_stake
+  protocol = seed.info["protocolversion"]
+  p protocol: protocol
+  break if protocol == 2000000
+end
+
+target_height = seed.block_count
+
+puts "Waiting for all nodes to sync at height #{target_height}"
+loop do
+  heights = all.map(&:block_count)
+  p heights
+  break if heights.all? { |h| h == target_height }
+  sleep 1
+end
+
+last_block_time = seed.top_block["time"]
+puts "Last block time: #{last_block_time}"
+
+puts "Shutting down seed"
+seed.shutdown
+image_name = "nunet2/seed"
+puts "Creating image #{image_name}"
+seed.wait_for_shutdown
+seed.commit(image_name)
+
+nodes.each_with_index do |node, i|
+  name = node_names[i]
+  image_name = "nunet2/#{name}"
+  puts "Creating image #{image_name}"
+  node.shutdown
+  node.wait_for_shutdown
+  node.commit(image_name)
+end
+
+node = empty_node
+name = "empty"
+image_name = "nunet2/#{name}"
+puts "Creating image #{image_name}"
+node.shutdown
+node.wait_for_shutdown
+node.commit(image_name)
