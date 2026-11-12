@@ -1,4 +1,4 @@
-Nu 5.3.0 BETA
+Nu 5.3.1 BETA
 Copyright (c) 2014 Nu Developers
 
 ## End-User License Agreement
@@ -26,10 +26,10 @@ NO LIABILITY FOR DAMAGES. In no event shall the authors of this Software be liab
 
 # Setup
 -----
-After completing windows setup then run Nu.
-Alternatively you can run windows command line (cmd) in nu program dir.
-  cd daemon
-  nud
+After completing Windows setup, start Nu from the Start Menu.
+For a headless server, extract the Windows server archive to a writable
+directory and run `nud.exe -daemon` from that directory. The data and wallet
+are stored in the user's Nu data directory, not beside the executable.
 You would need to create a configuration file nu.conf in the default
 wallet directory. Grant access to nud/nu in anti-virus and firewall
 applications if necessary.
