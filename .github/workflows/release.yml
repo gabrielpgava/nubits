@@ -32,9 +32,12 @@ jobs:
             libboost-program-options-dev \
             libboost-thread-dev \
             libboost-chrono-dev \
+            libboost-test-dev \
             libdb5.3++-dev \
             libcurl4-openssl-dev \
-            libssl-dev
+            libssl-dev \
+            ca-certificates \
+            patchelf
 
       - name: Build and run unit tests
         shell: bash
@@ -43,20 +46,15 @@ jobs:
           make -C src -f makefile.unix -j2 BDB_LIB_SUFFIX=-5.3 test_nu
           ./src/test_nu --report_level=short
           make -C src -f makefile.unix -j2 BDB_LIB_SUFFIX=-5.3 nud
-          ./src/nud -help >/dev/null
+          mkdir -p "$RUNNER_TEMP/nubits-smoke"
+          ./src/nud -datadir="$RUNNER_TEMP/nubits-smoke" --help >/dev/null
 
       - name: Package Linux server
         shell: bash
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME#v}"
-          stage="dist/linux-server"
-          mkdir -p "$stage"
-          cp src/nud update_posix.sh COPYING doc/README "$stage/"
-          chmod 0755 "$stage/nud" "$stage/update_posix.sh"
-          tar -C "$stage" -czf "dist/Nu-${version}-linux-x64-server.tar.gz" \
-            nud update_posix.sh COPYING README
-          tar -tzf "dist/Nu-${version}-linux-x64-server.tar.gz"
+          bash tools/package_linux.sh "$version"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -86,6 +84,7 @@ jobs:
             mingw-w64-x86_64-openssl
             mingw-w64-x86_64-qt5-base
             mingw-w64-x86_64-qt5-tools
+            mingw-w64-x86_64-angleproject
             mingw-w64-x86_64-ca-certificates
 
       - name: Verify tag and build binaries
@@ -99,7 +98,7 @@ jobs:
           make -C src -f makefile.mingw -j2
           qmake-qt5 nu.pro "RELEASE=1" "USE_UPNP=-"
           make -j2
-          test -s nu.exe
+          test -s release/nu.exe
           test -s src/nud.exe
 
       - name: Install NSIS

@@ -105,11 +105,9 @@ namespace
     {
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
-#ifdef WIN32
         static const std::string caBundle = (GetExecutablePath().parent_path() / "cacert.pem").string();
         if (boost::filesystem::exists(caBundle))
             curl_easy_setopt(curl, CURLOPT_CAINFO, caBundle.c_str());
-#endif
     }
 
     std::string ShellQuote(const std::string& value)
@@ -394,6 +392,18 @@ bool CAutoUpdate::CheckForUpdates(bool fSilent, std::string* pstrError)
                     aLower.compare(aLower.size() - platformPattern.size(), platformPattern.size(), platformPattern) == 0 &&
                     aName.find('/') == std::string::npos && aName.find('\\') == std::string::npos)
                 {
+                    assetName = aName;
+                    json_spirit::Value downloadValue = json_spirit::find_value(asset, "browser_download_url");
+                    if (downloadValue.type() != json_spirit::str_type)
+                    {
+                        assetName.clear();
+                        continue;
+                    }
+                    downloadUrl = downloadValue.get_str();
+                    json_spirit::Value sz = json_spirit::find_value(asset, "size");
+                    if (sz.type() == json_spirit::int_type)
+                        assetSize = sz.get_int64();
+
                     json_spirit::Value digestValue = json_spirit::find_value(asset, "digest");
                     if (digestValue.type() == json_spirit::str_type)
                     {
@@ -402,19 +412,8 @@ bool CAutoUpdate::CheckForUpdates(bool fSilent, std::string* pstrError)
                             expectedSha256 = expectedSha256.substr(7);
                         boost::algorithm::to_lower(expectedSha256);
                     }
-                    if (!IsSha256(expectedSha256))
-                        continue;
-
-                    json_spirit::Value downloadValue = json_spirit::find_value(asset, "browser_download_url");
-                    if (downloadValue.type() != json_spirit::str_type)
-                        continue;
-
-                    assetName = aName;
-                    downloadUrl = downloadValue.get_str();
-                    json_spirit::Value sz = json_spirit::find_value(asset, "size");
-                    if (sz.type() == json_spirit::int_type)
-                        assetSize = sz.get_int64();
-                    break;
+                    if (IsSha256(expectedSha256))
+                        break;
                 }
             }
         }
