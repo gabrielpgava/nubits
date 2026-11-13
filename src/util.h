@@ -20,6 +20,7 @@ typedef int pid_t; /* define for windows compatiblity */
 #endif
 #endif
 #include <map>
+#include <new>
 #include <vector>
 #include <string>
 
@@ -703,20 +704,41 @@ public:
 #ifdef WIN32
 typedef HANDLE bitcoin_pthread_t;
 
+struct BitcoinThreadStartData
+{
+    void (*pfn)(void*);
+    void* parg;
+};
+
+inline DWORD WINAPI BitcoinThreadStartProc(LPVOID parg)
+{
+    BitcoinThreadStartData* start = static_cast<BitcoinThreadStartData*>(parg);
+    void (*pfn)(void*) = start->pfn;
+    void* threadArg = start->parg;
+    delete start;
+    pfn(threadArg);
+    return 0;
+}
+
 inline bitcoin_pthread_t CreateThread(void(*pfn)(void*), void* parg, bool fWantHandle=false)
 {
+    BitcoinThreadStartData* start = new (std::nothrow) BitcoinThreadStartData{pfn, parg};
+    if (start == NULL)
+        return (bitcoin_pthread_t)0;
+
     DWORD nUnused = 0;
     HANDLE hthread =
-        CreateThread(
+        ::CreateThread(
             NULL,                        // default security
             0,                           // inherit stack size from parent
-            (LPTHREAD_START_ROUTINE)pfn, // function pointer
-            parg,                        // argument
+            BitcoinThreadStartProc,      // function pointer
+            start,                       // argument
             0,                           // creation option, start immediately
             &nUnused);                   // thread identifier
     if (hthread == NULL)
     {
-        printf("Error: CreateThread() returned %d\n", GetLastError());
+        delete start;
+        printf("Error: CreateThread() returned %lu\n", static_cast<unsigned long>(GetLastError()));
         return (bitcoin_pthread_t)0;
     }
     if (!fWantHandle)

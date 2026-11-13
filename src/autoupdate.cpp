@@ -110,6 +110,7 @@ namespace
             curl_easy_setopt(curl, CURLOPT_CAINFO, caBundle.c_str());
     }
 
+#ifndef WIN32
     std::string ShellQuote(const std::string& value)
     {
         std::string quoted("'");
@@ -123,6 +124,7 @@ namespace
         quoted += "'";
         return quoted;
     }
+#endif
 
     size_t WriteStringCallback(void* contents, size_t size, size_t nmemb, void* userp)
     {

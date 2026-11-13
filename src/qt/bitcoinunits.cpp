@@ -56,26 +56,31 @@ QString BitcoinUnits::name(int unit)
             {
                 case BTC: return QString("NSR");
             }
+            break;
         case 'B':
             switch(unit)
             {
                 case BTC: return QString("US-NBT");
             }
+            break;
         case 'Y':
             switch(unit)
             {
                 case BTC: return QString("CN-NBT");
             }
+            break;
         case 'E':
             switch(unit)
             {
                 case BTC: return QString("EU-NBT");
             }
+            break;
         case 'X':
             switch(unit)
             {
                 case BTC: return QString("X-NBT");
             }
+            break;
     }
     return QString("???");
 }
@@ -89,11 +94,13 @@ QString BitcoinUnits::description(int unit)
             {
                 case BTC: return QString("NuShares");
             }
+            break;
         case 'B':
             switch(unit)
             {
                 case BTC: return QString("NuBits");
             }
+            break;
     }
     return QString("???");
 }

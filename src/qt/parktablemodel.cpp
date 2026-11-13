@@ -113,8 +113,6 @@ public:
         if (wtx.vout.size() <= n)
             return;
 
-        const CTxOut& txo = wtx.vout[n];
-
         CBlockIndex *pindex = NULL;
         depth = wtx.GetDepthInMainChain(pindex);
 
@@ -469,4 +467,3 @@ QModelIndex ParkTableModel::index(int row, int column, const QModelIndex &parent
         return QModelIndex();
     }
 }
-

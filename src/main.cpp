@@ -4764,7 +4764,9 @@ void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash
         unsigned char pchPadding1[64];
     }
     tmp;
-    memset(&tmp, 0, sizeof(tmp));
+    // The entire buffer, including struct padding, is part of the hash input.
+    // Cast to void to document byte-wise initialization for this hash buffer.
+    memset(static_cast<void*>(&tmp), 0, sizeof(tmp));
 
     tmp.block.nVersion       = pblock->nVersion;
     tmp.block.hashPrevBlock  = pblock->hashPrevBlock;

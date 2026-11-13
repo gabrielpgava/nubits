@@ -85,7 +85,6 @@ void GetAddressBalances(unsigned int cutoffTime, BalanceMap& mapBalance)
         throw runtime_error("Cutoff date later than most recent block.");
 
     CTxDB txdb("r");
-    int nBlks = 0;
     while (pblk0 != pblk1)
     {
         if (pblk0->nTime >= cutoffTime) break;
@@ -100,6 +99,5 @@ void GetAddressBalances(unsigned int cutoffTime, BalanceMap& mapBalance)
         }
 
         pblk0 = pblk0->pnext;
-        nBlks++;
     }
 }

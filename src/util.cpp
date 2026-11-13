@@ -1146,7 +1146,7 @@ void CreatePidFile(const boost::filesystem::path &path, pid_t pid)
     FILE* file = fopen(path.string().c_str(), "w");
     if (file)
     {
-        fprintf(file, "%d\n", pid);
+        fprintf(file, "%lld\n", static_cast<long long>(pid));
         fclose(file);
     }
 }
@@ -1176,7 +1176,7 @@ void ShrinkDebugFile()
     {
         // Restart the file with some of the end
         char pch[200000];
-        fseek(file, -sizeof(pch), SEEK_END);
+        fseek(file, -static_cast<long>(sizeof(pch)), SEEK_END);
         int nBytes = fread(pch, 1, sizeof(pch), file);
         fclose(file);
 
