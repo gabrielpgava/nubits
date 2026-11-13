@@ -36,9 +36,17 @@ fi
 chmod +x "$TEMP_DIR/nud" "$TEMP_DIR/update_posix.sh"
 cp -f "$ROOT_DIR/nud" "$ROOT_DIR/nud.previous" 2>/dev/null || true
 install -m 0755 "$TEMP_DIR/nud" "$ROOT_DIR/nud.new"
-mv -f "$ROOT_DIR/nud.new" "$ROOT_DIR/nud"
 install -m 0755 "$TEMP_DIR/update_posix.sh" "$ROOT_DIR/update_posix.sh.new"
 mv -f "$ROOT_DIR/update_posix.sh.new" "$ROOT_DIR/update_posix.sh"
+if [[ -d "$TEMP_DIR/lib" ]]; then
+    mkdir -p "$ROOT_DIR/lib"
+    cp -af "$TEMP_DIR/lib/." "$ROOT_DIR/lib/"
+fi
+if [[ -s "$TEMP_DIR/cacert.pem" ]]; then
+    install -m 0644 "$TEMP_DIR/cacert.pem" "$ROOT_DIR/cacert.pem.new"
+    mv -f "$ROOT_DIR/cacert.pem.new" "$ROOT_DIR/cacert.pem"
+fi
+mv -f "$ROOT_DIR/nud.new" "$ROOT_DIR/nud"
 
 echo "Restarting updated NuBits daemon..."
 nohup "$ROOT_DIR/nud" -daemon >/dev/null 2>&1 &

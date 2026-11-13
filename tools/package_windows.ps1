@@ -31,7 +31,7 @@ function Copy-ApplicationFiles([string]$Destination, [bool]$IncludeGui) {
     Copy-Item -LiteralPath (Join-Path $RepositoryRoot 'doc/README_windows.txt') -Destination $Destination
 
     if ($IncludeGui) {
-        Copy-Item -LiteralPath (Join-Path $RepositoryRoot 'nu.exe') -Destination $Destination
+        Copy-Item -LiteralPath (Join-Path $RepositoryRoot 'release/nu.exe') -Destination $Destination
     }
 
     Copy-Item -LiteralPath (Join-Path $MingwBin '..\etc\ssl\cert.pem') `
@@ -99,7 +99,7 @@ function Add-RequiredDlls([string]$StageDirectory, [string[]]$EntryPoints) {
 }
 
 foreach ($required in @(
-    (Join-Path $RepositoryRoot 'nu.exe'),
+    (Join-Path $RepositoryRoot 'release/nu.exe'),
     (Join-Path $RepositoryRoot 'src/nud.exe'),
     (Join-Path $RepositoryRoot 'update_windows.bat'),
     (Join-Path $MingwBin 'objdump.exe'),
@@ -123,7 +123,7 @@ foreach ($generatedDirectory in @($runtimeDirectory, $serverDirectory)) {
 
 Copy-ApplicationFiles $runtimeDirectory $true
 $env:PATH = "$MingwBin;$env:PATH"
-& $windeployqt --release --compiler-runtime --no-translations --no-system-d3d-compiler `
+& $windeployqt --release --compiler-runtime --no-translations --no-system-d3d-compiler --no-opengl-sw `
     (Join-Path $runtimeDirectory 'nu.exe')
 if ($LASTEXITCODE -ne 0) {
     throw 'windeployqt failed to stage the Qt runtime'
