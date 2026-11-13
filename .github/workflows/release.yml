@@ -72,6 +72,7 @@ jobs:
           fetch-depth: 0
 
       - uses: msys2/setup-msys2@v2
+        id: msys2
         with:
           msystem: MINGW64
           update: true
@@ -108,9 +109,12 @@ jobs:
 
       - name: Package Windows runtimes
         shell: pwsh
+        env:
+          MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
         run: |
           $version = $env:GITHUB_REF_NAME -replace '^v', ''
-          & "$env:GITHUB_WORKSPACE\tools\package_windows.ps1" -Version $version
+          $mingwBin = Join-Path $env:MSYS2_LOCATION 'mingw64\bin'
+          & "$env:GITHUB_WORKSPACE\tools\package_windows.ps1" -Version $version -MingwBin $mingwBin
           if ($LASTEXITCODE -ne 0) { throw 'Windows packaging failed' }
           Push-Location "$env:GITHUB_WORKSPACE\share"
           & 'C:\Program Files (x86)\NSIS\makensis.exe' "/DVERSION=$version" `

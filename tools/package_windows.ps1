@@ -4,11 +4,16 @@ param(
     [ValidatePattern('^\d+\.\d+\.\d+$')]
     [string]$Version,
     [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path,
-    [string]$MingwBin = 'C:\msys64\mingw64\bin'
+    [string]$MingwBin
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+
+if ([string]::IsNullOrWhiteSpace($MingwBin)) {
+    $windeployqtCommand = Get-Command 'windeployqt-qt5.exe' -ErrorAction Stop
+    $MingwBin = Split-Path -Path $windeployqtCommand.Source -Parent
+}
 
 $distDirectory = Join-Path $RepositoryRoot 'dist'
 $runtimeDirectory = Join-Path $distDirectory 'windows-runtime'
