@@ -1,76 +1,84 @@
-# AGENTS.md — Guia de Contexto e Operação do Projeto NuBits
+# AGENTS.md — NuBits Project Context and Operations Guide
 
-## 1. Nó de Recuperação da Rede Mainnet (VM Legada)
+## Project language
 
-Existe uma VM ativa mantida pelo usuário rodando uma versão legada do NuBits com o banco de dados histórico da blockchain (encontrado online) com o objetivo de recuperar a rede:
+NuBits is an international project. Use English as the default language for
+project documentation (including README and AGENTS.md), code comments, commit
+messages, and new user-facing text. Preserve existing translations and
+localization resources; this policy does not require removing other languages
+from them. Respond to users in their preferred language when appropriate.
 
-- **IP do Nó (VM)**: `188.68.55.35`
-- **Porta P2P Mainnet padrão**: `7890`
-- **Porta RPC Mainnet padrão**: `14001` (NuShares `S`) / `14002` (NuBits `B`)
-- **Finalidade**: Servir como seed/peer de referência com a blockchain histórica para sincronização, testes de compatibilidade de protocolo P2P/blocos e recuperação da rede NuBits.
+## 1. Mainnet Recovery Node (Legacy VM)
 
-### Como conectar o cliente local (`nud`) à VM de recuperação
-Para sincronizar ou testar a conexão do binário local moderno com o nó legado da VM:
+The user maintains an active VM running a legacy NuBits version with a historical blockchain database found online to help recover the network:
+
+- **Node IP (VM)**: `188.68.55.35`
+- **Default mainnet P2P port**: `7890`
+- **Default mainnet RPC ports**: `14001` (NuShares `S`) / `14002` (NuBits `B`)
+- **Purpose**: Provide a reference seed/peer with the historical blockchain for synchronization, P2P/block protocol compatibility testing, and NuBits network recovery.
+
+### Connecting the local client (`nud`) to the recovery VM
+To synchronize or test the modern local binary against the legacy VM node:
 ```bash
-# Conectando exclusivamente ao nó de recuperação:
+# Connect exclusively to the recovery node:
 ./nud -connect=188.68.55.35:7890 -dnsseed=0
 
-# Ou adicionando o nó como peer prioritário:
+# Or add the node as a preferred peer:
 ./nud -addnode=188.68.55.35:7890
 ```
 
 ---
 
-## 2. Arquitetura e Estado Atual do Repositório
+## 2. Architecture and Current Repository Status
 
-- **Foco Concluído**: CLI / Daemon (`nud`), suíte de testes (`test_nu`) e Carteira Gráfica (`Nu.app` / Qt 5.15).
-- **Stack Modernizada (macOS Apple Silicon/Intel & Linux/WSL)**:
-  - **C++17** (`-std=c++17`) com otimização `-O2` por padrão (`-O3` com `RELEASE=1`).
-  - **Qt 5.15** (`qt@5` via Homebrew / Linux) com APIs migradas de Qt4 para Qt5 (`QtWidgets`, `QtConcurrent`, `QStandardPaths`, `QUrlQuery`, `setSectionResizeMode`).
-  - **OpenSSL 3.x nativo** (`openssl@3` / `libssl-dev`), com `CBigNum` encapsulando `BIGNUM*` (`BN_new`/`BN_clear_free`), `EVP_CIPHER_CTX` dinâmico e normalização DER estrita em `ECDSA_SIG`.
-  - **Boost 1.83+ / 1.85** e **Berkeley DB 5.3** (`berkeley-db@5` / `libdb5.3++-dev`).
+- **Completed scope**: CLI / daemon (`nud`), test suite (`test_nu`), and graphical wallet (`Nu.app` / Qt 5.15).
+- **Modernized stack (macOS Apple Silicon/Intel & Linux/WSL)**:
+  - **C++17** (`-std=c++17`) with `-O2` optimization by default (`-O3` with `RELEASE=1`).
+  - **Qt 5.15** (`qt@5` via Homebrew / Linux) with APIs migrated from Qt4 to Qt5 (`QtWidgets`, `QtConcurrent`, `QStandardPaths`, `QUrlQuery`, `setSectionResizeMode`).
+  - **Native OpenSSL 3.x** (`openssl@3` / `libssl-dev`), with `CBigNum` wrapping `BIGNUM*` (`BN_new`/`BN_clear_free`), dynamic `EVP_CIPHER_CTX`, and strict DER normalization in `ECDSA_SIG`.
+  - **Boost 1.83+ / 1.85** and **Berkeley DB 5.3** (`berkeley-db@5` / `libdb5.3++-dev`).
 
 ---
 
-## 3. Comandos Rápidos de Desenvolvimento
+## 3. Quick Development Commands
 
-### Compilar o Daemon (`nud`)
-- **No Linux / WSL**:
+### Build the Daemon (`nud`)
+- **On Linux / WSL**:
 ```bash
 ./build_linux.sh -j$(nproc)
 ```
-- **No macOS**:
+- **On macOS**:
 ```bash
 ./build_mac.sh -j$(sysctl -n hw.ncpu)
 ```
 
-### Compilar e Rodar a Suíte de Testes Unitários (`test_nu` — 83 testes)
-- **No Linux / WSL**:
+### Build and Run the Unit Test Suite (`test_nu` — 83 tests)
+- **On Linux / WSL**:
 ```bash
 make -C src -f makefile.unix -j$(nproc) test_nu
 ./src/test_nu --report_level=short
 ```
-- **No macOS**:
+- **On macOS**:
 ```bash
 make -C src -f makefile.osx -j$(sysctl -n hw.ncpu) test_nu
 ./src/test_nu --report_level=short
 ```
 
-### Executar a partir do Windows PowerShell / CMD
-Foi criado o wrapper `nud.bat` para facilitar a interação com o daemon direto do Windows:
+### Run from Windows PowerShell / CMD
+The `nud.bat` wrapper makes it easier to interact with the daemon directly from Windows:
 ```powershell
-# Iniciar daemon:
+# Start the daemon:
 wsl -d Ubuntu -- bash -c "/mnt/c/Users/gabri/Downloads/nubits-main/nubits-main/nud -daemon"
 
-# Consultar status do nó:
+# Query node status:
 .\nud.bat getinfo
 
-# Consultar peers conectados:
+# Query connected peers:
 .\nud.bat getpeerinfo
 ```
 
-### Modo Standalone Local (`-localnet` / `-regtest`)
-Para testar mineração de blocos e transações localmente sem depender da rede externa:
+### Local Standalone Mode (`-localnet` / `-regtest`)
+To test block generation and transactions locally without relying on the external network:
 ```bash
 ./run_localnet.sh start
 ./run_localnet.sh mine
