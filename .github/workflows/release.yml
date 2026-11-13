@@ -77,6 +77,7 @@ jobs:
           update: true
           install: >-
             base-devel
+            git
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-boost
             mingw-w64-x86_64-curl
