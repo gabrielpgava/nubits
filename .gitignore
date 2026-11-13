@@ -18,6 +18,8 @@ src/build.h
 *.orig
 *.o
 *.patch
+# Empty, randomly named JSON artifacts accidentally added at the repository root.
+/??????.json
 .peershares
 .nu
 #compilation and Qt preprocessor part
@@ -43,7 +45,6 @@ src/qt/res/styles/fire_app_log.txt
 /src/test/containers/tmp/
 /.localnet-data/
 /nud
-.qmake.stash
 
 
 # Windows build artifacts
@@ -53,7 +54,6 @@ src/qt/res/styles/fire_app_log.txt
 /object_script.*
 Makefile.Debug
 Makefile.Release
-.qmake.stash
 obj/
 src/obj/
 
