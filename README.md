@@ -91,6 +91,14 @@ do not use its predefined RPC credentials for a public node.
 Join the [NuBits community forum](https://discuss.nubits.com/) to ask questions,
 discuss the project, and connect with other community members.
 
+### Network recovery discussion
+
+The [network recovery and monetary policy proposal](doc/network-recovery-discussion.md)
+records a possible direction for restoring block production, rewarding staking
+and mining, and introducing fee burns and NSR-to-NBT conversion. It is an
+exploratory proposal for community evaluation and criticism, not an approved
+specification or implemented consensus change. No fiat peg is promised.
+
 ## Contributing
 
 Keep documentation, commit messages, and new user-facing text in English so
