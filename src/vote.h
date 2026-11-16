@@ -349,7 +349,7 @@ bool LimitParkRateChangeV2_0(std::vector<CParkRateVote>& results, const std::map
 bool CalculateParkRateResults(const CVote &vote, const CBlockIndex* pindexprev, int nProtocolVersion, std::vector<CParkRateVote>& vParkRateResult);
 int64 GetPremium(int64 nValue, int64 nDuration, unsigned char cUnit, const std::vector<CParkRateVote>& vParkRateResult);
 
-bool GenerateCurrencyCoinBases(const std::vector<CVote> vVote, const std::map<CCustodianAddress, CBlockIndex*>& mapAlreadyElected, std::vector<CTransaction>& vCurrencyCoinBaseRet);
+bool GenerateCurrencyCoinBases(const std::vector<CVote>& vVote, const std::map<CCustodianAddress, CBlockIndex*>& mapAlreadyElected, std::vector<CTransaction>& vCurrencyCoinBaseRet);
 
 int GetProtocolForNextBlock(const CBlockIndex* pPrevIndex);
 bool IsProtocolActiveForNextBlock(const CBlockIndex* pPrevIndex, int nSwitchTime, int nProtocolVersion, int nRequired=PROTOCOL_SWITCH_REQUIRE_VOTES, int nToCheck=PROTOCOL_SWITCH_COUNT_VOTES);

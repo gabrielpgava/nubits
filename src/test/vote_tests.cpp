@@ -718,6 +718,46 @@ BOOST_AUTO_TEST_CASE(vote_validity_tests)
     vote.vCustodianVote[0].address.hashAddress--;
 }
 
+BOOST_AUTO_TEST_CASE(park_rate_duration_validation)
+{
+    for (const bool inBlock : {false, true})
+    {
+        CParkRateVote parkRateVote;
+        parkRateVote.cUnit = 'B';
+        BOOST_CHECK(parkRateVote.IsValid(PROTOCOL_VERSION, inBlock));
+
+        parkRateVote.vParkRate = {
+            CParkRate(4, 100),
+            CParkRate(0, 0),
+            CParkRate(MAX_COMPACT_DURATION - 1, MAX_PARK_RATE)
+        };
+        const CParkRateVote originalVote = parkRateVote;
+        BOOST_CHECK(parkRateVote.IsValid(PROTOCOL_VERSION, inBlock));
+        BOOST_CHECK(parkRateVote == originalVote);
+
+        parkRateVote.vParkRate.push_back(CParkRate(4, 200));
+        BOOST_CHECK(!parkRateVote.IsValid(PROTOCOL_VERSION, inBlock));
+        parkRateVote.vParkRate.back().nRate = 100;
+        BOOST_CHECK(!parkRateVote.IsValid(PROTOCOL_VERSION, inBlock));
+        parkRateVote.vParkRate.pop_back();
+
+        parkRateVote.vParkRate.push_back(CParkRate(MAX_COMPACT_DURATION, 0));
+        BOOST_CHECK(!parkRateVote.IsValid(PROTOCOL_VERSION, inBlock));
+        parkRateVote.vParkRate.back() = CParkRate(1, -1);
+        BOOST_CHECK(!parkRateVote.IsValid(PROTOCOL_VERSION, inBlock));
+        parkRateVote.vParkRate.back().nRate = MAX_PARK_RATE + 1;
+        BOOST_CHECK(!parkRateVote.IsValid(PROTOCOL_VERSION, inBlock));
+        parkRateVote.vParkRate.pop_back();
+
+        parkRateVote.cUnit = 'S';
+        BOOST_CHECK(!parkRateVote.IsValid(PROTOCOL_VERSION, inBlock));
+        parkRateVote.cUnit = '?';
+        BOOST_CHECK(!parkRateVote.IsValid(PROTOCOL_V2_0, inBlock));
+        // Post-v2 protocols allow unknown currencies in blocks, but not in user votes.
+        BOOST_CHECK_EQUAL(inBlock, parkRateVote.IsValid(PROTOCOL_VERSION, inBlock));
+    }
+}
+
 void printVotes(vector<CVote> vVote)
 {
     BOOST_FOREACH(const CVote& vote, vVote)
@@ -732,7 +772,7 @@ BOOST_AUTO_TEST_CASE(create_currency_coin_bases)
     std::map<CCustodianAddress, CBlockIndex*> mapAlreadyElected;
 
     // Zero vote results in no new currency
-    vector<CTransaction> vCurrencyCoinBase;
+    vector<CTransaction> vCurrencyCoinBase(1);
     BOOST_CHECK(GenerateCurrencyCoinBases(vVote, mapAlreadyElected, vCurrencyCoinBase));
     BOOST_CHECK_EQUAL(0, vCurrencyCoinBase.size());
 
@@ -873,6 +913,56 @@ BOOST_AUTO_TEST_CASE(create_currency_coin_bases)
     // Unknown units should fail but we can only check if the CVote is valid or not
     vVote[1].vCustodianVote.back().address.cUnit = '?';
     BOOST_CHECK(!vVote[1].IsValid(PROTOCOL_VERSION));
+}
+
+BOOST_AUTO_TEST_CASE(currency_coin_bases_preserve_votes)
+{
+    CCustodianVote custodianVote;
+    custodianVote.address.cUnit = 'B';
+    custodianVote.address.hashAddress = uint160(1);
+    custodianVote.nAmount = 8 * COIN;
+
+    CVote vote;
+    vote.nCoinAgeDestroyed = 1000;
+    vote.vCustodianVote.push_back(custodianVote);
+    CParkRateVote parkRateVote;
+    parkRateVote.cUnit = 'B';
+    parkRateVote.vParkRate = {CParkRate(4, 100), CParkRate(0, 0)};
+    vote.vParkRateVote.push_back(parkRateVote);
+    vote.vMotion.push_back(uint160(123456));
+    vote.mapFeeVote['B'] = 100;
+
+    vector<CVote> vVote(2, vote);
+    vVote[1].nCoinAgeDestroyed = 2000;
+    const vector<CVote> originalVotes = vVote;
+    const map<CCustodianAddress, CBlockIndex*> mapAlreadyElected;
+    vector<CTransaction> vCurrencyCoinBase;
+
+    BOOST_REQUIRE(GenerateCurrencyCoinBases(vVote, mapAlreadyElected, vCurrencyCoinBase));
+    BOOST_REQUIRE_EQUAL(1, vCurrencyCoinBase.size());
+    BOOST_REQUIRE_EQUAL(1, vCurrencyCoinBase[0].vout.size());
+    BOOST_CHECK_EQUAL(8 * COIN, vCurrencyCoinBase[0].vout[0].nValue);
+    BOOST_CHECK(vVote == originalVotes);
+    BOOST_REQUIRE_EQUAL(originalVotes.size(), vVote.size());
+    // CVote equality excludes coin-age metadata.
+    for (size_t i = 0; i < vVote.size(); ++i)
+        BOOST_CHECK_EQUAL(originalVotes[i].nCoinAgeDestroyed, vVote[i].nCoinAgeDestroyed);
+}
+
+BOOST_AUTO_TEST_CASE(currency_coin_bases_reject_zero_weight)
+{
+    vector<CVote> vVote(2);
+    vVote[0].nCoinAgeDestroyed = 1000;
+    const vector<CVote> originalVotes = vVote;
+    const map<CCustodianAddress, CBlockIndex*> mapAlreadyElected;
+    vector<CTransaction> vCurrencyCoinBase(1);
+
+    BOOST_CHECK(!GenerateCurrencyCoinBases(vVote, mapAlreadyElected, vCurrencyCoinBase));
+    BOOST_CHECK(vCurrencyCoinBase.empty());
+    BOOST_CHECK(vVote == originalVotes);
+    BOOST_REQUIRE_EQUAL(originalVotes.size(), vVote.size());
+    for (size_t i = 0; i < vVote.size(); ++i)
+        BOOST_CHECK_EQUAL(originalVotes[i].nCoinAgeDestroyed, vVote[i].nCoinAgeDestroyed);
 }
 
 BOOST_AUTO_TEST_CASE(currency_coin_bases_order_in_protocol_v2)
