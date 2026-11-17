@@ -7,6 +7,7 @@
 
 #include <QTimer>
 #include <QIcon>
+#include <algorithm>
 
 using namespace std;
 
@@ -190,7 +191,7 @@ public:
         //  can be emitted from end to beginning (so that earlier updates will not influence
         // the indices of latter ones).
         QList<uint256> updated_sorted = updated;
-        qSort(updated_sorted);
+        std::sort(updated_sorted.begin(), updated_sorted.end());
 
         {
             LOCK2(cs_main, wallet->cs_wallet);
@@ -201,9 +202,9 @@ public:
                 std::map<uint256, CWalletTx>::iterator mi = wallet->mapWallet.find(hash);
                 bool inWallet = mi != wallet->mapWallet.end();
                 // Find bounds of this transaction in model
-                QList<ParkRecord>::iterator lower = qLowerBound(
+                QList<ParkRecord>::iterator lower = std::lower_bound(
                     records.begin(), records.end(), hash, TxLessThan());
-                QList<ParkRecord>::iterator upper = qUpperBound(
+                QList<ParkRecord>::iterator upper = std::upper_bound(
                     records.begin(), records.end(), hash, TxLessThan());
                 int lowerIndex = (lower - records.begin());
                 int upperIndex = (upper - records.begin());

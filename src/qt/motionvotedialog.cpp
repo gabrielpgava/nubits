@@ -1,4 +1,6 @@
 #include <QMessageBox>
+#include <QRegularExpression>
+#include <algorithm>
 
 #include "motionvotedialog.h"
 #include "ui_motionvotedialog.h"
@@ -53,7 +55,7 @@ void MotionVoteDialog::on_remove_clicked()
     foreach(const QModelIndex& index, selection.indexes())
         rows.append(index.row());
 
-    qSort(rows);
+    std::sort(rows.begin(), rows.end());
 
     int prev = -1;
     for (int i = rows.count() - 1; i >= 0; i -= 1)
@@ -74,7 +76,7 @@ void MotionVoteDialog::error(const QString& message)
 
 void MotionVoteDialog::accept()
 {
-    QRegExp rx("^[0-9A-Fa-f]*$");
+    const QRegularExpression rx("\\A[0-9A-Fa-f]*\\z");
 
     QTableWidget *table = ui->table;
     int rows = table->rowCount();
@@ -91,7 +93,7 @@ void MotionVoteDialog::accept()
         if (motionHash == "")
             continue;
 
-        if (!rx.exactMatch(motionHash))
+        if (!rx.match(motionHash).hasMatch())
         {
             error(tr("The motion hash must only contain hexdecimal characters (row %1)").arg(row));
             return;

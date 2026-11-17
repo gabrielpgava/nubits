@@ -15,7 +15,6 @@
 
 #include <QApplication>
 #include <QMessageBox>
-#include <QTextCodec>
 #include <QLocale>
 #include <QTranslator>
 #include <QSplashScreen>
@@ -174,12 +173,6 @@ int main(int argc, char *argv[])
     }
 #endif
 
-#if QT_VERSION < 0x050000
-    // Internal string conversion is all UTF-8
-    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForTr());
-#endif
-
     Q_INIT_RESOURCE(bitcoin);
 #if QT_VERSION >= 0x050600
     QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -246,15 +239,15 @@ int main(int argc, char *argv[])
     if (!qtTranslator.isEmpty())
         app.installTranslator(&qtTranslator);
 
-    translatorBase.load(":/translations/"+lang);
+    translatorBase.load(":/translations/bitcoin_"+lang+".qm");
     if (!translatorBase.isEmpty())
         app.installTranslator(&translatorBase);
 
-    translator.load(":/translations/"+lang_territory);
+    translator.load(":/translations/bitcoin_"+lang_territory+".qm");
     if (!translator.isEmpty())
         app.installTranslator(&translator);
 
-    QSplashScreen splash(QPixmap(":/images/splash"), 0);
+    QSplashScreen splash(QPixmap(":/images/splash"), Qt::WindowFlags());
     splash.setStyleSheet("background-color:transparent;");
     if (GetBoolArg("-splash", true) && !GetBoolArg("-min"))
     {

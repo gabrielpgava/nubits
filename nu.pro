@@ -3,10 +3,9 @@ TARGET = nu
 VERSION = 5.3.1
 INCLUDEPATH += src src/json src/qt
 DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE BOOST_BIND_GLOBAL_PLACEHOLDERS
-CONFIG += no_include_pwd c++17 sdk_no_version_check
-greaterThan(QT_MAJOR_VERSION, 4) {
-    QT += widgets concurrent
-}
+CONFIG += no_include_pwd c++17
+!versionAtLeast(QT_VERSION, 6.12.0): error("Qt 6.12 or newer is required")
+QT += widgets concurrent
 
 # for boost 1.37, add -mt to the boost libraries 
 # use: qmake BOOST_LIB_SUFFIX=-mt
@@ -31,9 +30,11 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 #QRENCODE_INCLUDE_PATH=/opt/local/include
 #QRENCODE_LIB_PATH=/opt/local/lib
 
-OBJECTS_DIR = build
-MOC_DIR = build
-UI_DIR = build
+OBJECTS_DIR = $$OUT_PWD/build
+MOC_DIR = $$OUT_PWD/moc
+UI_DIR = $$OUT_PWD/ui
+BUILD_INFO_DIR = $$OUT_PWD/build-info
+INCLUDEPATH += $$BUILD_INFO_DIR
 
 # use: qmake "RELEASE=1"
 contains(RELEASE, 1) {
@@ -102,10 +103,10 @@ contains(BITCOIN_NEED_QT_PLUGINS, 1) {
     # do not enable this on windows, as it will result in a non-working executable!
 }
 
-# regenerate src/build.h
+# Generate build metadata in the build directory.
 !windows || contains(USE_BUILD_INFO, 1) {
     genbuild.depends = FORCE
-    genbuild.commands = cd $$PWD; /bin/sh share/genbuild.sh $$OUT_PWD/build/build.h
+    genbuild.commands = $$QMAKE_MKDIR $$shell_quote($$BUILD_INFO_DIR) && cd $$shell_quote($$PWD) && /bin/sh share/genbuild.sh $$shell_quote($$BUILD_INFO_DIR/build.h)
     genbuild.target = genbuildhook
     PRE_TARGETDEPS += genbuildhook
     QMAKE_EXTRA_TARGETS += genbuild
@@ -324,25 +325,9 @@ TARGET = bitcoin-qt_test
 DEFINES += BITCOIN_QT_TEST
 }
 
-CODECFORTR = UTF-8
-
-# for lrelease/lupdate
-# also add new translations to src/qt/bitcoin.qrc under translations/
-TRANSLATIONS = $$files(src/qt/locale/bitcoin_*.ts)
-
-isEmpty(QMAKE_LRELEASE) {
-    win32:QMAKE_LRELEASE = $$[QT_INSTALL_BINS]\\lrelease-qt5.exe
-    else:QMAKE_LRELEASE = $$[QT_INSTALL_BINS]/lrelease
-}
-isEmpty(TS_DIR):TS_DIR = src/qt/locale
-# automatically build translations, so they can be included in resource file
-TSQM.name = lrelease ${QMAKE_FILE_IN}
-TSQM.input = TRANSLATIONS
-TSQM.output = $$TS_DIR/${QMAKE_FILE_BASE}.qm
-TSQM.commands = $$QMAKE_LRELEASE ${QMAKE_FILE_IN}
-TSQM.CONFIG = no_link
-QMAKE_EXTRA_COMPILERS += TSQM
-PRE_TARGETDEPS += compiler_TSQM_make_all
+CONFIG += lrelease embed_translations
+TRANSLATIONS = $$files($$PWD/src/qt/locale/bitcoin_*.ts)
+QM_FILES_RESOURCE_PREFIX = /translations
 
 # "Other files" to show in Qt Creator
 OTHER_FILES += \
@@ -413,9 +398,10 @@ windows:!contains(MINGW_THREAD_BUGFIX, 0) {
 macx:HEADERS += src/qt/macdockiconhandler.h
 macx:OBJECTIVE_SOURCES += src/qt/macdockiconhandler.mm
 macx:LIBS += -framework Foundation -framework ApplicationServices -framework AppKit -lz
-macx:DEFINES += MAC_OSX MSG_NOSIGNAL=0 Q_WS_MAC
+macx:DEFINES += MAC_OSX MSG_NOSIGNAL=0
 macx:ICON = src/qt/res/icons/nu.icns
-macx:TARGET = "Nu"
+macx:QMAKE_MACOSX_DEPLOYMENT_TARGET = 14.4
+macx:!contains(BITCOIN_QT_TEST, 1):TARGET = "Nu"
 
 # Set libraries and includes at end, to use platform-defined defaults if not overridden
 INCLUDEPATH += $$BOOST_INCLUDE_PATH $$BDB_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH $$QRENCODE_INCLUDE_PATH
@@ -431,5 +417,3 @@ contains(RELEASE, 1) {
         LIBS += -Wl,-Bdynamic
     }
 }
-
-system($$QMAKE_LRELEASE -silent $$_PRO_FILE_)

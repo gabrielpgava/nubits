@@ -13,27 +13,25 @@
 #if QT_VERSION >= 0x050000
 #include <QUrlQuery>
 #endif
-#include <QTextDocument> // For Qt::escape
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QClipboard>
 #include <QFileDialog>
-#include <QDesktopServices>
-#if QT_VERSION >= 0x050000
 #include <QStandardPaths>
-#endif
+#include <QLocale>
 #include <QThread>
+#include <QRegularExpression>
 
 namespace GUIUtil {
 
 QString dateTimeStr(const QDateTime &date)
 {
-    return date.date().toString(Qt::SystemLocaleShortDate) + QString(" ") + date.toString("hh:mm");
+    return QLocale().toString(date.date(), QLocale::ShortFormat) + QString(" ") + date.toString("hh:mm");
 }
 
 QString dateTimeStr(qint64 nTime)
 {
-    return dateTimeStr(QDateTime::fromTime_t((qint32)nTime));
+    return dateTimeStr(QDateTime::fromSecsSinceEpoch((qint32)nTime));
 }
 
 QFont bitcoinAddressFont()
@@ -119,13 +117,13 @@ bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
 
 bool parseBitcoinURI(QString uri, SendCoinsRecipient *out)
 {
-    // Convert bitcoin:// to bitcoin:
+    // Convert nu:// to nu:
     //
-    //    Cannot handle this later, because bitcoin:// will cause Qt to see the part after // as host,
+    //    Cannot handle this later, because nu:// will cause Qt to see the part after // as host,
     //    which will lowercase it (and thus invalidate the address).
     if(uri.startsWith("nu://"))
     {
-        uri.replace(0, 9, "nu:");
+        uri.replace(0, QString("nu://").size(), "nu:");
     }
     QUrl uriInstance(uri);
     return parseBitcoinURI(uriInstance, out);
@@ -133,11 +131,7 @@ bool parseBitcoinURI(QString uri, SendCoinsRecipient *out)
 
 QString HtmlEscape(const QString& str, bool fMultiLine)
 {
-#if QT_VERSION >= 0x050000
     QString escaped = str.toHtmlEscaped();
-#else
-    QString escaped = Qt::escape(str);
-#endif
     if(fMultiLine)
     {
         escaped = escaped.replace("\n", "<br>\n");
@@ -172,11 +166,7 @@ QString getSaveFileName(QWidget *parent, const QString &caption,
     QString myDir;
     if(dir.isEmpty()) // Default to user documents location
     {
-#if QT_VERSION >= 0x050000
         myDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-#else
-        myDir = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
-#endif
     }
     else
     {
@@ -185,11 +175,12 @@ QString getSaveFileName(QWidget *parent, const QString &caption,
     QString result = QFileDialog::getSaveFileName(parent, caption, myDir, filter, &selectedFilter);
 
     /* Extract first suffix from filter pattern "Description (*.foo)" or "Description (*.foo *.bar ...) */
-    QRegExp filter_re(".* \\(\\*\\.(.*)[ \\)]");
+    const QRegularExpression filter_re("\\A.* \\(\\*\\.(.*)[ \\)]\\z");
     QString selectedSuffix;
-    if(filter_re.exactMatch(selectedFilter))
+    const QRegularExpressionMatch filterMatch = filter_re.match(selectedFilter);
+    if(filterMatch.hasMatch())
     {
-        selectedSuffix = filter_re.cap(1);
+        selectedSuffix = filterMatch.captured(1);
     }
 
     /* Add suffix if needed */
@@ -263,4 +254,3 @@ qint64 annualInterestRatePercentageToRate(double percentage, qint64 blocks)
 }
 
 } // namespace GUIUtil
-

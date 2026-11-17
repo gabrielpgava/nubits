@@ -31,10 +31,10 @@ To synchronize or test the modern local binary against the legacy VM node:
 
 ## 2. Architecture and Current Repository Status
 
-- **Completed scope**: CLI / daemon (`nud`), test suite (`test_nu`), and graphical wallet (`Nu.app` / Qt 5.15).
-- **Modernized stack (macOS Apple Silicon/Intel & Linux/WSL)**:
+- **Maintained components**: CLI / daemon (`nud`), core test suite (`test_nu`), and graphical wallet (`Nu.app` / Qt 6.12+).
+- **Modernized stack**:
   - **C++17** (`-std=c++17`) with `-O2` optimization by default (`-O3` with `RELEASE=1`).
-  - **Qt 5.15** (`qt@5` via Homebrew / Linux) with APIs migrated from Qt4 to Qt5 (`QtWidgets`, `QtConcurrent`, `QStandardPaths`, `QUrlQuery`, `setSectionResizeMode`).
+  - **Qt 6.12+** (`qtbase`, `qttools`, and `qttranslations` via Homebrew), retaining Qt Widgets, Qt Concurrent, qmake, and C++17. The GUI migration is locally verified on macOS Apple Silicon; other GUI platforms still need verification.
   - **Native OpenSSL 3.x** (`openssl@3` / `libssl-dev`), with `CBigNum` wrapping `BIGNUM*` (`BN_new`/`BN_clear_free`), dynamic `EVP_CIPHER_CTX`, and strict DER normalization in `ECDSA_SIG`.
   - **Boost 1.83+ / 1.85** and **Berkeley DB 5.3** (`berkeley-db@5` / `libdb5.3++-dev`).
 
@@ -52,7 +52,15 @@ To synchronize or test the modern local binary against the legacy VM node:
 ./build_mac.sh -j$(sysctl -n hw.ncpu)
 ```
 
-### Build and Run the Unit Test Suite (`test_nu` — 83 tests)
+### Build the Graphical Wallet (macOS)
+```bash
+bash ./build_gui_mac.sh
+open ./Nu.app
+```
+See `doc/readme-qt.rst` for Qt 6 setup, separate Qt tests, and the local
+Homebrew dependency and deployment limitations.
+
+### Build and Run the Core Unit Test Suite (`test_nu` — 86 tests)
 - **On Linux / WSL**:
 ```bash
 make -C src -f makefile.unix -j$(nproc) test_nu

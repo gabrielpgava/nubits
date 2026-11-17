@@ -16,7 +16,7 @@
 #include <QTimer>
 #include <QIcon>
 #include <QDateTime>
-#include <QtAlgorithms>
+#include <algorithm>
 
 // Amount column is right-aligned it contains numbers
 static int column_alignments[] = {
@@ -94,7 +94,7 @@ public:
         //  can be emitted from end to beginning (so that earlier updates will not influence
         // the indices of latter ones).
         QList<uint256> updated_sorted = updated;
-        qSort(updated_sorted);
+        std::sort(updated_sorted.begin(), updated_sorted.end());
 
         {
             LOCK(wallet->cs_wallet);
@@ -105,9 +105,9 @@ public:
                 std::map<uint256, CWalletTx>::iterator mi = wallet->mapWallet.find(hash);
                 bool inWallet = mi != wallet->mapWallet.end();
                 // Find bounds of this transaction in model
-                QList<TransactionRecord>::iterator lower = qLowerBound(
+                QList<TransactionRecord>::iterator lower = std::lower_bound(
                     cachedWallet.begin(), cachedWallet.end(), hash, TxLessThan());
-                QList<TransactionRecord>::iterator upper = qUpperBound(
+                QList<TransactionRecord>::iterator upper = std::upper_bound(
                     cachedWallet.begin(), cachedWallet.end(), hash, TxLessThan());
                 int lowerIndex = (lower - cachedWallet.begin());
                 int upperIndex = (upper - cachedWallet.begin());
@@ -581,7 +581,7 @@ QVariant TransactionTableModel::data(const QModelIndex &index, int role) const
     case TypeRole:
         return rec->type;
     case DateRole:
-        return QDateTime::fromTime_t(static_cast<uint>(rec->time));
+        return QDateTime::fromSecsSinceEpoch(static_cast<qint64>(rec->time));
     case LongDescriptionRole:
         return priv->describe(rec);
     case AddressRole:
@@ -646,4 +646,3 @@ QModelIndex TransactionTableModel::index(int row, int column, const QModelIndex 
         return QModelIndex();
     }
 }
-

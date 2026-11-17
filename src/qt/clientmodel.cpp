@@ -34,7 +34,7 @@ int ClientModel::getNumBlocksAtStartup()
 
 QDateTime ClientModel::getLastBlockDate() const
 {
-    return QDateTime::fromTime_t(pindexBest->GetBlockTime());
+    return QDateTime::fromSecsSinceEpoch(pindexBest->GetBlockTime());
 }
 
 void ClientModel::update()

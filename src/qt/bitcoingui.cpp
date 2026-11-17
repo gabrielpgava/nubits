@@ -34,17 +34,15 @@
 #include "votepage.h"
 #include "autoupdate.h"
 
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MACOS
 #include "macdockiconhandler.h"
 #endif
 
 #include <QApplication>
 #include <QMainWindow>
-#if QT_VERSION >= 0x050000
-#include <QStandardPaths>
-#endif
 #include <QMenuBar>
 #include <QMenu>
+#include <QActionGroup>
 #include <QIcon>
 #include <QTabWidget>
 #include <QVBoxLayout>
@@ -62,9 +60,8 @@
 #include <QDateTime>
 #include <QMovie>
 #include <QFileDialog>
-#include <QDesktopServices>
+#include <QStandardPaths>
 #include <QTimer>
-#include <QSignalMapper>
 
 #include <QDragEnterEvent>
 #include <QMouseEvent>
@@ -96,7 +93,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     setMinimumSize(880, 560);
     setWindowTitle(tr("Nu"));
     setStyle(QStyleFactory::create("Fusion"));
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MACOS
     setWindowIcon(QIcon(":icons/nu"));
 #else
     // nu: setting this breaks the visual styles for the toolbar, so turning off
@@ -217,6 +214,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     // Clicking on a transaction on the overview page simply sends you to transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), this, SLOT(gotoHistoryPage()));
+    connect(overviewPage, SIGNAL(stakingUnlockRequested(bool)), this, SLOT(unlockForMinting(bool)));
 
     // Doubleclicking on a transaction on the transaction history page shows details
     connect(transactionView, SIGNAL(doubleClicked(QModelIndex)), transactionView, SLOT(showDetails()));
@@ -229,7 +227,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
 BitcoinGUI::~BitcoinGUI()
 {
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MACOS
     delete appMenuBar;
 #endif
 }
@@ -359,7 +357,7 @@ void BitcoinGUI::createActions()
 
 void BitcoinGUI::createMenuBar()
 {
-#ifdef Q_WS_MAC
+#ifdef Q_OS_MACOS
     // Create a decoupled menu bar on Mac which stays even if the window is closed
     appMenuBar = new QMenuBar();
 #else
@@ -476,7 +474,7 @@ void BitcoinGUI::setClientModel(ClientModel *clientModel)
         {
             QString title_testnet = windowTitle() + QString(" ") + tr("[testnet]");
             setWindowTitle(title_testnet);
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MACOS
             setWindowIcon(QIcon(":icons/nu_testnet"));
 #else
             MacDockIconHandler::instance()->setIcon(QIcon(":icons/nu_testnet"));
@@ -562,7 +560,7 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
             walletModel->setPollInterval(MODEL_UPDATE_DELAY_BACKGROUND);
 
         // nubit: change the client stylesheet when the unit context changes
-        QFile stylesheet(QString(":/styles/%1.qss").arg(QString(walletModel->getUnit())));
+        QFile stylesheet(QString(":/styles/%1.qss").arg(QChar::fromLatin1(static_cast<char>(walletModel->getUnit()))));
         if (stylesheet.open(QFile::ReadOnly))
         {
             QString setSheet = QLatin1String(stylesheet.readAll());
@@ -582,22 +580,21 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         }
 
         changeUnitActions.clear();
-        QSignalMapper *mapper = new QSignalMapper();
-
         BOOST_FOREACH(CWallet *wallet, setpwalletRegistered)
         {
-            QString unitString(wallet->Unit());
+            QString unitString(QChar::fromLatin1(static_cast<char>(wallet->Unit())));
             QAction *action = new QAction(BitcoinUnits::baseName(wallet->Unit()), this);
             action->setCheckable(true);
-            if (unitString == QString(walletModel->getWallet()->Unit()))
+            if (unitString == QString(QChar::fromLatin1(static_cast<char>(walletModel->getWallet()->Unit()))))
                 action->setChecked(true);
 
             changeUnitActions.append(action);
 
-            connect(action, SIGNAL(triggered()), mapper, SLOT(map()));
-            mapper->setMapping(action, QString(wallet->Unit()));
+            const QString walletUnit = unitString;
+            connect(action, &QAction::triggered, this, [this, walletUnit]() {
+                changeUnit(walletUnit);
+            });
         }
-        connect(mapper, SIGNAL(mapped(const QString&)), this, SLOT(changeUnit(const QString&)));
         unitMenu->clear();
         for (int i=0; i < changeUnitActions.size(); ++i)
             unitMenu->addAction(changeUnitActions[i]);
@@ -631,7 +628,7 @@ void BitcoinGUI::changeUnit(const QString &unit)
 
     BOOST_FOREACH(CWallet *wallet, setpwalletRegistered)
     {
-        if (QString(wallet->Unit()) == unit)
+        if (QString(QChar::fromLatin1(static_cast<char>(wallet->Unit()))) == unit)
         {
             newWalletModel = new WalletModel(wallet, optionsModel);
             break;
@@ -649,7 +646,7 @@ void BitcoinGUI::changeUnit(const QString &unit)
 void BitcoinGUI::createTrayIcon()
 {
     QMenu *trayIconMenu;
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MACOS
     trayIcon = new QSystemTrayIcon(this);
     trayIconMenu = new QMenu(this);
     trayIcon->setContextMenu(trayIconMenu);
@@ -677,7 +674,7 @@ void BitcoinGUI::createTrayIcon()
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(addNodesAction);
     trayIconMenu->addAction(optionsAction);
-#ifndef Q_WS_MAC // This is built-in on Mac
+#ifndef Q_OS_MACOS // This is built-in on Mac
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
 #endif
@@ -689,7 +686,7 @@ void BitcoinGUI::createTrayIcon()
     updateCheckTimer->start(60000); // Check update status every 60 seconds
 }
 
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MACOS
 void BitcoinGUI::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     if(reason == QSystemTrayIcon::Trigger)
@@ -776,6 +773,8 @@ void BitcoinGUI::setNumConnections(int count)
     }
     labelConnectionsIcon->setPixmap(QIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
     labelConnectionsIcon->setToolTip(tr("%n active connection(s) to Nu network", "", count) + QString("\n") + tr("Clique para gerenciar servidores / nós"));
+    if (overviewPage)
+        setNumBlocks(clientModel ? clientModel->getNumBlocks() : 0);
 }
 
 void BitcoinGUI::setNumBlocks(int count)
@@ -783,6 +782,8 @@ void BitcoinGUI::setNumBlocks(int count)
     // don't show / hide progressBar and it's label if we have no connection(s) to the network
     if (!clientModel || clientModel->getNumConnections() == 0)
     {
+        if (overviewPage)
+            overviewPage->setStakingNetworkStatus(tr("No network connections"));
         progressBarLabel->setVisible(false);
         progressBar->setVisible(false);
 
@@ -791,6 +792,16 @@ void BitcoinGUI::setNumBlocks(int count)
 
     int nTotalBlocks = clientModel->getNumBlocksOfPeers();
     QString tooltip;
+    if (overviewPage)
+    {
+        const QString warnings = clientModel->getStatusBarWarnings();
+        if (!warnings.isEmpty())
+            overviewPage->setStakingNetworkStatus(tr("Network warning"));
+        else if (clientModel->inInitialBlockDownload() || count < nTotalBlocks)
+            overviewPage->setStakingNetworkStatus(tr("Synchronizing with network"));
+        else
+            overviewPage->setStakingNetworkStatus(tr("Network connected"));
+    }
 
     if(count < nTotalBlocks)
     {
@@ -929,7 +940,7 @@ void BitcoinGUI::updatePollingInterval(bool background)
 void BitcoinGUI::changeEvent(QEvent *e)
 {
     QMainWindow::changeEvent(e);
-#ifndef Q_WS_MAC // Ignored on Mac
+#ifndef Q_OS_MACOS // Ignored on Mac
     if(e->type() == QEvent::WindowStateChange)
     {
         if(clientModel && clientModel->getOptionsModel()->getMinimizeToTray())
@@ -971,7 +982,7 @@ void BitcoinGUI::closeEvent(QCloseEvent *event)
 {
     if(clientModel)
     {
-#ifndef Q_WS_MAC // Ignored on Mac
+#ifndef Q_OS_MACOS // Ignored on Mac
         if(!clientModel->getOptionsModel()->getMinimizeToTray() &&
            !clientModel->getOptionsModel()->getMinimizeOnClose())
         {
@@ -1220,15 +1231,13 @@ void BitcoinGUI::unlockForMinting(bool status)
         walletModel->setWalletLocked(true);
         walletModel->setUnlockedForMintingOnly(false);
     }
+    if (overviewPage)
+        overviewPage->refreshStakingStatus();
 }
 
 void BitcoinGUI::backupWallet()
 {
-#if QT_VERSION >= 0x050000
     QString saveDir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-#else
-    QString saveDir = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
-#endif
     QString filename = QFileDialog::getSaveFileName(this, tr("Backup Portfolio"), saveDir, tr("Portfolio Data (*.dat)"));
     if(!filename.isEmpty()) {
         if(!walletModel->backupWallet(filename)) {

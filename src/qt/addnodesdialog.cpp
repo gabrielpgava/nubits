@@ -1,8 +1,5 @@
 #include "addnodesdialog.h"
 
-#include "net.h"
-#include "util.h"
-
 #include <QAbstractItemView>
 #include <QCheckBox>
 #include <QGroupBox>
@@ -24,6 +21,9 @@
 
 #include <string>
 #include <vector>
+
+#include "net.h"
+#include "util.h"
 
 AddNodesDialog::AddNodesDialog(QWidget *parent) :
     QDialog(parent),

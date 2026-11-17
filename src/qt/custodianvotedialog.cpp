@@ -1,4 +1,5 @@
 #include <QMessageBox>
+#include <algorithm>
 
 #include "custodianvotedialog.h"
 #include "ui_custodianvotedialog.h"
@@ -60,7 +61,7 @@ void CustodianVoteDialog::on_remove_clicked()
     foreach(const QModelIndex& index, selection.indexes())
         rows.append(index.row());
 
-    qSort(rows);
+    std::sort(rows.begin(), rows.end());
 
     int prev = -1;
     for (int i = rows.count() - 1; i >= 0; i -= 1)

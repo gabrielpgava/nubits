@@ -29,8 +29,7 @@ public:
     QBalanceItem(int64 nBalance)
     {
         double dBalance = (double)nBalance / COIN;
-        QString sBalance;
-        sBalance.sprintf("%.4f", dBalance);
+        const QString sBalance = QString::asprintf("%.4f", dBalance);
         setData(QVariant(sBalance), Qt::DisplayRole);
         setData(QVariant(dBalance), Qt::UserRole);
         setData(QVariant(Qt::AlignRight | Qt::AlignVCenter), Qt::TextAlignmentRole);
@@ -42,8 +41,7 @@ class QDividendItem : public QStandardItem
 public:
     QDividendItem(double dDividend)
     {
-        QString sDividend;
-        sDividend.sprintf("%.2f", dDividend);
+        const QString sDividend = QString::asprintf("%.2f", dDividend);
         setData(QVariant(sDividend), Qt::DisplayRole);
         setData(QVariant(dDividend), Qt::UserRole);
         setData(QVariant(Qt::AlignRight | Qt::AlignVCenter), Qt::TextAlignmentRole);

@@ -94,7 +94,7 @@ void DataFeedDialog::accept()
     previousDataFeed = model->getDataFeed();
     model->setDataFeed(getDataFeed());
 
-    updateResult = QtConcurrent::run(model, &WalletModel::updateFromDataFeed);
+    updateResult = QtConcurrent::run(&WalletModel::updateFromDataFeed, model);
     updateWatcher.setFuture(updateResult);
 }
 

@@ -13,6 +13,7 @@ namespace Ui {
 }
 class WalletModel;
 class TxViewDelegate;
+class QPushButton;
 
 /** Overview ("home") page widget */
 class OverviewPage : public QWidget
@@ -28,9 +29,13 @@ public:
 public slots:
     void setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 parked);
     void setNumTransactions(int count);
+    void refreshStakingStatus();
+    void setStakingNetworkStatus(const QString &status);
+    void setStakingWalletState(bool isShares, bool encrypted, bool locked, bool mintOnly, bool stakingDisabled);
 
 signals:
     void transactionClicked(const QModelIndex &index);
+    void stakingUnlockRequested(bool unlock);
 
 private:
     Ui::OverviewPage *ui;
@@ -41,6 +46,11 @@ private:
     qint64 currentParked;
 
     TxViewDelegate *txdelegate;
+    QLabel *stakingLabel;
+    QLabel *stakingStatus;
+    QLabel *stakingNetworkStatus;
+    QLabel *stakingConfigStatus;
+    QPushButton *stakingAction;
 
     int stakeRow;
 

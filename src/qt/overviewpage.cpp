@@ -8,9 +8,13 @@
 #include "transactionfilterproxy.h"
 #include "guiutil.h"
 #include "guiconstants.h"
+#include "util.h"
 
 #include <QAbstractItemDelegate>
 #include <QPainter>
+#include <QPushButton>
+#include <QFormLayout>
+#include <QVBoxLayout>
 
 #define DECORATION_SIZE 64
 #define NUM_ITEMS 3
@@ -96,12 +100,43 @@ public:
 OverviewPage::OverviewPage(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::OverviewPage),
+    model(0),
     currentBalance(-1),
     currentStake(0),
     currentUnconfirmedBalance(-1),
-    txdelegate(new TxViewDelegate())
+    currentParked(0),
+    txdelegate(new TxViewDelegate()),
+    stakingLabel(new QLabel(tr("Staking:"), this)),
+    stakingStatus(new QLabel(this)),
+    stakingNetworkStatus(new QLabel(this)),
+    stakingConfigStatus(new QLabel(this)),
+    stakingAction(new QPushButton(this))
 {
     ui->setupUi(this);
+    stakingStatus->setObjectName("stakingStatus");
+    stakingStatus->setWordWrap(true);
+    stakingStatus->setAccessibleName(tr("Staking wallet status"));
+    stakingNetworkStatus->setObjectName("stakingNetworkStatus");
+    stakingNetworkStatus->setWordWrap(true);
+    stakingNetworkStatus->setAccessibleName(tr("Network status for staking"));
+    stakingConfigStatus->setObjectName("stakingConfigStatus");
+    stakingConfigStatus->setWordWrap(true);
+    stakingConfigStatus->setAccessibleName(tr("Staking startup configuration"));
+    stakingAction->setObjectName("stakingAction");
+    stakingAction->setVisible(false);
+    QFormLayout *formLayout = qobject_cast<QFormLayout *>(ui->frame->layout());
+    QWidget *stakingDetails = new QWidget(ui->frame);
+    QVBoxLayout *stakingLayout = new QVBoxLayout(stakingDetails);
+    stakingLayout->setContentsMargins(0, 0, 0, 0);
+    stakingLayout->setSpacing(6);
+    stakingLayout->addWidget(stakingStatus);
+    stakingLayout->addWidget(stakingNetworkStatus);
+    stakingLayout->addWidget(stakingConfigStatus);
+    stakingLayout->addWidget(stakingAction);
+    formLayout->insertRow(3, stakingLabel, stakingDetails);
+    connect(stakingAction, &QPushButton::clicked, this, [this]() {
+        emit stakingUnlockRequested(stakingAction->property("unlock").toBool());
+    });
 
     setAttribute(Qt::WA_StyledBackground, true);
     setAutoFillBackground(true);
@@ -141,10 +176,10 @@ OverviewPage::OverviewPage(QWidget *parent) :
 
     // Hiding doesn't remove the margin so we have to remove the widgets
     // See https://bugreports.qt-project.org/browse/QTBUG-6864
-    QFormLayout* formLayout = (QFormLayout*)ui->frame->layout();
     formLayout->getWidgetPosition(ui->labelStake, &stakeRow, NULL);
     removeLabels(ui->labelParkedLabel, ui->labelParked);
     removeLabels(ui->labelStakeLabel, ui->labelStake);
+    refreshStakingStatus();
 }
 
 OverviewPage::~OverviewPage()
@@ -200,7 +235,10 @@ void OverviewPage::setNumTransactions(int count)
 
 void OverviewPage::setModel(WalletModel *model)
 {
+    if (this->model && this->model != model)
+        disconnect(this->model, SIGNAL(encryptionStatusChanged(int)), this, SLOT(refreshStakingStatus()));
     this->model = model;
+    refreshStakingStatus();
     if(model)
     {
         // Set up transaction list
@@ -217,6 +255,7 @@ void OverviewPage::setModel(WalletModel *model)
         // Keep up to date with wallet
         setBalance(model->getBalance(), model->getStake(), model->getUnconfirmedBalance(), model->getParked());
         connect(model, SIGNAL(balanceChanged(qint64, qint64, qint64, qint64)), this, SLOT(setBalance(qint64, qint64, qint64, qint64)));
+        connect(model, SIGNAL(encryptionStatusChanged(int)), this, SLOT(refreshStakingStatus()));
 
         setNumTransactions(model->getNumTransactions());
         connect(model, SIGNAL(numTransactionsChanged(int)), this, SLOT(setNumTransactions(int)));
@@ -225,6 +264,82 @@ void OverviewPage::setModel(WalletModel *model)
 
         emit displayUnitChanged();
     }
+}
+
+void OverviewPage::refreshStakingStatus()
+{
+    QFormLayout *formLayout = qobject_cast<QFormLayout *>(ui->frame->layout());
+    if (!model) {
+        stakingAction->setVisible(false);
+        stakingAction->setEnabled(false);
+        stakingAction->setProperty("unlock", false);
+        stakingConfigStatus->clear();
+        stakingConfigStatus->setVisible(false);
+        stakingStatus->setText(tr("Wallet status unavailable."));
+        stakingStatus->setAccessibleDescription(stakingStatus->text());
+        formLayout->setRowVisible(stakingLabel, true);
+        return;
+    }
+    if (model->getUnit() != 'S') {
+        setStakingWalletState(false, false, false, false, false);
+        return;
+    }
+    const WalletModel::EncryptionStatus status = model->getEncryptionStatus();
+    setStakingWalletState(true, status != WalletModel::Unencrypted,
+                          status == WalletModel::Locked,
+                          model->isUnlockedForMintingOnly(),
+                          !GetBoolArg("-stakegen", true));
+}
+
+void OverviewPage::setStakingWalletState(bool isShares, bool encrypted, bool locked, bool mintOnly, bool stakingDisabled)
+{
+    QFormLayout *formLayout = qobject_cast<QFormLayout *>(ui->frame->layout());
+    formLayout->setRowVisible(stakingLabel, isShares);
+    stakingAction->setVisible(false);
+    stakingAction->setEnabled(false);
+    stakingAction->setProperty("unlock", false);
+    if (!isShares) {
+        stakingConfigStatus->setVisible(false);
+        return;
+    }
+
+    if (locked) {
+        stakingStatus->setText(tr("Wallet locked"));
+    } else if (!encrypted) {
+        stakingStatus->setText(tr("Wallet not encrypted"));
+    } else if (mintOnly) {
+        stakingStatus->setText(tr("Unlocked for staking only"));
+    } else {
+        stakingStatus->setText(tr("Wallet fully unlocked"));
+    }
+    stakingConfigStatus->setVisible(stakingDisabled);
+    stakingConfigStatus->setText(stakingDisabled
+        ? tr("Staking is disabled in startup settings. Restart Nu with staking enabled to participate.")
+        : QString());
+    stakingStatus->setToolTip(tr("Sending still requires wallet authorization. Participation also depends on startup settings, synchronization, and eligible NuShares."));
+    stakingNetworkStatus->setToolTip(tr("A network connection does not confirm staking participation."));
+    stakingAction->setAccessibleDescription(stakingStatus->text());
+
+    if (stakingDisabled && !(mintOnly && !locked))
+        return;
+    if (locked && encrypted) {
+        stakingAction->setText(tr("Unlock for staking"));
+        stakingAction->setProperty("unlock", true);
+        stakingAction->setToolTip(stakingStatus->toolTip());
+        stakingAction->setEnabled(true);
+        stakingAction->setVisible(true);
+    } else if (mintOnly && !locked) {
+        stakingAction->setText(tr("Lock wallet"));
+        stakingAction->setProperty("unlock", false);
+        stakingAction->setToolTip(tr("Lock the wallet."));
+        stakingAction->setEnabled(true);
+        stakingAction->setVisible(true);
+    }
+}
+
+void OverviewPage::setStakingNetworkStatus(const QString &status)
+{
+    stakingNetworkStatus->setText(status);
 }
 
 void OverviewPage::displayUnitChanged()

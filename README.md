@@ -33,7 +33,7 @@ assets must be publicly accessible for this check to work.
 ## Building from source
 
 The modernized build uses C++17, OpenSSL 3.x, Boost, and Berkeley DB 5.3.
-The graphical wallet additionally requires Qt 5.15. Install the development
+The graphical wallet additionally requires Qt 6.12 or newer. Install the development
 dependencies for your platform before building.
 
 Run the following commands from the repository root.
@@ -50,9 +50,36 @@ Run the following commands from the repository root.
 ./build_mac.sh -j$(sysctl -n hw.ncpu)
 ```
 
-Both scripts copy the built daemon to `./nud`. See
+For the graphical wallet, install the Qt 6 Homebrew modules without replacing
+an existing Qt 5 installation:
+
+```bash
+brew install --skip-link qtbase qtsvg qtdeclarative qttools qttranslations
+bash ./build_gui_mac.sh
+open ./Nu.app
+```
+
+Qt 6.12 has a minimum macOS version of 14.4; installed Homebrew dependencies
+may require a newer macOS version. Generated files live in `build/qt6/`,
+separate from older Qt builds. This is a local build that uses Homebrew
+libraries, not a portable or notarized distribution.
+
+The daemon build scripts copy the built daemon to `./nud`. See
 [`doc/`](doc/) for additional documentation and platform-specific build notes;
 some historical instructions describe the legacy toolchain.
+
+## Staking with NuShares
+
+1. Select **NuShares (NSR)** and open the overview.
+2. If the wallet is locked, choose **Unlock for staking** and enter its passphrase.
+   This uses the existing minting-only authorization; sending funds still
+   requires the normal wallet authorization.
+3. Keep Nu running, connected, and synchronized. The overview shows wallet and
+   network states separately; neither confirms that eligible coins are staking.
+
+**Lock wallet** removes the minting-only authorization. NuBits (NBT) parking is
+separate from NuShares staking. See the
+[Qt wallet guide](doc/readme-qt.rst) for startup settings and build/test details.
 
 ## Unit tests
 

@@ -197,7 +197,7 @@ private slots:
     void checkPeriodicUpdate();
     /** Show distribute dividends dialog */
     void distributeDividendsClicked();
-#ifndef Q_WS_MAC
+#ifndef Q_OS_MACOS
     /** Handle tray icon clicked */
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason);
 #endif
