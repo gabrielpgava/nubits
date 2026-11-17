@@ -636,11 +636,10 @@ bool CTransaction::CheckTransaction() const
 
     // Check for duplicate inputs
     set<COutPoint> vInOutPoints;
-    BOOST_FOREACH(const CTxIn& txin, vin)
+    for (const CTxIn& txin : vin)
     {
-        if (vInOutPoints.count(txin.prevout))
+        if (!vInOutPoints.insert(txin.prevout).second)
             return false;
-        vInOutPoints.insert(txin.prevout);
     }
 
     // nubit: CoinStake maximum size

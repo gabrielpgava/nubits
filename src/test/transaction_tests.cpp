@@ -17,9 +17,17 @@ BOOST_AUTO_TEST_CASE(basic_transaction_tests)
     stream >> tx;
     BOOST_CHECK_MESSAGE(tx.CheckTransaction(), "Simple deserialized transaction should be valid.");
 
+    const int nDoSBeforeDuplicate = tx.nDoS;
+    CTransaction txWithDistinctInputs = tx;
+    CTxIn distinctInput = txWithDistinctInputs.vin[0];
+    distinctInput.prevout.n ^= 1;
+    txWithDistinctInputs.vin.push_back(distinctInput);
+    BOOST_CHECK_MESSAGE(txWithDistinctInputs.CheckTransaction(), "Transaction with distinct inputs should be valid.");
+
     // Check that duplicate txins fail
     tx.vin.push_back(tx.vin[0]);
     BOOST_CHECK_MESSAGE(!tx.CheckTransaction(), "Transaction with duplicate txins should be invalid.");
+    BOOST_CHECK_EQUAL(tx.nDoS, nDoSBeforeDuplicate);
 }
 
 //
