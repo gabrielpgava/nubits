@@ -6,6 +6,7 @@
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
+class QResizeEvent;
 QT_END_NAMESPACE
 
 namespace Ui {
@@ -26,6 +27,9 @@ public:
 
     void setModel(WalletModel *model);
 
+protected:
+    void resizeEvent(QResizeEvent *event) override;
+
 public slots:
     void setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 parked);
     void setNumTransactions(int count);
@@ -36,6 +40,9 @@ public slots:
 signals:
     void transactionClicked(const QModelIndex &index);
     void stakingUnlockRequested(bool unlock);
+    void stakingDetailsChanged(const QString &walletStatus, const QString &networkStatus,
+                               const QString &configurationStatus, const QString &actionText,
+                               bool actionVisible, bool unlock);
 
 private:
     Ui::OverviewPage *ui;
@@ -56,6 +63,7 @@ private:
 
     void removeLabels(QLabel* labelLabel, QLabel* label);
     void insertLabels(QLabel* labelLabel, QLabel* label, int row);
+    void emitStakingDetails();
 
 private slots:
     void displayUnitChanged();

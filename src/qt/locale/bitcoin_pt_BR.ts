@@ -321,17 +321,17 @@ Tem certeza de que deseja criptografar sua carteira?</translation>
     <message>
         <location filename="../bitcoingui.cpp" line="210" />
         <source>Browse transaction history</source>
-        <translation type="unfinished">Navegar pelo histórico de transações</translation>
+        <translation>Navegar pelo histórico de transações</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="215" />
         <source>&amp;Address Book</source>
-        <translation type="unfinished">&amp;Catálogo de endereços</translation>
+        <translation>&amp;Endereços</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="216" />
         <source>Edit the list of stored addresses and labels</source>
-        <translation type="unfinished">Editar a lista de endereços e rótulos</translation>
+        <translation>Editar a lista de endereços e rótulos</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="221" />
@@ -453,7 +453,7 @@ Tem certeza de que deseja criptografar sua carteira?</translation>
     <message>
         <location filename="../bitcoingui.cpp" line="292" />
         <source>&amp;Encrypt Portfolio</source>
-        <translation>&amp;Criptografar Carteira</translation>
+        <translation>&amp;Criptografar carteira</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="293" />
@@ -463,17 +463,17 @@ Tem certeza de que deseja criptografar sua carteira?</translation>
     <message>
         <location filename="../bitcoingui.cpp" line="295" />
         <source>&amp;Unlock Wallet for Minting Only</source>
-        <translation>&amp;Desbloquear Carteira Apenas para Minting</translation>
+        <translation>&amp;Desbloquear carteira somente para staking</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="296" />
         <source>Unlock wallet only for minting. Sending NuShares will still require the passphrase.</source>
-        <translation>Desbloquear carteira apenas para minting. O envio de moedas ainda exigirá a frase de segurança.</translation>
+        <translation>Desbloquear a carteira somente para staking. O envio de NuShares ainda exigirá a senha.</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="298" />
         <source>&amp;Backup Wallet</source>
-        <translation>&amp;Backup da Carteira</translation>
+        <translation>&amp;Fazer backup da carteira</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="299" />
@@ -483,7 +483,7 @@ Tem certeza de que deseja criptografar sua carteira?</translation>
     <message>
         <location filename="../bitcoingui.cpp" line="300" />
         <source>&amp;Change Passphrase</source>
-        <translation>&amp;Alterar Frase de Segurança</translation>
+        <translation>&amp;Alterar senha</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="301" />
@@ -493,7 +493,7 @@ Tem certeza de que deseja criptografar sua carteira?</translation>
     <message>
         <location filename="../bitcoingui.cpp" line="302" />
         <source>&amp;Debug window</source>
-        <translation>Janela de &amp;Depuração</translation>
+        <translation>Janela de &amp;depuração</translation>
     </message>
     <message>
         <location filename="../bitcoingui.cpp" line="303" />
@@ -759,6 +759,161 @@ Do you want to proceed?</translation>
         <location filename="../bitcoingui.cpp" line="1109" />
         <source>Error: %1</source>
         <translation>Erro: %1</translation>
+    </message>
+    <message><source>Change your vote in the DAO</source><translation>Alterar seu voto na DAO</translation></message>
+    <message><source>&amp;Export NuBits keys...</source><translation>&amp;Exportar chaves NuBits...</translation></message>
+    <message><source>Export NuBits private keys via RPC</source><translation>Exportar chaves privadas NuBits por RPC</translation></message>
+    <message>
+        <source>&amp;Parking</source>
+        <translation>Estacionamento</translation>
+    </message>
+    <message>
+        <source>Manage NuBits parked in the wallet</source>
+        <translation>Gerenciar NuBits estacionados na carteira</translation>
+    </message>
+    <message>
+        <source>&amp;Staking</source>
+        <translation>&amp;Staking</translation>
+    </message>
+    <message>
+        <source>Review NuShares staking wallet and network status</source>
+        <translation>Consultar a carteira NuShares e o estado da rede para staking</translation>
+    </message>
+    <message>
+        <source>NuShares staking</source>
+        <translation>Staking de NuShares</translation>
+    </message>
+    <message>
+        <source>Review wallet security, startup settings, and network state. These do not confirm staking participation or guarantee rewards.</source>
+        <translation>Consulte a segurança da carteira, as configurações de inicialização e o estado da rede. Essas informações não confirmam participação em staking nem garantem recompensas.</translation>
+    </message>
+    <message>
+        <source>More</source>
+        <translation>Mais</translation>
+    </message>
+    <message>
+        <source>More tools</source>
+        <translation>Mais ferramentas</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation>Configurações</translation>
+    </message>
+    <message>
+        <source>&amp;Settings...</source>
+        <translation>&amp;Configurações...</translation>
+    </message>
+    <message>
+        <source>Open Nu settings</source>
+        <translation>Abrir as configurações do Nu</translation>
+    </message>
+    <message>
+        <source>Select wallet</source>
+        <translation>Selecionar carteira</translation>
+    </message>
+    <message>
+        <source>Active wallet asset</source>
+        <translation>Ativo da carteira atual</translation>
+    </message>
+    <message>
+        <source>Choose a loaded NuBits or NuShares wallet</source>
+        <translation>Escolher uma carteira NuBits ou NuShares carregada</translation>
+    </message>
+    <message>
+        <source>%1 (%2)</source>
+        <translation>%1 (%2)</translation>
+    </message>
+    <message>
+        <source>&amp;Network peers...</source>
+        <translation>&amp;Pares da rede...</translation>
+    </message>
+    <message>
+        <source>&amp;Addresses</source>
+        <translation>&amp;Endereços</translation>
+    </message>
+    <message>
+        <source>View connected peers and add a peer manually</source>
+        <translation>Ver pares conectados e adicionar um par manualmente</translation>
+    </message>
+    <message>
+        <source>Click to manage network peers</source>
+        <translation>Clique para gerenciar os pares da rede</translation>
+    </message>
+    <message>
+        <source>No network connections</source>
+        <translation>Sem conexões de rede</translation>
+    </message>
+    <message>
+        <source>Network warning</source>
+        <translation>Alerta de rede</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network</source>
+        <translation>Sincronizando com a rede</translation>
+    </message>
+    <message>
+        <source>Network connected</source>
+        <translation>Conectado à rede</translation>
+    </message>
+    <message>
+        <source>NuBits update</source>
+        <translation>Atualização do NuBits</translation>
+    </message>
+    <message>
+        <source>A new version of NuBits is available (%1)!
+
+Current version: v%2
+
+Download and install it now?</source>
+        <translation>Uma nova versão do NuBits está disponível (%1)!
+
+Versão atual: v%2
+
+Deseja baixar e instalar agora?</translation>
+    </message>
+    <message>
+        <source>Update error</source>
+        <translation>Erro de atualização</translation>
+    </message>
+    <message>
+        <source>Update check</source>
+        <translation>Verificação de atualização</translation>
+    </message>
+    <message>
+        <source>NuBits is up to date</source>
+        <translation>O NuBits está atualizado</translation>
+    </message>
+    <message>
+        <source>You are already running the latest version of NuBits (v%1).</source>
+        <translation>Você já está usando a versão mais recente do NuBits (v%1).</translation>
+    </message>
+    <message>
+        <source>Update available</source>
+        <translation>Atualização disponível</translation>
+    </message>
+    <message>
+        <source>A new version of NuBits (%1) is available on GitHub.</source>
+        <translation>Uma nova versão do NuBits (%1) está disponível no GitHub.</translation>
+    </message>
+    <message>
+        <source>No NuBits network connections</source>
+        <translation>Sem conexões com a rede NuBits</translation>
+    </message>
+    <message>
+        <source>No NuBits network connections were found. Open More &gt; Network peers to add one manually.</source>
+        <translation>Nenhuma conexão com a rede NuBits foi encontrada. Abra Mais &gt; Pares da rede para adicionar um manualmente.</translation>
+    </message>
+    <message>
+        <source>No active peers</source>
+        <translation>Nenhum par ativo</translation>
+    </message>
+    <message>
+        <source>No active peers were found on the network.
+
+Would you like to open the peer manager and add a peer (for example, 188.68.55.35:7890)?</source>
+        <translation>Nenhum par ativo foi encontrado na rede.
+
+Deseja abrir o gerenciador de pares e adicionar um (por exemplo, 188.68.55.35:7890)?</translation>
     </message>
 </context>
 <context>
@@ -1095,6 +1250,18 @@ This label turns red, if the priority is smaller than "medium".
         <source>Whether to show coin control features or not</source>
         <translation type="unfinished" />
     </message>
+    <message>
+        <source>&amp;Language (restart required):</source>
+        <translation>&amp;Idioma (requer reinicialização):</translation>
+    </message>
+    <message>
+        <source>Use system language</source>
+        <translation>Usar o idioma do sistema</translation>
+    </message>
+    <message>
+        <source>English</source>
+        <translation>Inglês</translation>
+    </message>
 </context>
 <context>
     <name>DistributeDivDialog</name>
@@ -1330,6 +1497,18 @@ This label turns red, if the priority is smaller than "medium".
         <source>Options</source>
         <translation>Opções</translation>
     </message>
+    <message>
+        <source>Settings</source>
+        <translation>Configurações</translation>
+    </message>
+    <message>
+        <source>Language changed</source>
+        <translation>Idioma alterado</translation>
+    </message>
+    <message>
+        <source>The new language will be used after you restart Nu.</source>
+        <translation>O novo idioma será aplicado após reiniciar o Nu.</translation>
+    </message>
 </context>
 <context>
     <name>OverviewPage</name>
@@ -1402,6 +1581,86 @@ This label turns red, if the priority is smaller than "medium".
         <location filename="../overviewpage.cpp" line="122" />
         <source>Total number of transactions in wallet</source>
         <translation>Número total de transações na carteira</translation>
+    </message>
+    <message>
+        <source>Staking:</source>
+        <translation>Staking:</translation>
+    </message>
+    <message>
+        <source>Staking wallet status</source>
+        <translation>Estado da carteira para staking</translation>
+    </message>
+    <message>
+        <source>Network status for staking</source>
+        <translation>Estado da rede para staking</translation>
+    </message>
+    <message>
+        <source>Staking startup configuration</source>
+        <translation>Configuração de staking na inicialização</translation>
+    </message>
+    <message>
+        <source>Wallet status unavailable.</source>
+        <translation>Estado da carteira indisponível.</translation>
+    </message>
+    <message>
+        <source>Wallet locked</source>
+        <translation>Carteira bloqueada</translation>
+    </message>
+    <message>
+        <source>Wallet not encrypted</source>
+        <translation>Carteira sem criptografia</translation>
+    </message>
+    <message>
+        <source>Unlocked for staking only</source>
+        <translation>Desbloqueada somente para staking</translation>
+    </message>
+    <message>
+        <source>Wallet fully unlocked</source>
+        <translation>Carteira totalmente desbloqueada</translation>
+    </message>
+    <message>
+        <source>Staking is disabled in startup settings. Restart Nu with staking enabled to participate.</source>
+        <translation>O staking está desativado nas configurações de inicialização. Reinicie o Nu com staking ativado para participar.</translation>
+    </message>
+    <message>
+        <source>Sending still requires wallet authorization. Participation also depends on startup settings, synchronization, and eligible NuShares.</source>
+        <translation>O envio ainda exige autorização da carteira. A participação também depende das configurações de inicialização, da sincronização e de NuShares elegíveis.</translation>
+    </message>
+    <message>
+        <source>A network connection does not confirm staking participation.</source>
+        <translation>Uma conexão de rede não confirma participação em staking.</translation>
+    </message>
+    <message>
+        <source>Unlock for staking</source>
+        <translation>Desbloquear para staking</translation>
+    </message>
+    <message>
+        <source>Lock wallet</source>
+        <translation>Bloquear carteira</translation>
+    </message>
+    <message>
+        <source>Lock the wallet.</source>
+        <translation>Bloquear a carteira.</translation>
+    </message>
+    <message>
+        <source>No network connections</source>
+        <translation>Sem conexões de rede</translation>
+    </message>
+    <message>
+        <source>Network warning</source>
+        <translation>Alerta de rede</translation>
+    </message>
+    <message>
+        <source>Synchronizing with network</source>
+        <translation>Sincronizando com a rede</translation>
+    </message>
+    <message>
+        <source>Network connected</source>
+        <translation>Conectado à rede</translation>
+    </message>
+    <message>
+        <source>Network state unavailable.</source>
+        <translation>Estado da rede indisponível.</translation>
     </message>
 </context>
 <context>
@@ -3334,5 +3593,37 @@ If the file does not exist, create it with owner-readable-only file permissions.
         <source>Insufficient funds</source>
         <translation type="unfinished" />
     </message>
+</context>
+<context>
+    <name>AddNodesDialog</name>
+    <message><source>Network peers</source><translation>Pares da rede</translation></message>
+    <message><source>Connected peers</source><translation>Pares conectados</translation></message>
+    <message><source>Active connections: 0</source><translation>Conexões ativas: 0</translation></message>
+    <message><source>Address / IP</source><translation>Endereço / IP</translation></message>
+    <message><source>Version / Client</source><translation>Versão / Cliente</translation></message>
+    <message><source>Block height</source><translation>Altura do bloco</translation></message>
+    <message><source>Direction</source><translation>Direção</translation></message>
+    <message><source>Add a peer</source><translation>Adicionar um par</translation></message>
+    <message><source>For example: node.example.org:7890</source><translation>Por exemplo: no.exemplo.org:7890</translation></message>
+    <message><source>Add and connect</source><translation>Adicionar e conectar</translation></message>
+    <message><source>Save permanently in nu.conf</source><translation>Salvar permanentemente em nu.conf</translation></message>
+    <message><source>Fill recovery peer</source><translation>Preencher par de recuperação</translation></message>
+    <message><source>Fill in the known historical recovery peer address</source><translation>Preencher o endereço conhecido do par histórico de recuperação</translation></message>
+    <message><source>Manually added peers</source><translation>Pares adicionados manualmente</translation></message>
+    <message><source>Remove selected</source><translation>Remover selecionado</translation></message>
+    <message><source>Close</source><translation>Fechar</translation></message>
+    <message><source>No active connections</source><translation>Sem conexões ativas</translation></message>
+    <message><source>Active connections: %1</source><translation>Conexões ativas: %1</translation></message>
+    <message><source>Incoming</source><translation>Entrada</translation></message>
+    <message><source>Outgoing</source><translation>Saída</translation></message>
+    <message><source>Recovery peer address filled. Select Add and connect to connect.</source><translation>Endereço do par de recuperação preenchido. Selecione Adicionar e conectar para conectar.</translation></message>
+    <message><source>Enter a valid IP address or hostname, such as node.example.org:7890.</source><translation>Informe um endereço IP ou nome de host válido, como no.exemplo.org:7890.</translation></message>
+    <message><source>Invalid address</source><translation>Endereço inválido</translation></message>
+    <message><source>Could not add the peer.</source><translation>Não foi possível adicionar o par.</translation></message>
+    <message><source>Could not add peer</source><translation>Não foi possível adicionar o par</translation></message>
+    <message><source>Peer %1 added. Connecting...</source><translation>Par %1 adicionado. Conectando...</translation></message>
+    <message><source>Peer %1 removed.</source><translation>Par %1 removido.</translation></message>
+    <message><source>Could not remove peer %1.</source><translation>Não foi possível remover o par %1.</translation></message>
+    <message><source>Could not remove peer</source><translation>Não foi possível remover o par</translation></message>
 </context>
 </TS>

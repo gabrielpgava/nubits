@@ -54,7 +54,7 @@ AddNodesDialog::~AddNodesDialog()
 
 void AddNodesDialog::setupUi()
 {
-    setWindowTitle(tr("Servidores da Rede (Nós / Peers)"));
+    setWindowTitle(tr("Network peers"));
     setMinimumSize(680, 560);
     resize(740, 600);
 
@@ -63,17 +63,17 @@ void AddNodesDialog::setupUi()
     mainLayout->setSpacing(12);
 
     // Section 1: Connected Peers
-    QGroupBox *peersGroup = new QGroupBox(tr("Peers Conectados no Momento"), this);
+    QGroupBox *peersGroup = new QGroupBox(tr("Connected peers"), this);
     QVBoxLayout *peersLayout = new QVBoxLayout(peersGroup);
     peersLayout->setContentsMargins(12, 14, 12, 12);
     peersLayout->setSpacing(8);
 
-    connectionsStatusLabel = new QLabel(tr("Conexões ativas: 0"), peersGroup);
+    connectionsStatusLabel = new QLabel(tr("Active connections: 0"), peersGroup);
     peersLayout->addWidget(connectionsStatusLabel);
 
     peersTable = new QTableWidget(0, 4, peersGroup);
     QStringList headers;
-    headers << tr("Endereço / IP") << tr("Versão / Cliente") << tr("Altura de Blocos") << tr("Direção");
+    headers << tr("Address / IP") << tr("Version / Client") << tr("Block height") << tr("Direction");
     peersTable->setHorizontalHeaderLabels(headers);
     peersTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
     peersTable->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -96,7 +96,7 @@ void AddNodesDialog::setupUi()
     mainLayout->addWidget(peersGroup, 2);
 
     // Section 2: Add New Server
-    QGroupBox *addGroup = new QGroupBox(tr("Adicionar Novo Servidor"), this);
+    QGroupBox *addGroup = new QGroupBox(tr("Add a peer"), this);
     QVBoxLayout *addLayout = new QVBoxLayout(addGroup);
     addLayout->setContentsMargins(12, 14, 12, 12);
     addLayout->setSpacing(8);
@@ -104,8 +104,8 @@ void AddNodesDialog::setupUi()
     QHBoxLayout *inputRow = new QHBoxLayout();
     inputRow->setSpacing(8);
     nodeInput = new QLineEdit(addGroup);
-    nodeInput->setPlaceholderText(tr("Ex: 188.68.55.35:7890 ou meu-no.exemplo.com"));
-    addButton = new QPushButton(QIcon(":/icons/add"), tr("Adicionar e Conectar"), addGroup);
+    nodeInput->setPlaceholderText(tr("For example: node.example.org:7890"));
+    addButton = new QPushButton(QIcon(":/icons/add"), tr("Add and connect"), addGroup);
     addButton->setAutoDefault(false);
     addButton->setDefault(false);
     addButton->setCursor(Qt::PointingHandCursor);
@@ -120,13 +120,13 @@ void AddNodesDialog::setupUi()
 
     QHBoxLayout *optionsRow = new QHBoxLayout();
     optionsRow->setSpacing(8);
-    saveToConfCheck = new QCheckBox(tr("Salvar permanentemente no nu.conf"), addGroup);
+    saveToConfCheck = new QCheckBox(tr("Save permanently in nu.conf"), addGroup);
     saveToConfCheck->setChecked(true);
-    fillRecoveryButton = new QPushButton(tr("Preencher Nó de Recuperação (188.68.55.35:7890)"), addGroup);
+    fillRecoveryButton = new QPushButton(tr("Fill recovery peer"), addGroup);
     fillRecoveryButton->setAutoDefault(false);
     fillRecoveryButton->setDefault(false);
     fillRecoveryButton->setCursor(Qt::PointingHandCursor);
-    fillRecoveryButton->setToolTip(tr("Preenche o campo com o servidor histórico de recuperação da rede NuBits"));
+    fillRecoveryButton->setToolTip(tr("Fill in the known historical recovery peer address"));
     optionsRow->addWidget(saveToConfCheck);
     optionsRow->addStretch(1);
     optionsRow->addWidget(fillRecoveryButton);
@@ -135,7 +135,7 @@ void AddNodesDialog::setupUi()
     mainLayout->addWidget(addGroup);
 
     // Section 3: Manually Added Servers
-    QGroupBox *customGroup = new QGroupBox(tr("Servidores Adicionados Manualmente"), this);
+    QGroupBox *customGroup = new QGroupBox(tr("Manually added peers"), this);
     QVBoxLayout *customLayout = new QVBoxLayout(customGroup);
     customLayout->setContentsMargins(12, 14, 12, 12);
     customLayout->setSpacing(8);
@@ -147,7 +147,7 @@ void AddNodesDialog::setupUi()
 
     QHBoxLayout *customButtonsRow = new QHBoxLayout();
     customButtonsRow->addStretch(1);
-    removeButton = new QPushButton(QIcon(":/icons/remove"), tr("Remover Selecionado"), customGroup);
+    removeButton = new QPushButton(QIcon(":/icons/remove"), tr("Remove selected"), customGroup);
     removeButton->setAutoDefault(false);
     removeButton->setDefault(false);
     removeButton->setEnabled(false);
@@ -162,7 +162,7 @@ void AddNodesDialog::setupUi()
     bottomRow->setSpacing(12);
     statusLabel = new QLabel(this);
     statusLabel->setWordWrap(true);
-    closeButton = new QPushButton(tr("Fechar"), this);
+    closeButton = new QPushButton(tr("Close"), this);
     closeButton->setAutoDefault(false);
     closeButton->setDefault(false);
     closeButton->setCursor(Qt::PointingHandCursor);
@@ -210,12 +210,12 @@ void AddNodesDialog::refreshPeers()
 
     if (vStats.empty())
     {
-        connectionsStatusLabel->setText(tr("Conexões ativas: 0 — Nenhum peer conectado no momento"));
+        connectionsStatusLabel->setText(tr("No active connections"));
         connectionsStatusLabel->setStyleSheet("color: #e3b341; font-weight: 600;");
     }
     else
     {
-        connectionsStatusLabel->setText(tr("Conexões ativas: %1").arg(vStats.size()));
+        connectionsStatusLabel->setText(tr("Active connections: %1").arg(vStats.size()));
         connectionsStatusLabel->setStyleSheet("color: #3fb950; font-weight: 600;");
     }
 
@@ -241,7 +241,7 @@ void AddNodesDialog::refreshPeers()
             versionStr = QString::number(stats.nVersion);
 
         QString heightStr = stats.nStartingHeight >= 0 ? QString::number(stats.nStartingHeight) : tr("N/A");
-        QString dirStr = stats.fInbound ? tr("Entrada") : tr("Saída");
+        QString dirStr = stats.fInbound ? tr("Incoming") : tr("Outgoing");
 
         QTableWidgetItem *addrItem = new QTableWidgetItem(addrStr);
         QTableWidgetItem *verItem = new QTableWidgetItem(versionStr);
@@ -288,7 +288,7 @@ void AddNodesDialog::onFillRecoveryNode()
 {
     nodeInput->setText("188.68.55.35:7890");
     nodeInput->setFocus();
-    setStatusMessage(tr("Nó de recuperação preenchido. Clique em \"Adicionar e Conectar\" para conectar."), false);
+    setStatusMessage(tr("Recovery peer address filled. Select Add and connect to connect."), false);
 }
 
 void AddNodesDialog::onAddNodeClicked()
@@ -296,9 +296,9 @@ void AddNodesDialog::onAddNodeClicked()
     QString qNode = nodeInput->text().trimmed();
     if (qNode.isEmpty())
     {
-        QString msg = tr("Informe um endereço IP ou hostname válido (ex: 188.68.55.35:7890).");
+        QString msg = tr("Enter a valid IP address or hostname, such as node.example.org:7890.");
         setStatusMessage(msg, true);
-        QMessageBox::warning(this, tr("Endereço Inválido"), msg);
+        QMessageBox::warning(this, tr("Invalid address"), msg);
         nodeInput->setFocus();
         return;
     }
@@ -309,16 +309,16 @@ void AddNodesDialog::onAddNodeClicked()
 
     if (!AddCustomNode(strNode, fSaveToConf, strError))
     {
-        QString errMsg = strError.empty() ? tr("Não foi possível adicionar o servidor.") : QString::fromStdString(strError);
+        QString errMsg = strError.empty() ? tr("Could not add the peer.") : QString::fromStdString(strError);
         setStatusMessage(errMsg, true);
-        QMessageBox::warning(this, tr("Erro ao Adicionar Servidor"), errMsg);
+        QMessageBox::warning(this, tr("Could not add peer"), errMsg);
         return;
     }
 
     nodeInput->clear();
     refreshCustomNodes();
     refreshPeers();
-    setStatusMessage(tr("Servidor %1 adicionado. Conectando...").arg(qNode), false);
+    setStatusMessage(tr("Peer %1 added. Connecting...").arg(qNode), false);
 }
 
 void AddNodesDialog::onRemoveNodeClicked()
@@ -334,13 +334,13 @@ void AddNodesDialog::onRemoveNodeClicked()
     {
         refreshCustomNodes();
         refreshPeers();
-        setStatusMessage(tr("Servidor %1 removido.").arg(qNode), false);
+        setStatusMessage(tr("Peer %1 removed.").arg(qNode), false);
     }
     else
     {
-        QString errMsg = tr("Não foi possível remover o servidor %1.").arg(qNode);
+        QString errMsg = tr("Could not remove peer %1.").arg(qNode);
         setStatusMessage(errMsg, true);
-        QMessageBox::warning(this, tr("Erro ao Remover Servidor"), errMsg);
+        QMessageBox::warning(this, tr("Could not remove peer"), errMsg);
     }
 }
 

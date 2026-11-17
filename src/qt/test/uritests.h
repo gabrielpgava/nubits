@@ -13,6 +13,7 @@ private slots:
     void uriTests();
     void addressValidatorTests();
     void embeddedTranslationLoads();
+    void languagePreferencePriority();
     void amountFieldEmitsValueChange();
 };
 
@@ -36,6 +37,12 @@ class BitcoinGUITests : public QObject
     Q_OBJECT
 private slots:
     void constructsWithoutModels();
+    void everydayNavigationAndSettingsAreVisible();
+    void activeAssetShowsRelevantWalletPage();
+    void loadedWalletMenuSwitchesWallets();
+    void navigationUsesInstalledTranslation();
+    void languagePreferenceCancelAndReload();
+    void capturesMainWindowAtSupportedSizes();
 };
 
 #endif // URITESTS_H

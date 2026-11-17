@@ -14,6 +14,8 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QFormLayout>
+#include <QBoxLayout>
+#include <QResizeEvent>
 #include <QVBoxLayout>
 
 #define DECORATION_SIZE 64
@@ -187,6 +189,13 @@ OverviewPage::~OverviewPage()
     delete ui;
 }
 
+void OverviewPage::resizeEvent(QResizeEvent *event)
+{
+    ui->horizontalLayout->setDirection(width() < 800
+        ? QBoxLayout::TopToBottom : QBoxLayout::LeftToRight);
+    QWidget::resizeEvent(event);
+}
+
 void OverviewPage::removeLabels(QLabel* labelLabel, QLabel* label)
 {
     labelLabel->hide();
@@ -278,6 +287,7 @@ void OverviewPage::refreshStakingStatus()
         stakingStatus->setText(tr("Wallet status unavailable."));
         stakingStatus->setAccessibleDescription(stakingStatus->text());
         formLayout->setRowVisible(stakingLabel, true);
+        emitStakingDetails();
         return;
     }
     if (model->getUnit() != 'S') {
@@ -300,6 +310,7 @@ void OverviewPage::setStakingWalletState(bool isShares, bool encrypted, bool loc
     stakingAction->setProperty("unlock", false);
     if (!isShares) {
         stakingConfigStatus->setVisible(false);
+        emitStakingDetails();
         return;
     }
 
@@ -320,8 +331,10 @@ void OverviewPage::setStakingWalletState(bool isShares, bool encrypted, bool loc
     stakingNetworkStatus->setToolTip(tr("A network connection does not confirm staking participation."));
     stakingAction->setAccessibleDescription(stakingStatus->text());
 
-    if (stakingDisabled && !(mintOnly && !locked))
+    if (stakingDisabled && !(mintOnly && !locked)) {
+        emitStakingDetails();
         return;
+    }
     if (locked && encrypted) {
         stakingAction->setText(tr("Unlock for staking"));
         stakingAction->setProperty("unlock", true);
@@ -335,11 +348,21 @@ void OverviewPage::setStakingWalletState(bool isShares, bool encrypted, bool loc
         stakingAction->setEnabled(true);
         stakingAction->setVisible(true);
     }
+    emitStakingDetails();
 }
 
 void OverviewPage::setStakingNetworkStatus(const QString &status)
 {
     stakingNetworkStatus->setText(status);
+    emitStakingDetails();
+}
+
+void OverviewPage::emitStakingDetails()
+{
+    emit stakingDetailsChanged(stakingStatus->text(), stakingNetworkStatus->text(),
+                               stakingConfigStatus->text(), stakingAction->text(),
+                               !stakingAction->isHidden(),
+                               stakingAction->property("unlock").toBool());
 }
 
 void OverviewPage::displayUnitChanged()

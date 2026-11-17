@@ -32,6 +32,9 @@ namespace GUIUtil
     // See Bitcoin URI definition discussion here: https://bitcointalk.org/index.php?topic=33490.0
     bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out);
     bool parseBitcoinURI(QString uri, SendCoinsRecipient *out);
+    QString resolveLanguagePreference(const QString &commandLineLanguage,
+                                      const QString &savedLanguage,
+                                      const QString &systemLanguage);
 
     // HTML escaping for rich text controls
     QString HtmlEscape(const QString& str, bool fMultiLine=false);

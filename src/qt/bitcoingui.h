@@ -18,7 +18,6 @@ class ParkPage;
 class VotePage;
 class Notificator;
 class RPCConsole;
-
 QT_BEGIN_NAMESPACE
 class QLabel;
 class QLineEdit;
@@ -30,6 +29,10 @@ class QStackedWidget;
 class QUrl;
 class QShowEvent;
 class QHideEvent;
+class QToolButton;
+class QPushButton;
+class QMenu;
+class QScrollArea;
 QT_END_NAMESPACE
 
 /**
@@ -79,6 +82,14 @@ private:
     SignVerifyMessageDialog *messagePage;
     ParkPage *parkPage;
     VotePage *votePage;
+    QWidget *stakingPage;
+    QLabel *stakingPageWalletStatus;
+    QLabel *stakingPageNetworkStatus;
+    QLabel *stakingPageConfigurationStatus;
+    QPushButton *stakingPageUnlockButton;
+    QToolButton *unitSelectorButton;
+    QToolButton *moreButton;
+    QMenu *moreMenu;
 
     QLabel *labelEncryptionIcon;
     QLabel *labelConnectionsIcon;
@@ -111,6 +122,7 @@ private:
     QAction *distributeDividendsAction;
     QAction *parkAction;
     QAction *voteAction;
+    QAction *stakingPageAction;
     QVector<QAction*> changeUnitActions;
 
     QMenu *unitMenu;
@@ -126,8 +138,6 @@ private:
 
     QMovie *syncIconMovie;
 
-    QString switchUnitTarget;
-
     /** Create the main UI actions. */
     void createActions();
     /** Create the menu bar and submenus. */
@@ -136,6 +146,8 @@ private:
     void createToolBars();
     /** Create system tray (notification) icon */
     void createTrayIcon();
+    void updateUnitSelector();
+    QWidget *scrollAreaForPage(QWidget *page) const;
     /** Adjust polling interval and pause/resume background GUI work when minimized/hidden */
     void updatePollingInterval(bool background);
 
@@ -180,6 +192,7 @@ private slots:
     void gotoParkPage();
     /** Switch to vote page */
     void gotoVotePage();
+    void gotoStakingPage();
 
     /** Show configuration dialog */
     void optionsClicked();
@@ -228,8 +241,6 @@ private slots:
     /** Switch to another unit */
     void changeUnit(const QString &unit);
 
-    /** Switch wallet units button**/
-    void switchUnitButtonClicked();
 };
 
 #endif

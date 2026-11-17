@@ -7,6 +7,8 @@
 #include <QStyleFactory>
 #include <QPalette>
 #include <QColor>
+#include <QSettings>
+#include <QTemporaryDir>
 
 #include "uritests.h"
 
@@ -14,6 +16,12 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    QTemporaryDir settingsDirectory;
+    app.setOrganizationName("NuTests");
+    app.setApplicationName("NuTests");
+    QSettings::setDefaultFormat(QSettings::IniFormat);
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, settingsDirectory.path());
+    QSettings::setPath(QSettings::IniFormat, QSettings::SystemScope, settingsDirectory.path());
     app.setStyle(QStyleFactory::create("Fusion"));
     QPalette darkPalette;
     darkPalette.setColor(QPalette::Window, QColor(13, 17, 23));

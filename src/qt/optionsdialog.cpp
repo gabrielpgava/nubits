@@ -20,6 +20,11 @@
 #include <QRegularExpression>
 #include <QRegularExpressionValidator>
 #include <QDialogButtonBox>
+#include <QComboBox>
+#include <QDir>
+#include <QLocale>
+#include <QSettings>
+#include <QMessageBox>
 
 /* First page of options */
 class MainOptionsPage : public QWidget
@@ -44,7 +49,6 @@ private:
     QLineEdit *proxy_port;
 
 signals:
-
 public slots:
 
 };
@@ -56,11 +60,14 @@ public:
     explicit DisplayOptionsPage(QWidget *parent=0);
 
     void setMapper(MonitoredDataMapper *mapper);
+    bool saveLanguagePreference();
 private:
     QValueComboBox *unit;
+    QComboBox *language;
     QCheckBox *display_addresses;
     QCheckBox *coin_control_features;
 signals:
+    void languagePreferenceChanged();
 
 public slots:
 
@@ -87,6 +94,7 @@ OptionsDialog::OptionsDialog(QWidget *parent):
     contents_widget->addItem(item_display);
     display_page = new DisplayOptionsPage(this);
     pages_widget->addWidget(display_page);
+    connect(display_page, SIGNAL(languagePreferenceChanged()), this, SLOT(enableApply()));
 
     contents_widget->setCurrentRow(0);
 
@@ -98,12 +106,14 @@ OptionsDialog::OptionsDialog(QWidget *parent):
     layout->addLayout(main_layout);
 
     QDialogButtonBox *buttonbox = new QDialogButtonBox();
+    buttonbox->setObjectName("optionsButtonBox");
     buttonbox->setStandardButtons(QDialogButtonBox::Apply|QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
     apply_button = buttonbox->button(QDialogButtonBox::Apply);
+    apply_button->setEnabled(false);
     layout->addWidget(buttonbox);
 
     setLayout(layout);
-    setWindowTitle(tr("Options"));
+    setWindowTitle(tr("Settings"));
 
     /* Widget-to-option mapper */
     mapper = new MonitoredDataMapper(this);
@@ -140,6 +150,9 @@ void OptionsDialog::changePage(int index)
 void OptionsDialog::okClicked()
 {
     mapper->submit();
+    if (display_page->saveLanguagePreference())
+        QMessageBox::information(this, tr("Language changed"),
+                                 tr("The new language will be used after you restart Nu."));
     accept();
 }
 
@@ -151,6 +164,9 @@ void OptionsDialog::cancelClicked()
 void OptionsDialog::applyClicked()
 {
     mapper->submit();
+    if (display_page->saveLanguagePreference())
+        QMessageBox::information(this, tr("Language changed"),
+                                 tr("The new language will be used after you restart Nu."));
     apply_button->setEnabled(false);
 }
 
@@ -249,9 +265,40 @@ void MainOptionsPage::setMapper(MonitoredDataMapper *mapper)
 }
 
 DisplayOptionsPage::DisplayOptionsPage(QWidget *parent):
-        QWidget(parent)
+        QWidget(parent),
+        language(new QComboBox(this))
 {
     QVBoxLayout *layout = new QVBoxLayout();
+
+    language->setObjectName("languageCombo");
+    QHBoxLayout *languageLayout = new QHBoxLayout();
+    QLabel *languageLabel = new QLabel(tr("&Language (restart required):"), this);
+    languageLabel->setObjectName("languageRestartLabel");
+    languageLabel->setBuddy(language);
+    languageLayout->addWidget(languageLabel);
+    languageLayout->addWidget(language, 1);
+    language->addItem(tr("Use system language"), QString());
+    language->addItem(tr("English"), "en");
+    const QStringList catalogs = QDir(":/translations").entryList(
+        QStringList() << "bitcoin_*.qm", QDir::Files, QDir::Name);
+    for (const QString &catalog : catalogs) {
+        const QString code = catalog.mid(QString("bitcoin_").size(),
+                                         catalog.size() - QString("bitcoin_").size() - 3);
+        if (code == "en")
+            continue;
+        const QLocale locale(code);
+        QString name = locale.nativeLanguageName();
+        if (name.isEmpty())
+            name = code;
+        language->addItem(QString("%1 (%2)").arg(name, code), code);
+    }
+    QSettings settings;
+    const QString savedLanguage = settings.value("language").toString();
+    const int savedIndex = language->findData(savedLanguage);
+    language->setCurrentIndex(savedIndex >= 0 ? savedIndex : 0);
+    connect(language, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, [this](int) { emit languagePreferenceChanged(); });
+    layout->addLayout(languageLayout);
 
     QHBoxLayout *unit_hbox = new QHBoxLayout();
     unit_hbox->addSpacing(18);
@@ -284,4 +331,18 @@ void DisplayOptionsPage::setMapper(MonitoredDataMapper *mapper)
     mapper->addMapping(unit, OptionsModel::DisplayUnit);
     mapper->addMapping(display_addresses, OptionsModel::DisplayAddresses);
     mapper->addMapping(coin_control_features, OptionsModel::CoinControlFeatures);
+}
+
+bool DisplayOptionsPage::saveLanguagePreference()
+{
+    const QString selectedLanguage = language->currentData().toString();
+    QSettings settings;
+    const QString savedLanguage = settings.value("language").toString();
+    if (selectedLanguage == savedLanguage)
+        return false;
+    if (selectedLanguage.isEmpty())
+        settings.remove("language");
+    else
+        settings.setValue("language", selectedLanguage);
+    return true;
 }

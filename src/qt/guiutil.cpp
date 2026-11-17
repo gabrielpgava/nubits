@@ -17,6 +17,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QFileDialog>
+#include <QFile>
 #include <QStandardPaths>
 #include <QLocale>
 #include <QThread>
@@ -127,6 +128,27 @@ bool parseBitcoinURI(QString uri, SendCoinsRecipient *out)
     }
     QUrl uriInstance(uri);
     return parseBitcoinURI(uriInstance, out);
+}
+
+QString resolveLanguagePreference(const QString &commandLineLanguage,
+                                  const QString &savedLanguage,
+                                  const QString &systemLanguage)
+{
+    QString language = !commandLineLanguage.isEmpty() ? commandLineLanguage
+                    : !savedLanguage.isEmpty() ? savedLanguage
+                    : systemLanguage;
+    if (language.isEmpty())
+        return "en";
+
+    if (QFile::exists(":/translations/bitcoin_" + language + ".qm"))
+        return language;
+    const int separator = language.indexOf('_');
+    if (separator > 0) {
+        const QString baseLanguage = language.left(separator);
+        if (QFile::exists(":/translations/bitcoin_" + baseLanguage + ".qm"))
+            return baseLanguage;
+    }
+    return "en";
 }
 
 QString HtmlEscape(const QString& str, bool fMultiLine)

@@ -54,6 +54,26 @@ QToolBar > .toolbarSpacer:hover {
     border-color: #3b82f6;
 }
 
+#sidebar .toolbarSpacer {
+    min-width: 0;
+    background-image: none;
+    background-color: #0d1117;
+}
+
+#sidebar QToolButton#walletUnitSelector {
+    min-width: 0;
+    background-image: none;
+    background-color: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    margin: 0px 4px 6px 4px;
+}
+
+#sidebar QToolButton#walletUnitSelector:hover {
+    background-color: #1c2128;
+    border-color: #3fb950;
+}
+
 /* Navigation Buttons in Sidebar */
 #sidebar QToolButton,
 QToolBar QToolButton {
@@ -70,6 +90,12 @@ QToolBar QToolButton {
     border: none;
     border-radius: 6px;
     margin: 1px 4px;
+}
+
+#sidebar QToolButton {
+    min-width: 0;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 #sidebar QToolButton:hover,

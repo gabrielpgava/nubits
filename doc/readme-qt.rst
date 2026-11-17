@@ -94,11 +94,41 @@ miniupnpc, ``USE_DBUS=1`` requires Qt DBus, and ``USE_QRCODE=1`` requires
 libqrencode. UPnP is excluded by default. These optional combinations and
 Linux/Windows GUI builds need their own platform verification.
 
+Navigation and language
+-----------------------
+
+The sidebar prioritizes Overview, Send, Receive, Transactions, and Addresses.
+Choose a loaded wallet from the asset menu at the top. NuShares exposes
+Staking; NuBits exposes Parking. Less frequent operations remain available
+under More, including voting, signing messages, network peers, and debugging.
+Settings stays accessible at the bottom; the navigation and page content
+can scroll independently in smaller windows. Existing keyboard shortcuts
+and menu access remain available.
+
+Choose a language in Settings > Display. Apply or OK saves the preference;
+Cancel discards unapplied changes. Restart Nu to use the selected language.
+The configuration/command-line ``-lang`` option takes precedence over the
+saved preference, followed by the system locale. Unsupported locales fall
+back to English. The selector lists embedded catalogs, not a promise that
+every string in each catalog is translated. Unfinished translations can
+still appear in English; this revision fills the critical Brazilian
+Portuguese navigation, settings, and staking text.
+
+Navigation revision verification (macOS arm64, Qt 6.12.0): the local GUI
+build and all four Qt test suites passed (15 functional cases, plus setup
+and cleanup). Tests exercise real window navigation, wallet switching,
+keyboard activation, language preference persistence/cancellation, installed
+Brazilian Portuguese UI text, loading all 31 catalogs, and English fallback.
+English and Brazilian Portuguese window captures cover 750x500 and 1100x700.
+Some older translations and standard Qt button labels remain in English;
+this is not a complete translation of all catalogs. Checks used dummy wallets,
+isolated settings, offscreen rendering, and no external network or real funds.
+
 Staking
 -------
 
 Staking applies to NuShares (NSR), not NuBits (NBT). Select NuShares in the
-asset selector and open the overview.
+asset selector and open Staking (the overview also retains the unlock action).
 
 * **Wallet locked** offers **Unlock for staking**. The existing passphrase
   dialog grants minting-only access; canceling or an incorrect passphrase
@@ -126,5 +156,6 @@ another network's reward or delegation model:
 
 * `Exodus staking UX <https://www.exodus.com/support/en/articles/8598638-does-exodus-pay-stakes-how-to-stake-crypto>`_
 * `Nielsen Norman Group usability heuristics <https://www.nngroup.com/articles/ten-usability-heuristics/>`_
+* `Bitcoin Core task-oriented wallet UI <https://bitcoin.org/en/bitcoin-core/features/user-interface>`_
 * `Qt 6.12 release <https://www.qt.io/blog/qt-6.12-released>`_
 * `Qt 6.12 supported platforms <https://doc.qt.io/qt-6.12/supported-platforms.html>`_

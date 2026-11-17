@@ -21,6 +21,7 @@
 #include <QLibraryInfo>
 #include <QPalette>
 #include <QColor>
+#include <QSettings>
 
 #include <boost/interprocess/ipc/message_queue.hpp>
 
@@ -221,14 +222,18 @@ int main(int argc, char *argv[])
     // ... then GUI settings:
     OptionsModel optionsModel;
 
-    // Get desired locale ("en_US") from command line or system locale
-    QString lang_territory = QString::fromStdString(GetArg("-lang", QLocale::system().name().toStdString()));
+    // Command-line/configuration language overrides the saved preference and system locale.
+    QSettings guiSettings;
+    const QString commandLineLanguage = QString::fromStdString(GetArg("-lang", ""));
+    const QString savedLanguage = guiSettings.value("language").toString();
+    QString lang_territory = GUIUtil::resolveLanguagePreference(
+        commandLineLanguage, savedLanguage, QLocale::system().name());
     // Load language files for configured locale:
     // - First load the translator for the base language, without territory
     // - Then load the more specific locale translator
     QString lang = lang_territory;
 
-    lang.truncate(lang_territory.lastIndexOf('_')); // "en"
+    lang = lang_territory.section('_', 0, 0);
     QTranslator qtTranslatorBase, qtTranslator, translatorBase, translator;
 
     qtTranslatorBase.load(QLibraryInfo::location(QLibraryInfo::TranslationsPath) + "/qt_" + lang);

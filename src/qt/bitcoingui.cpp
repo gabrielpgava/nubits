@@ -62,6 +62,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QTimer>
+#include <QScrollArea>
 
 #include <QDragEnterEvent>
 #include <QMouseEvent>
@@ -77,6 +78,14 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     QMainWindow(parent),
     clientModel(0),
     walletModel(0),
+    stakingPage(0),
+    stakingPageWalletStatus(0),
+    stakingPageNetworkStatus(0),
+    stakingPageConfigurationStatus(0),
+    stakingPageUnlockButton(0),
+    unitSelectorButton(0),
+    moreButton(0),
+    moreMenu(0),
     exportPeercoinKeysAction(0),
     encryptWalletAction(0),
     unlockForMintingAction(0),
@@ -90,7 +99,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     fNoPeersTimerStarted(false)
 {
     resize(980, 620);
-    setMinimumSize(880, 560);
+    setMinimumSize(750, 500);
     setWindowTitle(tr("Nu"));
     setStyle(QStyleFactory::create("Fusion"));
 #ifndef Q_OS_MACOS
@@ -132,8 +141,57 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     messagePage = new SignVerifyMessageDialog(this);
 
     parkPage = new ParkPage(this);
+    parkPage->setObjectName("parkingPage");
 
     votePage = new VotePage(this);
+
+    stakingPage = new QWidget(this);
+    stakingPage->setObjectName("stakingPage");
+    QVBoxLayout *stakingLayout = new QVBoxLayout(stakingPage);
+    stakingLayout->setContentsMargins(24, 24, 24, 24);
+    QLabel *stakingTitle = new QLabel(tr("NuShares staking"), stakingPage);
+    QFont stakingTitleFont = stakingTitle->font();
+    stakingTitleFont.setPointSize(stakingTitleFont.pointSize() + 2);
+    stakingTitleFont.setBold(true);
+    stakingTitle->setFont(stakingTitleFont);
+    QLabel *stakingExplanation = new QLabel(
+        tr("Review wallet security, startup settings, and network state. These do not confirm staking participation or guarantee rewards."),
+        stakingPage);
+    stakingExplanation->setWordWrap(true);
+    stakingPageWalletStatus = new QLabel(stakingPage);
+    stakingPageWalletStatus->setObjectName("stakingPageWalletStatus");
+    stakingPageNetworkStatus = new QLabel(stakingPage);
+    stakingPageNetworkStatus->setObjectName("stakingPageNetworkStatus");
+    stakingPageConfigurationStatus = new QLabel(stakingPage);
+    stakingPageConfigurationStatus->setObjectName("stakingPageConfigurationStatus");
+    stakingPageConfigurationStatus->setWordWrap(true);
+    stakingPageUnlockButton = new QPushButton(stakingPage);
+    stakingPageUnlockButton->setObjectName("stakingPageAction");
+    stakingPageUnlockButton->setVisible(false);
+    stakingLayout->addWidget(stakingTitle);
+    stakingLayout->addWidget(stakingExplanation);
+    stakingLayout->addSpacing(16);
+    stakingLayout->addWidget(stakingPageWalletStatus);
+    stakingLayout->addWidget(stakingPageNetworkStatus);
+    stakingLayout->addWidget(stakingPageConfigurationStatus);
+    stakingLayout->addWidget(stakingPageUnlockButton);
+    stakingLayout->addStretch(1);
+    connect(overviewPage, &OverviewPage::stakingDetailsChanged, this,
+        [this](const QString &walletStatus, const QString &networkStatus,
+               const QString &configurationStatus, const QString &actionText,
+               bool actionVisible, bool unlock) {
+            stakingPageWalletStatus->setText(walletStatus);
+            stakingPageNetworkStatus->setText(networkStatus);
+            stakingPageConfigurationStatus->setText(configurationStatus);
+            stakingPageConfigurationStatus->setVisible(!configurationStatus.isEmpty());
+            stakingPageUnlockButton->setText(actionText);
+            stakingPageUnlockButton->setProperty("unlock", unlock);
+            stakingPageUnlockButton->setVisible(actionVisible);
+            stakingPageUnlockButton->setEnabled(actionVisible);
+        });
+    connect(stakingPageUnlockButton, &QPushButton::clicked, this, [this]() {
+        unlockForMinting(stakingPageUnlockButton->property("unlock").toBool());
+    });
 
     centralWidget = new QStackedWidget(this);
     centralWidget->setObjectName("centralWidget");
@@ -159,16 +217,25 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     votePage->setAttribute(Qt::WA_StyledBackground, true);
     votePage->setAutoFillBackground(true);
 
-    centralWidget->addWidget(overviewPage);
-    centralWidget->addWidget(transactionsPage);
-    centralWidget->addWidget(addressBookPage);
-    centralWidget->addWidget(receiveCoinsPage);
-    centralWidget->addWidget(sendCoinsPage);
+    auto addScrollablePage = [this](QWidget *page, const QString &name) {
+        QScrollArea *scrollArea = new QScrollArea(centralWidget);
+        scrollArea->setObjectName(name);
+        scrollArea->setWidgetResizable(true);
+        scrollArea->setFrameShape(QFrame::NoFrame);
+        scrollArea->setWidget(page);
+        centralWidget->addWidget(scrollArea);
+    };
+    addScrollablePage(overviewPage, "overviewPageScrollArea");
+    addScrollablePage(transactionsPage, "transactionsPageScrollArea");
+    addScrollablePage(addressBookPage, "addressBookPageScrollArea");
+    addScrollablePage(receiveCoinsPage, "receiveCoinsPageScrollArea");
+    addScrollablePage(sendCoinsPage, "sendCoinsPageScrollArea");
 #ifdef FIRST_CLASS_MESSAGING
-    centralWidget->addWidget(messagePage);
+    addScrollablePage(messagePage, "messagePageScrollArea");
 #endif
-    centralWidget->addWidget(parkPage);
-    centralWidget->addWidget(votePage);
+    addScrollablePage(parkPage, "parkingPageScrollArea");
+    addScrollablePage(votePage, "votePageScrollArea");
+    addScrollablePage(stakingPage, "stakingPageScrollArea");
 
     // Create dedicated vertical sidebar and integrate with mainContainer
     createToolBars();
@@ -223,6 +290,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     connect(openRPCConsoleAction, SIGNAL(triggered()), rpcConsole, SLOT(show()));
 
     gotoOverviewPage();
+    overviewPage->refreshStakingStatus();
 }
 
 BitcoinGUI::~BitcoinGUI()
@@ -237,30 +305,35 @@ void BitcoinGUI::createActions()
     QActionGroup *tabGroup = new QActionGroup(this);
 
     overviewAction = new QAction(QIcon(":/icons/overview"), tr("&Overview"), this);
+    overviewAction->setObjectName("overviewAction");
     overviewAction->setToolTip(tr("Show general overview of holdings"));
     overviewAction->setCheckable(true);
     overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     tabGroup->addAction(overviewAction);
 
     historyAction = new QAction(QIcon(":/icons/history"), tr("&Transactions"), this);
+    historyAction->setObjectName("historyAction");
     historyAction->setToolTip(tr("Browse transaction history"));
     historyAction->setCheckable(true);
     historyAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_4));
     tabGroup->addAction(historyAction);
 
-    addressBookAction = new QAction(QIcon(":/icons/address-book"), tr("&Address Book"), this);
+    addressBookAction = new QAction(QIcon(":/icons/address-book"), tr("&Addresses"), this);
+    addressBookAction->setObjectName("addressBookAction");
     addressBookAction->setToolTip(tr("Edit the list of stored addresses and labels"));
     addressBookAction->setCheckable(true);
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
     receiveCoinsAction = new QAction(QIcon(":/icons/receiving_addresses"), tr("&Receive"), this);
+    receiveCoinsAction->setObjectName("receiveCoinsAction");
     receiveCoinsAction->setToolTip(tr("Show the list of addresses for receiving %1").arg(BitcoinUnits::baseName()));
     receiveCoinsAction->setCheckable(true);
     receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
     tabGroup->addAction(receiveCoinsAction);
 
     sendCoinsAction = new QAction(QIcon(":/icons/send"), tr("&Send"), this);
+    sendCoinsAction->setObjectName("sendCoinsAction");
     sendCoinsAction->setToolTip(tr("Send coins to a %1 address").arg(BitcoinUnits::baseName()));
     sendCoinsAction->setCheckable(true);
     sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
@@ -273,17 +346,29 @@ void BitcoinGUI::createActions()
 #endif
     tabGroup->addAction(messageAction);
 
-    parkAction = new QAction(QIcon(":/icons/tx_mined"), tr("&Park"), this);
-    parkAction->setToolTip(tr("Park coins for yield"));
+    parkAction = new QAction(QIcon(":/icons/tx_mined"), tr("&Parking"), this);
+    parkAction->setObjectName("parkAction");
+    parkAction->setToolTip(tr("Manage NuBits parked in the wallet"));
     parkAction->setCheckable(true);
     parkAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    parkAction->setVisible(false);
     tabGroup->addAction(parkAction);
 
     voteAction = new QAction(QIcon(":/icons/edit"), tr("&Vote"), this);
+    voteAction->setObjectName("voteAction");
     voteAction->setToolTip(tr("Change your vote in the DAO"));
     voteAction->setCheckable(true);
     voteAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_7));
+    voteAction->setVisible(false);
     tabGroup->addAction(voteAction);
+
+    stakingPageAction = new QAction(QIcon(":/icons/lock_open"), tr("&Staking"), this);
+    stakingPageAction->setObjectName("stakingPageAction");
+    stakingPageAction->setToolTip(tr("Review NuShares staking wallet and network status"));
+    stakingPageAction->setCheckable(true);
+    stakingPageAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_8));
+    stakingPageAction->setVisible(false);
+    tabGroup->addAction(stakingPageAction);
 
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
@@ -301,6 +386,8 @@ void BitcoinGUI::createActions()
     connect(parkAction, SIGNAL(triggered()), this, SLOT(gotoParkPage()));
     connect(voteAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(voteAction, SIGNAL(triggered()), this, SLOT(gotoVotePage()));
+    connect(stakingPageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(stakingPageAction, SIGNAL(triggered()), this, SLOT(gotoStakingPage()));
 
     quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
@@ -314,11 +401,12 @@ void BitcoinGUI::createActions()
     aboutQtAction->setMenuRole(QAction::AboutQtRole);
     checkUpdatesAction = new QAction(tr("Check for &Updates..."), this);
     checkUpdatesAction->setToolTip(tr("Check GitHub for newer versions of NuBits"));
-    optionsAction = new QAction(QIcon(":/icons/options"), tr("&Options..."), this);
-    optionsAction->setToolTip(tr("Modify configuration options for Nu"));
+    optionsAction = new QAction(QIcon(":/icons/options"), tr("&Settings..."), this);
+    optionsAction->setObjectName("optionsAction");
+    optionsAction->setToolTip(tr("Open Nu settings"));
     optionsAction->setMenuRole(QAction::PreferencesRole);
-    addNodesAction = new QAction(QIcon(":/icons/connect_4"), tr("&Servidores / Nós (Peers)..."), this);
-    addNodesAction->setToolTip(tr("Gerenciar servidores da rede e adicionar nós manualmente"));
+    addNodesAction = new QAction(QIcon(":/icons/connect_4"), tr("&Network peers..."), this);
+    addNodesAction->setToolTip(tr("View connected peers and add a peer manually"));
     toggleHideAction = new QAction(QIcon(":/icons/nu"), tr("Show/Hide &Nu"), this);
     toggleHideAction->setToolTip(tr("Show or hide the Nu window"));
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
@@ -380,6 +468,7 @@ void BitcoinGUI::createMenuBar()
     sharesMenu->addAction(distributeDividendsAction);
 
     unitMenu = appMenuBar->addMenu(tr("&Unit"));
+    unitMenu->setObjectName("unitMenu");
 
     QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
     settings->addAction(encryptWalletAction);
@@ -409,10 +498,10 @@ void BitcoinGUI::createToolBars()
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    // Dedicated modern dark sidebar
+    // Keep frequent wallet tasks visible and group occasional tools separately.
     QFrame *sidebar = new QFrame(mainContainer);
     sidebar->setObjectName("sidebar");
-    sidebar->setFixedWidth(205);
+    sidebar->setFixedWidth(180);
     sidebar->setAttribute(Qt::WA_StyledBackground, true);
     sidebar->setAutoFillBackground(true);
 
@@ -420,28 +509,47 @@ void BitcoinGUI::createToolBars()
     sidebarLayout->setContentsMargins(10, 14, 10, 14);
     sidebarLayout->setSpacing(4);
 
-    // Currency Switcher Card (NuBits NBT / NuShares NSR)
-    QPushButton* toolbarSpacer = new QPushButton(sidebar);
-    toolbarSpacer->setObjectName("switchUnitBtn");
-    toolbarSpacer->setProperty("class", "toolbarSpacer");
-    toolbarSpacer->setCursor(Qt::PointingHandCursor);
-    toolbarSpacer->setToolTip(tr("Click to switch unit (NuBits NBT / NuShares NSR)"));
-    toolbarSpacer->setFixedHeight(54);
-    connect(toolbarSpacer, SIGNAL(clicked()), this, SLOT(switchUnitButtonClicked()));
-    sidebarLayout->addWidget(toolbarSpacer);
+    unitSelectorButton = new QToolButton(sidebar);
+    unitSelectorButton->setObjectName("walletUnitSelector");
+    unitSelectorButton->setCursor(Qt::PointingHandCursor);
+    unitSelectorButton->setFixedHeight(54);
+    unitSelectorButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    unitSelectorButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    unitSelectorButton->setPopupMode(QToolButton::InstantPopup);
+    unitSelectorButton->setText(tr("Select wallet"));
+    unitSelectorButton->setAccessibleName(tr("Active wallet asset"));
+    unitSelectorButton->setToolTip(tr("Choose a loaded NuBits or NuShares wallet"));
+    unitSelectorButton->setMenu(unitMenu);
+    sidebarLayout->addWidget(unitSelectorButton);
     sidebarLayout->addSpacing(8);
 
+    QScrollArea *navigationScroll = new QScrollArea(sidebar);
+    navigationScroll->setObjectName("navigationScrollArea");
+    navigationScroll->setWidgetResizable(true);
+    navigationScroll->setFrameShape(QFrame::NoFrame);
+    navigationScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    QWidget *navigationContent = new QWidget(navigationScroll);
+    QVBoxLayout *navigationLayout = new QVBoxLayout(navigationContent);
+    navigationLayout->setContentsMargins(0, 0, 0, 0);
+    navigationLayout->setSpacing(4);
+    navigationScroll->setWidget(navigationContent);
+    sidebarLayout->addWidget(navigationScroll, 1);
+
     // Navigation buttons helper
-    auto addNavButton = [sidebar, sidebarLayout](QAction *action) {
-        QToolButton *btn = new QToolButton(sidebar);
+    auto addNavButton = [navigationContent, navigationLayout](QAction *action) {
+        QToolButton *btn = new QToolButton(navigationContent);
+        btn->setObjectName(action->objectName() + "NavButton");
         btn->setDefaultAction(action);
+        btn->setVisible(action->isVisible());
         btn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         btn->setIconSize(QSize(18, 18));
         btn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
         btn->setFixedHeight(40);
         btn->setCursor(Qt::PointingHandCursor);
-        connect(btn, SIGNAL(clicked()), action, SLOT(trigger()));
-        sidebarLayout->addWidget(btn);
+        QObject::connect(action, &QAction::changed, btn, [action, btn]() {
+            btn->setVisible(action->isVisible());
+        });
+        navigationLayout->addWidget(btn);
         return btn;
     };
 
@@ -450,14 +558,43 @@ void BitcoinGUI::createToolBars()
     addNavButton(receiveCoinsAction);
     addNavButton(historyAction);
     addNavButton(addressBookAction);
-#ifdef FIRST_CLASS_MESSAGING
-    addNavButton(messageAction);
-#endif
     addNavButton(parkAction);
-    addNavButton(voteAction);
+    addNavButton(stakingPageAction);
 
-    // Push buttons neatly to top
-    sidebarLayout->addStretch(1);
+    moreButton = new QToolButton(navigationContent);
+    moreButton->setObjectName("moreToolsButton");
+    moreButton->setText(tr("More"));
+    moreButton->setAccessibleName(tr("More tools"));
+    moreButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    moreButton->setIcon(QIcon(":/icons/edit"));
+    moreButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    moreButton->setFixedHeight(40);
+    moreButton->setPopupMode(QToolButton::InstantPopup);
+    moreMenu = new QMenu(moreButton);
+    moreMenu->addAction(messageAction);
+    moreMenu->addAction(voteAction);
+    moreMenu->addSeparator();
+    moreMenu->addAction(exportPeercoinKeysAction);
+    moreMenu->addAction(distributeDividendsAction);
+    moreMenu->addAction(addNodesAction);
+    moreMenu->addAction(openRPCConsoleAction);
+    moreMenu->addSeparator();
+    moreMenu->addAction(backupWalletAction);
+    moreMenu->addAction(exportAction);
+    moreMenu->addAction(encryptWalletAction);
+    moreMenu->addAction(unlockForMintingAction);
+    moreMenu->addAction(changePassphraseAction);
+    moreButton->setMenu(moreMenu);
+    navigationLayout->addWidget(moreButton);
+
+    QToolButton *settingsButton = new QToolButton(sidebar);
+    settingsButton->setObjectName("settingsButton");
+    settingsButton->setDefaultAction(optionsAction);
+    settingsButton->setAccessibleName(tr("Settings"));
+    settingsButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    settingsButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    settingsButton->setFixedHeight(40);
+    sidebarLayout->addWidget(settingsButton);
 
     mainLayout->addWidget(sidebar);
     mainLayout->addWidget(centralWidget, 1);
@@ -537,17 +674,24 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         parkAction->setVisible(walletModel->getUnit() != 'S');
 
         voteAction->setVisible(walletModel->getUnit() == 'S');
+        stakingPageAction->setVisible(walletModel->getUnit() == 'S');
+        exportPeercoinKeysAction->setVisible(walletModel->getUnit() == 'S');
+        distributeDividendsAction->setVisible(walletModel->getUnit() == 'S');
+        updateUnitSelector();
 
-        if (walletModel->getUnit() != 'S' && centralWidget->currentWidget() == votePage)
+        if (walletModel->getUnit() != 'S' && centralWidget->currentWidget() == scrollAreaForPage(votePage))
             gotoOverviewPage();
 
-        if (walletModel->getUnit() == 'S' && centralWidget->currentWidget() == parkPage)
+        if (walletModel->getUnit() == 'S' && centralWidget->currentWidget() == scrollAreaForPage(parkPage))
+            gotoOverviewPage();
+        if (walletModel->getUnit() != 'S' && centralWidget->currentWidget() == scrollAreaForPage(stakingPage))
             gotoOverviewPage();
 
         sharesMenu->setEnabled(walletModel->getUnit() == 'S');
 
         setEncryptionStatus(walletModel->getEncryptionStatus());
         connect(walletModel, SIGNAL(encryptionStatusChanged(int)), this, SLOT(setEncryptionStatus(int)));
+        overviewPage->refreshStakingStatus();
 
         // Balloon popup for new transaction
         connect(walletModel->getTransactionTableModel(), SIGNAL(rowsInserted(QModelIndex,int,int)),
@@ -599,24 +743,6 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         for (int i=0; i < changeUnitActions.size(); ++i)
             unitMenu->addAction(changeUnitActions[i]);
 
-        switch (walletModel->getUnit())
-        {
-            case 'S':
-                switchUnitTarget = "B";
-                break;
-            case 'B':
-                switchUnitTarget = "S";
-                break;
-            case 'Y':
-                switchUnitTarget = "B";
-                break;
-            case 'E':
-                switchUnitTarget = "B";
-                break;
-            case 'X':
-                switchUnitTarget = "B";
-                break;
-        }
     }
 }
 
@@ -772,7 +898,7 @@ void BitcoinGUI::setNumConnections(int count)
     default: icon = ":/icons/connect_4"; break;
     }
     labelConnectionsIcon->setPixmap(QIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-    labelConnectionsIcon->setToolTip(tr("%n active connection(s) to Nu network", "", count) + QString("\n") + tr("Clique para gerenciar servidores / nós"));
+    labelConnectionsIcon->setToolTip(tr("%n active connection(s) to Nu network", "", count) + QString("\n") + tr("Click to manage network peers"));
     if (overviewPage)
         setNumBlocks(clientModel ? clientModel->getNumBlocks() : 0);
 }
@@ -1043,7 +1169,7 @@ void BitcoinGUI::incomingTransaction(const QModelIndex & parent, int start, int 
 void BitcoinGUI::gotoOverviewPage()
 {
     overviewAction->setChecked(true);
-    centralWidget->setCurrentWidget(overviewPage);
+    centralWidget->setCurrentWidget(scrollAreaForPage(overviewPage));
 
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
@@ -1052,7 +1178,7 @@ void BitcoinGUI::gotoOverviewPage()
 void BitcoinGUI::gotoHistoryPage()
 {
     historyAction->setChecked(true);
-    centralWidget->setCurrentWidget(transactionsPage);
+    centralWidget->setCurrentWidget(scrollAreaForPage(transactionsPage));
 
     exportAction->setEnabled(true);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
@@ -1062,7 +1188,7 @@ void BitcoinGUI::gotoHistoryPage()
 void BitcoinGUI::gotoAddressBookPage()
 {
     addressBookAction->setChecked(true);
-    centralWidget->setCurrentWidget(addressBookPage);
+    centralWidget->setCurrentWidget(scrollAreaForPage(addressBookPage));
 
     exportAction->setEnabled(true);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
@@ -1072,7 +1198,7 @@ void BitcoinGUI::gotoAddressBookPage()
 void BitcoinGUI::gotoReceiveCoinsPage()
 {
     receiveCoinsAction->setChecked(true);
-    centralWidget->setCurrentWidget(receiveCoinsPage);
+    centralWidget->setCurrentWidget(scrollAreaForPage(receiveCoinsPage));
 
     exportAction->setEnabled(true);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
@@ -1082,7 +1208,7 @@ void BitcoinGUI::gotoReceiveCoinsPage()
 void BitcoinGUI::gotoSendCoinsPage()
 {
     sendCoinsAction->setChecked(true);
-    centralWidget->setCurrentWidget(sendCoinsPage);
+    centralWidget->setCurrentWidget(scrollAreaForPage(sendCoinsPage));
 
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
@@ -1092,7 +1218,7 @@ void BitcoinGUI::gotoMessagePage()
 {
 #ifdef FIRST_CLASS_MESSAGING
     messageAction->setChecked(true);
-    centralWidget->setCurrentWidget(messagePage);
+    centralWidget->setCurrentWidget(scrollAreaForPage(messagePage));
 
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
@@ -1105,7 +1231,7 @@ void BitcoinGUI::gotoMessagePage()
 void BitcoinGUI::gotoParkPage()
 {
     parkAction->setChecked(true);
-    centralWidget->setCurrentWidget(parkPage);
+    centralWidget->setCurrentWidget(scrollAreaForPage(parkPage));
 
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
@@ -1114,10 +1240,38 @@ void BitcoinGUI::gotoParkPage()
 void BitcoinGUI::gotoVotePage()
 {
     voteAction->setChecked(true);
-    centralWidget->setCurrentWidget(votePage);
+    centralWidget->setCurrentWidget(scrollAreaForPage(votePage));
 
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::gotoStakingPage()
+{
+    stakingPageAction->setChecked(true);
+    centralWidget->setCurrentWidget(scrollAreaForPage(stakingPage));
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::updateUnitSelector()
+{
+    if (!unitSelectorButton || !walletModel)
+        return;
+    const unsigned char unit = walletModel->getUnit();
+    const QString asset = BitcoinUnits::baseName(unit);
+    const QString ticker = BitcoinUnits::name(BitcoinUnits::BTC);
+    unitSelectorButton->setText(tr("%1 (%2)").arg(asset, ticker));
+}
+
+QWidget *BitcoinGUI::scrollAreaForPage(QWidget *page) const
+{
+    for (int i = 0; i < centralWidget->count(); ++i) {
+        QScrollArea *scrollArea = qobject_cast<QScrollArea *>(centralWidget->widget(i));
+        if (scrollArea && scrollArea->widget() == page)
+            return scrollArea;
+    }
+    return page;
 }
 
 void BitcoinGUI::dragEnterEvent(QDragEnterEvent *event)
@@ -1323,13 +1477,6 @@ void BitcoinGUI::distributeDividendsClicked()
     dd.exec();
 }
 
-void BitcoinGUI::switchUnitButtonClicked()
-{
-    gotoOverviewPage();
-
-    changeUnit(switchUnitTarget);
-}
-
 void BitcoinGUI::checkForUpdatesClicked()
 {
     std::string err;
@@ -1338,8 +1485,8 @@ void BitcoinGUI::checkForUpdatesClicked()
     if (info.fUpdateAvailable)
     {
         QMessageBox msgBox(this);
-        msgBox.setWindowTitle(tr("Atualização do NuBits"));
-        msgBox.setText(tr("Uma nova versão do NuBits está disponível (%1)!\n\nVersão atual: v%2\n\nDeseja baixar e atualizar agora?")
+        msgBox.setWindowTitle(tr("NuBits update"));
+        msgBox.setText(tr("A new version of NuBits is available (%1)!\n\nCurrent version: v%2\n\nDownload and install it now?")
             .arg(QString::fromStdString(info.strLatestVersion))
             .arg(QString::fromStdString(info.strCurrentVersion)));
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -1349,18 +1496,18 @@ void BitcoinGUI::checkForUpdatesClicked()
             std::string msg;
             if (!CAutoUpdate::ApplyUpdate(msg))
             {
-                QMessageBox::warning(this, tr("Erro na Atualização"), QString::fromStdString(msg));
+                QMessageBox::warning(this, tr("Update error"), QString::fromStdString(msg));
             }
         }
     }
     else if (!success)
     {
-        QMessageBox::warning(this, tr("Verificação de Atualização"), QString::fromStdString(err));
+        QMessageBox::warning(this, tr("Update check"), QString::fromStdString(err));
     }
     else
     {
-        QMessageBox::information(this, tr("NuBits Atualizado"),
-            tr("Você já está executando a versão mais recente do NuBits (v%1).")
+        QMessageBox::information(this, tr("NuBits is up to date"),
+            tr("You are already running the latest version of NuBits (v%1).")
             .arg(QString::fromStdString(info.strCurrentVersion)));
     }
 }
@@ -1375,13 +1522,13 @@ void BitcoinGUI::checkPeriodicUpdate()
         if (notificator)
         {
             notificator->notify(Notificator::Information,
-                tr("Atualização Disponível"),
-                tr("Uma nova versão do NuBits (%1) está disponível no GitHub.").arg(QString::fromStdString(info.strLatestVersion)));
+                tr("Update available"),
+                tr("A new version of NuBits (%1) is available on GitHub.").arg(QString::fromStdString(info.strLatestVersion)));
         }
 
         QMessageBox msgBox(this);
-        msgBox.setWindowTitle(tr("Atualização do NuBits"));
-        msgBox.setText(tr("Uma nova versão do NuBits está disponível (%1)!\n\nVersão atual: v%2\n\nDeseja baixar e atualizar agora?")
+        msgBox.setWindowTitle(tr("NuBits update"));
+        msgBox.setText(tr("A new version of NuBits is available (%1)!\n\nCurrent version: v%2\n\nDownload and install it now?")
             .arg(QString::fromStdString(info.strLatestVersion))
             .arg(QString::fromStdString(info.strCurrentVersion)));
         msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
@@ -1391,7 +1538,7 @@ void BitcoinGUI::checkPeriodicUpdate()
             std::string msg;
             if (!CAutoUpdate::ApplyUpdate(msg))
             {
-                QMessageBox::warning(this, tr("Erro na Atualização"), QString::fromStdString(msg));
+                QMessageBox::warning(this, tr("Update error"), QString::fromStdString(msg));
             }
         }
     }
@@ -1412,14 +1559,14 @@ void BitcoinGUI::checkNoPeersOnStartup()
         if (notificator)
         {
             notificator->notify(Notificator::Warning,
-                tr("Rede NuBits sem conexões"),
-                tr("Nenhuma conexão encontrada na rede NuBits. Clique em Configurações -> Servidores / Nós para adicionar manualmente."));
+                tr("No NuBits network connections"),
+                tr("No NuBits network connections were found. Open More > Network peers to add one manually."));
         }
 
         QMessageBox *msgBox = new QMessageBox(
             QMessageBox::Question,
-            tr("Nenhum Servidor Encontrado"),
-            tr("Nenhum servidor ativo foi encontrado na rede.\n\nDeseja abrir a janela para adicionar novos servidores (ex: nó de recuperação 188.68.55.35:7890)?"),
+            tr("No active peers"),
+            tr("No active peers were found on the network.\n\nWould you like to open the peer manager and add a peer (for example, 188.68.55.35:7890)?"),
             QMessageBox::Yes | QMessageBox::No,
             this);
         msgBox->setDefaultButton(QMessageBox::Yes);
