@@ -454,7 +454,7 @@ public:
                 memcpy(&nSize, &pc[0], 2);
                 pc += 2;
             }
-            else if (opcode == OP_PUSHDATA4)
+            else
             {
                 if (end() - pc < 4)
                     return false;

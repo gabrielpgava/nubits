@@ -236,20 +236,16 @@ int main(int argc, char *argv[])
     lang = lang_territory.section('_', 0, 0);
     QTranslator qtTranslatorBase, qtTranslator, translatorBase, translator;
 
-    qtTranslatorBase.load(QLibraryInfo::location(QLibraryInfo::TranslationsPath) + "/qt_" + lang);
-    if (!qtTranslatorBase.isEmpty())
+    if (qtTranslatorBase.load(QLibraryInfo::location(QLibraryInfo::TranslationsPath) + "/qt_" + lang))
         app.installTranslator(&qtTranslatorBase);
 
-    qtTranslator.load(QLibraryInfo::location(QLibraryInfo::TranslationsPath) + "/qt_" + lang_territory);
-    if (!qtTranslator.isEmpty())
+    if (qtTranslator.load(QLibraryInfo::location(QLibraryInfo::TranslationsPath) + "/qt_" + lang_territory))
         app.installTranslator(&qtTranslator);
 
-    translatorBase.load(":/translations/bitcoin_"+lang+".qm");
-    if (!translatorBase.isEmpty())
+    if (translatorBase.load(":/translations/bitcoin_"+lang+".qm"))
         app.installTranslator(&translatorBase);
 
-    translator.load(":/translations/bitcoin_"+lang_territory+".qm");
-    if (!translator.isEmpty())
+    if (translator.load(":/translations/bitcoin_"+lang_territory+".qm"))
         app.installTranslator(&translator);
 
     QSplashScreen splash(QPixmap(":/images/splash"), Qt::WindowFlags());

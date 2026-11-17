@@ -22,9 +22,8 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QTabBar" name="currencyTabBar" native="true">
-         <zorder>verticalLayoutWidget_2</zorder>
-        </widget>
+         <widget class="QTabBar" name="currencyTabBar" native="true">
+         </widget>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_4">

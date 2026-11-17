@@ -21,6 +21,8 @@
 #include <QScrollBar>
 #include <QFrame>
 #include <QLayout>
+#include <QIcon>
+#include <QPixmap>
 
 #include "uritests.h"
 #include "../bitcoinamountfield.h"
@@ -92,7 +94,7 @@ void BitcoinGUITests::activeAssetShowsRelevantWalletPage()
         QApplication::processEvents();
         QCOMPARE(asset->width(), gui.findChild<QFrame *>("sidebar")->layout()->contentsRect().width());
         QVERIFY(asset->width() >= asset->sizeHint().width());
-        QVERIFY(asset->text().contains("NuShares (NSR)"));
+        QCOMPARE(asset->text(), QString("NuShares"));
         QVERIFY(gui.findChild<QToolButton *>("stakingPageActionNavButton")->isVisibleTo(&gui));
         QVERIFY(!gui.findChild<QToolButton *>("parkActionNavButton")->isVisibleTo(&gui));
         gui.findChild<QToolButton *>("stakingPageActionNavButton")->click();
@@ -111,7 +113,7 @@ void BitcoinGUITests::activeAssetShowsRelevantWalletPage()
     QToolButton *asset = gui.findChild<QToolButton *>("walletUnitSelector");
     QCOMPARE(asset->width(), gui.findChild<QFrame *>("sidebar")->layout()->contentsRect().width());
     QVERIFY(asset->width() >= asset->sizeHint().width());
-    QVERIFY(asset->text().contains("US-NBT (US-NBT)"));
+    QCOMPARE(asset->text(), QString("US-NBT"));
     QVERIFY(gui.findChild<QToolButton *>("parkActionNavButton")->isVisibleTo(&gui));
     QVERIFY(!gui.findChild<QToolButton *>("stakingPageActionNavButton")->isVisibleTo(&gui));
     gui.findChild<QToolButton *>("parkActionNavButton")->click();
@@ -155,6 +157,14 @@ void BitcoinGUITests::loadedWalletMenuSwitchesWallets()
         QToolButton *selector = gui.findChild<QToolButton *>("walletUnitSelector");
         QMenu *menu = selector ? selector->menu() : nullptr;
         QVERIFY(menu);
+        const auto iconMatchesCurrency = [](const QIcon &icon, char unit) {
+            const QPixmap asset(QString(":/images/%1").arg(QChar::fromLatin1(unit)));
+            if (asset.isNull() || icon.isNull())
+                return false;
+            const QIcon expected(asset.copy(0, 0, asset.height(), asset.height()));
+            return icon.pixmap(QSize(16, 16)).toImage() ==
+                   expected.pixmap(QSize(16, 16)).toImage();
+        };
         QAction *sharesAction = nullptr;
         QAction *bitsAction = nullptr;
         for (QAction *action : menu->actions()) {
@@ -165,11 +175,15 @@ void BitcoinGUITests::loadedWalletMenuSwitchesWallets()
         }
         QVERIFY(sharesAction);
         QVERIFY(bitsAction);
+        QVERIFY(iconMatchesCurrency(sharesAction->icon(), 'S'));
+        QVERIFY(iconMatchesCurrency(bitsAction->icon(), 'B'));
+        QVERIFY(iconMatchesCurrency(selector->icon(), 'B'));
 
         sharesAction->trigger();
         cleanup.model = gui.getWalletModel();
         QCOMPARE(cleanup.model->getWallet(), &shares);
-        QCOMPARE(selector->text(), QString("NuShares (NSR)"));
+        QCOMPARE(selector->text(), QString("NuShares"));
+        QVERIFY(iconMatchesCurrency(selector->icon(), 'S'));
         QTRY_COMPARE(selector->width(), gui.findChild<QFrame *>("sidebar")->layout()->contentsRect().width());
         QVERIFY(selector->width() >= selector->sizeHint().width());
         QVERIFY(gui.findChild<QToolButton *>("stakingPageActionNavButton")->isVisibleTo(&gui));
@@ -181,10 +195,12 @@ void BitcoinGUITests::loadedWalletMenuSwitchesWallets()
                 bitsAction = action;
         }
         QVERIFY(bitsAction);
+        QVERIFY(iconMatchesCurrency(bitsAction->icon(), 'B'));
         bitsAction->trigger();
         cleanup.model = gui.getWalletModel();
         QCOMPARE(cleanup.model->getWallet(), &bits);
-        QCOMPARE(selector->text(), QString("US-NBT (US-NBT)"));
+        QCOMPARE(selector->text(), QString("US-NBT"));
+        QVERIFY(iconMatchesCurrency(selector->icon(), 'B'));
         QTRY_COMPARE(selector->width(), gui.findChild<QFrame *>("sidebar")->layout()->contentsRect().width());
         QVERIFY(selector->width() >= selector->sizeHint().width());
         QVERIFY(!gui.findChild<QToolButton *>("stakingPageActionNavButton")->isVisibleTo(&gui));

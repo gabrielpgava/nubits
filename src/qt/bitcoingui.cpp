@@ -73,6 +73,16 @@
 #include <QFont>
 #include <QFontDatabase>
 #include <QStyleFactory>
+#include <QPixmap>
+
+static QIcon currencyIcon(unsigned char unit)
+{
+    const QPixmap asset(QString(":/images/%1")
+        .arg(QChar::fromLatin1(static_cast<char>(unit))));
+    if (asset.isNull())
+        return QIcon();
+    return QIcon(asset.copy(0, 0, asset.height(), asset.height()));
+}
 
 BitcoinGUI::BitcoinGUI(QWidget *parent):
     QMainWindow(parent),
@@ -514,7 +524,8 @@ void BitcoinGUI::createToolBars()
     unitSelectorButton->setCursor(Qt::PointingHandCursor);
     unitSelectorButton->setFixedHeight(54);
     unitSelectorButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    unitSelectorButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+    unitSelectorButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    unitSelectorButton->setIconSize(QSize(28, 28));
     unitSelectorButton->setPopupMode(QToolButton::InstantPopup);
     unitSelectorButton->setText(tr("Select wallet"));
     unitSelectorButton->setAccessibleName(tr("Active wallet asset"));
@@ -727,7 +738,8 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         BOOST_FOREACH(CWallet *wallet, setpwalletRegistered)
         {
             QString unitString(QChar::fromLatin1(static_cast<char>(wallet->Unit())));
-            QAction *action = new QAction(BitcoinUnits::baseName(wallet->Unit()), this);
+            QAction *action = new QAction(currencyIcon(wallet->Unit()),
+                                          BitcoinUnits::baseName(wallet->Unit()), this);
             action->setCheckable(true);
             if (unitString == QString(QChar::fromLatin1(static_cast<char>(walletModel->getWallet()->Unit()))))
                 action->setChecked(true);
@@ -1260,8 +1272,8 @@ void BitcoinGUI::updateUnitSelector()
         return;
     const unsigned char unit = walletModel->getUnit();
     const QString asset = BitcoinUnits::baseName(unit);
-    const QString ticker = BitcoinUnits::name(BitcoinUnits::BTC);
-    unitSelectorButton->setText(tr("%1 (%2)").arg(asset, ticker));
+    unitSelectorButton->setIcon(currencyIcon(unit));
+    unitSelectorButton->setText(asset);
 }
 
 QWidget *BitcoinGUI::scrollAreaForPage(QWidget *page) const

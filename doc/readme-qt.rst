@@ -159,3 +159,26 @@ another network's reward or delegation model:
 * `Bitcoin Core task-oriented wallet UI <https://bitcoin.org/en/bitcoin-core/features/user-interface>`_
 * `Qt 6.12 release <https://www.qt.io/blog/qt-6.12-released>`_
 * `Qt 6.12 supported platforms <https://doc.qt.io/qt-6.12/supported-platforms.html>`_
+
+Build-warning cleanup
+--------------------
+
+The local cleanup removes the redundant block-template fee accumulator,
+makes the exhaustive script push-data branch explicit, checks translator
+load results, scopes the D-Bus notification constant to its users, and
+removes a stale UI z-order entry. Script tests also reject truncated
+push-data encodings. Existing currency emblems remain visible in the
+wallet selector and its menu.
+
+Warnings inside Boost 1.85 iostreams and linker warnings about Homebrew
+libraries built for newer macOS versions remain visible. No diagnostic
+suppression or installed-header patches are used. The source deployment
+target of macOS 14.4 does not make this local binary compatible with 14.4:
+the installed OpenSSL and Berkeley DB libraries target macOS 27, and
+the linked Boost libraries target macOS 26. Dependency rebuilding and
+verification on macOS 14.4 were not performed.
+
+Local verification passed on macOS arm64: the rebuilt core suite (86 cases),
+the Qt suite (15 functional cases), production help startup with isolated
+settings and data, and strict ad-hoc signature verification. The currency
+selector icons and geometry are covered by wallet-switch tests.

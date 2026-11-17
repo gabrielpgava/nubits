@@ -189,6 +189,20 @@ BOOST_AUTO_TEST_CASE(script_PushData)
     vector<vector<unsigned char> > pushdata4Stack;
     BOOST_CHECK(EvalScript(pushdata4Stack, CScript(&pushdata4[0], &pushdata4[sizeof(pushdata4)]), CTransaction(), 0, 0));
     BOOST_CHECK(pushdata4Stack == directStack);
+
+    for (const auto& encoded : {std::vector<unsigned char>(direct, direct + sizeof(direct)),
+                               std::vector<unsigned char>(pushdata1, pushdata1 + sizeof(pushdata1)),
+                               std::vector<unsigned char>(pushdata2, pushdata2 + sizeof(pushdata2)),
+                               std::vector<unsigned char>(pushdata4, pushdata4 + sizeof(pushdata4))})
+    {
+        for (size_t length = 1; length < encoded.size(); ++length)
+        {
+            const CScript truncated(encoded.begin(), encoded.begin() + length);
+            auto position = truncated.begin();
+            opcodetype opcode;
+            BOOST_CHECK(!truncated.GetOp(position, opcode));
+        }
+    }
 }
 
 CScript
